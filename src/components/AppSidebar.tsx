@@ -13,10 +13,8 @@ interface AppSidebarProps {
   favorites: string[];
   activeCategory: string | null;
   activeTab: string;
-  activeSubTab: string;
   onCategorySelect: (cat: string | null) => void;
   onTabSelect: (tab: string) => void;
-  onSubTabSelect: (tab: string) => void;
   onAddPlaylist: () => void;
   onDeletePlaylist: (id: string) => void;
   onRefreshPlaylist: (id: string) => void;
