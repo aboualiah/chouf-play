@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { TvIcon } from "./TvIcon";
 
 interface SplashScreenProps {
   show: boolean;
@@ -13,34 +14,44 @@ export function SplashScreen({ show }: SplashScreenProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Logo */}
+          {/* Ambient glow */}
+          <div className="absolute w-[400px] h-[400px] rounded-full" style={{
+            background: "radial-gradient(circle, hsl(24 100% 50% / 0.06), transparent 70%)"
+          }} />
+
+          {/* TV Icon */}
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-orange glow-orange"
+            className="relative mb-8"
           >
-            <span className="text-4xl font-extrabold tracking-tight text-primary-foreground">CP</span>
+            <TvIcon size={160} animated showPlayButton showStand showLetters />
           </motion.div>
 
           {/* Title */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl font-bold text-foreground">
-              CHOUF<span className="font-light text-primary">Play</span>
+            <h1 className="text-4xl tracking-tight leading-none">
+              <span className="font-bold text-foreground">CHOUF</span>{" "}
+              <span className="font-light text-primary">Play</span>
             </h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              className="mt-2 text-sm font-medium tracking-[0.3em] text-accent"
-            >
-              IPTV PLAYER
-            </motion.p>
+          </motion.div>
+
+          {/* Subtitle */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.6 }}
+            className="mt-3"
+          >
+            <p className="text-xs tracking-[4px] uppercase font-medium text-accent">
+              Léger · Rapide · 4K
+            </p>
           </motion.div>
 
           {/* Loading bar */}
