@@ -90,10 +90,9 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     const streamType = detectStreamType(rawUrl);
     const isHLS = streamType === 'hls';
     const isMpegTS = streamType === 'mpegts';
-    const url = getStreamUrl(rawUrl);
-    const isMixedProxy = needsMixedContentProxy(rawUrl);
+    const isMixed = rawUrl.startsWith('http://') && window.location.protocol === 'https:';
 
-    console.log("CHOUF: URL=" + rawUrl + " type=" + streamType + " proxied=" + isMixedProxy);
+    console.log("CHOUF: URL=" + rawUrl + " type=" + streamType + " mixed=" + isMixed);
 
     const startPlay = () => {
       if (cancelled) return;
@@ -106,104 +105,151 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       setError('Impossible de lire ce flux');
     };
 
-    const tryDirect = (v: HTMLVideoElement, u: string, onOk: () => void, onErr: () => void) => {
-      v.src = u;
-      v.onplaying = onOk;
-      v.onerror = onErr;
-      v.play().catch(onErr);
-    };
-
     const safetyTimeout = setTimeout(() => {
       if (!cancelled) setLoading(false);
-    }, 10000);
+    }, 12000);
 
     const initTimer = setTimeout(() => {
-      if (isHLS) {
-        if (Hls.isSupported()) {
-          const initHls = (videoUrl: string, retryWithProxy = false) => {
-            const useProxy = retryWithProxy || isMixedProxy;
-            const hls = new Hls({
-              enableWorker: true,
-              lowLatencyMode: true,
-              maxBufferLength: 30,
-              xhrSetup: (xhr, xhrUrl) => {
-                if (useProxy && !xhrUrl.startsWith(CORS_PROXY)) {
-                  const proxied = xhrUrl.startsWith('http://') || retryWithProxy
-                    ? withCorsProxy(xhrUrl) : xhrUrl;
-                  if (proxied !== xhrUrl) xhr.open('GET', proxied, true);
-                }
-              },
-            });
-
-            hlsRef.current = hls;
-            hls.loadSource(videoUrl);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              video.play().catch(() => {});
-              startPlay();
-            });
-            hls.on(Hls.Events.ERROR, (_, data) => {
-              if (!data.fatal) return;
-
-              hls.destroy();
-              if (hlsRef.current === hls) hlsRef.current = null;
-              if (cancelled) return;
-
-              if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !retryWithProxy) {
-                console.log('CHOUF: Retry with CORS proxy');
-                initHls(withCorsProxy(url), true);
-                return;
-              }
-
-              setError(data.type === Hls.ErrorTypes.NETWORK_ERROR ? 'Flux indisponible' : 'Erreur de lecture');
-              setLoading(false);
-            });
+      // STRATEGY: For HTTP streams on HTTPS page, try native video.src first
+      // Native <video> is more permissive than XHR (HLS.js) for mixed content
+      
+      const tryNativeFirst = (nativeUrl: string, fallback: () => void) => {
+        console.log("CHOUF: Trying native playback:", nativeUrl);
+        video.crossOrigin = 'anonymous';
+        video.src = nativeUrl;
+        video.onplaying = startPlay;
+        
+        const nativeTimeout = setTimeout(() => {
+          if (cancelled) return;
+          console.log("CHOUF: Native timeout, trying without crossOrigin");
+          video.removeAttribute('crossOrigin');
+          video.src = nativeUrl;
+          video.onplaying = startPlay;
+          video.onerror = () => {
+            if (cancelled) return;
+            console.log("CHOUF: Native failed, falling back");
+            fallback();
           };
+          video.play().catch(() => {
+            if (!cancelled) fallback();
+          });
+        }, 5000);
 
-          initHls(url);
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = url;
+        video.onerror = () => {
+          clearTimeout(nativeTimeout);
+          if (cancelled) return;
+          console.log("CHOUF: Native with crossOrigin failed, trying without");
+          video.removeAttribute('crossOrigin');
+          video.src = nativeUrl;
+          video.onplaying = () => { clearTimeout(nativeTimeout); startPlay(); };
+          video.onerror = () => {
+            clearTimeout(nativeTimeout);
+            if (!cancelled) fallback();
+          };
+          video.play().catch(() => {
+            clearTimeout(nativeTimeout);
+            if (!cancelled) fallback();
+          });
+        };
+        
+        video.play().catch(() => {});
+      };
+
+      const initHlsPlayer = (videoUrl: string, retryWithProxy = false) => {
+        if (!Hls.isSupported()) {
+          // Safari native HLS
+          video.src = videoUrl;
           video.addEventListener("playing", startPlay, { once: true });
-          video.play().catch(() => {});
-        } else {
-          tryDirect(video, url, startPlay, onStreamError);
+          video.play().catch(onStreamError);
+          return;
         }
-      } else if (isMpegTS && window.mpegts && window.mpegts.isSupported()) {
-        (async () => {
-          let playUrl = url;
-          try {
-            const test = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
-            if (!test.ok) throw new Error('not ok');
-          } catch {
-            playUrl = withCorsProxy(url);
-            console.log("[VideoPlayer] Using CORS proxy for:", playUrl);
+        
+        const useProxy = retryWithProxy;
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          maxBufferLength: 30,
+          xhrSetup: (xhr, xhrUrl) => {
+            if (useProxy && !xhrUrl.startsWith(CORS_PROXY)) {
+              const proxied = withCorsProxy(xhrUrl);
+              xhr.open('GET', proxied, true);
+            }
+          },
+        });
+
+        hlsRef.current = hls;
+        hls.loadSource(videoUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+          startPlay();
+        });
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (!data.fatal) return;
+          hls.destroy();
+          if (hlsRef.current === hls) hlsRef.current = null;
+          if (cancelled) return;
+
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !retryWithProxy) {
+            console.log('CHOUF: HLS retry with CORS proxy');
+            initHlsPlayer(withCorsProxy(rawUrl), true);
+            return;
           }
-          try {
-            const player = window.mpegts.createPlayer({
-              type: 'mpegts', url: playUrl, isLive: true,
-              cors: true, hasAudio: true, hasVideo: true,
-            }, {
-              enableWorker: true, enableStashBuffer: false,
-              stashInitialSize: 128, liveBufferLatencyChasing: true,
-            });
-            mpegtsRef.current = player;
-            player.on(window.mpegts.Events.ERROR, (type: any, detail: any, info: any) => {
-              console.error('CHOUF mpegts error:', type, detail, info);
-              setError('Erreur de lecture: ' + detail);
-              setLoading(false);
-            });
-            player.attachMediaElement(video);
-            player.load();
-            player.play();
-            video.addEventListener('playing', startPlay, { once: true });
-          } catch (e) {
-            console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
-            tryDirect(video, url, startPlay, onStreamError);
+
+          setError(data.type === Hls.ErrorTypes.NETWORK_ERROR ? 'Flux indisponible' : 'Erreur de lecture');
+          setLoading(false);
+        });
+      };
+
+      if (isHLS) {
+        if (isMixed) {
+          // Mixed content: try native first, then HLS.js with proxy
+          tryNativeFirst(rawUrl, () => {
+            if (cancelled) return;
+            console.log("CHOUF: Native failed for HLS, trying HLS.js with proxy");
+            initHlsPlayer(withCorsProxy(rawUrl), true);
+          });
+        } else {
+          // Same protocol: use HLS.js directly
+          initHlsPlayer(rawUrl);
+        }
+      } else if (isMpegTS) {
+        // For MPEG-TS, always try native first
+        tryNativeFirst(rawUrl, () => {
+          if (cancelled) return;
+          // Fallback: try mpegts.js
+          if (window.mpegts && window.mpegts.isSupported()) {
+            console.log("CHOUF: Trying mpegts.js");
+            try {
+              const player = window.mpegts.createPlayer({
+                type: 'mpegts', url: isMixed ? withCorsProxy(rawUrl) : rawUrl,
+                isLive: true, cors: true, hasAudio: true, hasVideo: true,
+              }, {
+                enableWorker: true, enableStashBuffer: false,
+                stashInitialSize: 128, liveBufferLatencyChasing: true,
+              });
+              mpegtsRef.current = player;
+              player.on(window.mpegts.Events.ERROR, (type: any, detail: any) => {
+                if (!cancelled) { setError('Erreur: ' + detail); setLoading(false); }
+              });
+              player.attachMediaElement(video);
+              player.load();
+              player.play();
+              video.addEventListener('playing', startPlay, { once: true });
+            } catch (e) {
+              console.warn("CHOUF: mpegts.js failed:", e);
+              onStreamError();
+            }
+          } else {
+            onStreamError();
           }
-        })();
+        });
       } else {
-        if (isMpegTS) console.warn("[VideoPlayer] mpegts.js not available");
-        tryDirect(video, url, startPlay, onStreamError);
+        // Direct playback
+        video.src = rawUrl;
+        video.onplaying = startPlay;
+        video.onerror = onStreamError;
+        video.play().catch(onStreamError);
       }
     }, 300);
 
