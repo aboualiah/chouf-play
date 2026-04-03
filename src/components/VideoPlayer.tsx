@@ -35,6 +35,8 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState(1);
+  const [showDebug, setShowDebug] = useState(true);
+  const [debugInfo, setDebugInfo] = useState({ url: '', type: '', mpegts: '', hlsjs: '', method: '' });
 
   const hideControlsAfterDelay = useCallback(() => {
     clearTimeout(hideTimer.current);
