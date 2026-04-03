@@ -39,7 +39,32 @@ export function getPlaylists(): Playlist[] {
 }
 
 export function savePlaylists(playlists: Playlist[]) {
-  localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+  try {
+    // Try saving as-is first
+    localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+  } catch (e) {
+    // localStorage quota exceeded — strip logos to reduce size
+    console.warn("localStorage quota exceeded, stripping logos...");
+    try {
+      const stripped = playlists.map(p => ({
+        ...p,
+        channels: p.channels.map(c => ({ ...c, logo: undefined })),
+        vodStreams: p.vodStreams?.map(c => ({ ...c, logo: undefined })),
+        series: p.series?.map(c => ({ ...c, logo: undefined })),
+      }));
+      localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(stripped));
+    } catch (e2) {
+      // Still too large — keep only channel names/urls (no logos, minimal data)
+      console.warn("Still too large, keeping minimal data...");
+      const minimal = playlists.map(p => ({
+        ...p,
+        channels: p.channels.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId })),
+        vodStreams: p.vodStreams?.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId })),
+        series: p.series?.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId, seriesInfo: c.seriesInfo })),
+      }));
+      localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(minimal));
+    }
+  }
 }
 
 // ======== Recents ========

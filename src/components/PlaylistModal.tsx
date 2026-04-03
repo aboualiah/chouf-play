@@ -70,12 +70,18 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
         const playlistId = `xt_${Date.now()}`;
         const data = await loadXtreamPlaylist(creds, playlistId, setProgress);
         const total = data.liveChannels.length + data.vodStreams.length + data.series.length;
+        if (total === 0) {
+          toast.error("Aucune chaîne trouvée sur ce serveur");
+          setLoading(false); setProgress("");
+          return;
+        }
         toast.success(`${total} éléments chargés`);
         onPlaylistLoaded(creds.server.replace(/https?:\/\//, ""), data.liveChannels, data);
         onClose();
         return;
-      } catch {
-        toast.error("Erreur Xtream");
+      } catch (err) {
+        console.error("Xtream error:", err);
+        toast.error("Erreur de connexion Xtream");
       } finally { setLoading(false); setProgress(""); }
       return;
     }

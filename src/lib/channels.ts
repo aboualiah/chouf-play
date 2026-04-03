@@ -19,7 +19,6 @@ export const DEMO_CHANNELS: Channel[] = [
   { id: "d4", name: "France 24 FR", category: "Info FR", url: "https://stream.france24.com/live/france24_fr/france24_fr.m3u8", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/2/24/France_24_logo_2018.svg/200px-France_24_logo_2018.svg.png", type: "live" },
   { id: "d5", name: "TV5Monde Info", category: "Info FR", url: "https://ott.tv5monde.com/Content/HLS/Live/channel(info)/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/TV5Monde_Logo.svg/200px-TV5Monde_Logo.svg.png", type: "live" },
   { id: "d7", name: "Arte", category: "Info FR", url: "https://artesimulcast.akamaized.net/hls/live/2031003/artelive_fr/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Arte_Logo_2017.svg/200px-Arte_Logo_2017.svg.png", type: "live" },
-  { id: "d20", name: "Euronews FR", category: "Info FR", url: "https://rakuten-euronews-fr-1-be.samsung.wurl.tv/manifest/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Euronews_2016_logo.svg/200px-Euronews_2016_logo.svg.png", type: "live" },
   // 📰 Info EN
   { id: "d8", name: "France 24 EN", category: "Info EN", url: "https://stream.france24.com/live/france24_en/france24_en.m3u8", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/2/24/France_24_logo_2018.svg/200px-France_24_logo_2018.svg.png", type: "live" },
   { id: "d9", name: "Al Jazeera EN", category: "Info EN", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Aljazeera_eng.svg/200px-Aljazeera_eng.svg.png", type: "live" },
@@ -33,6 +32,11 @@ export const DEMO_CHANNELS: Channel[] = [
   { id: "d17", name: "Red Bull TV", category: "Sport", url: "https://rbmn-live.akamaized.net/hls/live/590964/BossRu498worwor/master_264.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/Red_Bull_TV_logo.svg/200px-Red_Bull_TV_logo.svg.png", type: "live" },
   { id: "d19", name: "NHK World", category: "Culture", url: "https://nhkworld.webcdn.stream.ne.jp/www11/nhkworld-tv/domestic/263942/live_wa_s.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/NHK_World-Japan_Logo.svg/200px-NHK_World-Japan_Logo.svg.png", type: "live" },
   { id: "d18", name: "Arirang TV", category: "Culture", url: "https://amdlive-ch01-ctnd-com.akamaized.net/arirang_1ch/smil:arirang_1ch.smil/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Arirang_TV_logo.svg/200px-Arirang_TV_logo.svg.png", type: "live" },
+  // 📺 YouTube-based (reliable HLS)
+  { id: "d21", name: "NASA TV", category: "Science", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png", type: "live" },
+  { id: "d22", name: "Bloomberg TV", category: "Business", url: "https://www.bloomberg.com/media-manifest/streams/us.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Bloomberg_logo.svg/200px-Bloomberg_logo.svg.png", type: "live" },
+  { id: "d23", name: "CGTN", category: "Info EN", url: "https://news.cgtn.com/resource/live/english/cgtn-news.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CGTN.svg/200px-CGTN.svg.png", type: "live" },
+  { id: "d24", name: "RT News", category: "Info EN", url: "https://rt-glb.rttv.com/live/rtnews/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/200px-Russia-today-logo.svg.png", type: "live" },
 ];
 
 export function getCategories(channels: Channel[]): string[] {
