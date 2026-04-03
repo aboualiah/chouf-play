@@ -22,6 +22,12 @@ function detectStreamType(url: string): "hls" | "mpegts" | "direct" {
   return "direct";
 }
 
+const CORS_PROXY = "https://corsproxy.io/?";
+
+function withCorsProxy(url: string) {
+  return `${CORS_PROXY}${encodeURIComponent(url)}`;
+}
+
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,6 +69,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !channel?.url) return;
+    let cancelled = false;
 
     cleanup();
     setError(null);
@@ -77,8 +84,16 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     console.log("CHOUF DEBUG: URL = " + url);
     console.log("CHOUF: URL=" + url + " type=" + streamType);
 
-    const startPlay = () => { setLoading(false); setPlaying(true); };
-    const onStreamError = () => { setLoading(false); setError('Impossible de lire ce flux'); };
+    const startPlay = () => {
+      if (cancelled) return;
+      setLoading(false);
+      setPlaying(true);
+    };
+    const onStreamError = () => {
+      if (cancelled) return;
+      setLoading(false);
+      setError('Impossible de lire ce flux');
+    };
 
     const tryDirect = (v: HTMLVideoElement, u: string, onOk: () => void, onErr: () => void) => {
       v.src = u;
@@ -87,19 +102,51 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       v.play().catch(onErr);
     };
 
-    const safetyTimeout = setTimeout(() => setLoading(false), 8000);
+    const safetyTimeout = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 10000);
 
     const initTimer = setTimeout(() => {
       if (isHLS) {
         if (Hls.isSupported()) {
-          const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
-          hlsRef.current = hls;
-          hls.loadSource(url);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); startPlay(); });
-          hls.on(Hls.Events.ERROR, (_, d) => {
-            if (d.fatal) { hls.destroy(); hlsRef.current = null; tryDirect(video, url, startPlay, onStreamError); }
-          });
+          const initHls = (videoUrl: string, retryWithProxy = false) => {
+            const hls = new Hls({
+              enableWorker: true,
+              lowLatencyMode: true,
+              maxBufferLength: 30,
+              xhrSetup: (xhr, xhrUrl) => {
+                if (retryWithProxy && !xhrUrl.startsWith(CORS_PROXY)) {
+                  xhr.open('GET', withCorsProxy(xhrUrl), true);
+                }
+              },
+            });
+
+            hlsRef.current = hls;
+            hls.loadSource(videoUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              video.play().catch(() => {});
+              startPlay();
+            });
+            hls.on(Hls.Events.ERROR, (_, data) => {
+              if (!data.fatal) return;
+
+              hls.destroy();
+              if (hlsRef.current === hls) hlsRef.current = null;
+              if (cancelled) return;
+
+              if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !retryWithProxy) {
+                console.log('CHOUF: Retry with CORS proxy');
+                initHls(withCorsProxy(url), true);
+                return;
+              }
+
+              setError(data.type === Hls.ErrorTypes.NETWORK_ERROR ? 'Flux indisponible' : 'Erreur de lecture');
+              setLoading(false);
+            });
+          };
+
+          initHls(url);
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = url;
           video.addEventListener("playing", startPlay, { once: true });
@@ -114,7 +161,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
             const test = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
             if (!test.ok) throw new Error('not ok');
           } catch {
-            playUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+            playUrl = withCorsProxy(url);
             console.log("[VideoPlayer] Using CORS proxy for:", playUrl);
           }
           try {
@@ -149,6 +196,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     hideControlsAfterDelay();
 
     return () => {
+      cancelled = true;
       clearTimeout(safetyTimeout);
       clearTimeout(initTimer);
       cleanup();
