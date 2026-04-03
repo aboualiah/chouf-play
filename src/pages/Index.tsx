@@ -31,7 +31,7 @@ export default function Index() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
@@ -354,7 +354,7 @@ export default function Index() {
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
-                    {activeTab === "live" && <MatchCarousel />}
+                    {/* Match carousel only on landing/empty, not in channel list */}
                     {/* Sub-tab filters for Live TV */}
                     {activeTab === "live" && (
                       <div className="flex items-center gap-2 px-5 py-3">

@@ -1,5 +1,8 @@
-import { Zap, Shield, Crown, Plus, Play, Trophy } from "lucide-react";
+import { Zap, Shield, Crown, Plus, Play, Trophy, QrCode, Eye, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { QRCodePortal } from "@/components/QRCodePortal";
+import { getMatchSettings } from "@/pages/Settings";
 import heroBg from "@/assets/hero-bg.jpg";
 
 interface EmptyStateProps {
@@ -20,6 +23,14 @@ const FEATURED_MATCHES = [
 ];
 
 export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
+  const [qrOpen, setQrOpen] = useState(false);
+  const [matchSettings, setMatchSettings] = useState(getMatchSettings);
+  const [showMatches, setShowMatches] = useState(matchSettings.showBanner);
+
+  const toggleShowMatches = () => {
+    setShowMatches(v => !v);
+  };
+
   return (
     <div className="flex flex-1 flex-col overflow-y-auto scrollbar-thin">
       <div className="w-full max-w-5xl mx-auto">
@@ -54,21 +65,31 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
           ))}
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA - Ajouter + À distance côte à côte */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="flex flex-col items-center gap-2 mt-8 px-6">
-          <button onClick={onAddPlaylist}
-            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-gradient-orange glow-orange-soft"
-            style={{ color: "#F5F5F7" }}>
-            <Plus size={18} />
-            Ajouter une playlist
-          </button>
+          className="flex flex-col items-center gap-3 mt-8 px-6">
+          <div className="flex items-center gap-3">
+            <button onClick={onAddPlaylist}
+              className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-gradient-orange glow-orange-soft"
+              style={{ color: "#F5F5F7" }}>
+              <Plus size={18} />
+              Ajouter une playlist
+            </button>
+            <button onClick={() => setQrOpen(true)}
+              className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #C9A84C, #A8893A)", color: "#F5F5F7" }}>
+              <QrCode size={18} />
+              À distance
+            </button>
+          </div>
           <p className="text-xs text-center" style={{ color: "#48484A" }}>
             M3U, URL ou Xtream Codes
           </p>
         </motion.div>
 
-        {/* 3 Match Banners */}
+        <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
+
+        {/* 3 Match Banners with toggle */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
           className="mt-10 px-6 pb-12">
           <div className="flex items-center gap-2 mb-4">
@@ -77,9 +98,17 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
               Matchs en vedette
             </h3>
             <div className="h-px flex-1" style={{ background: "#1C1C24" }} />
+            <button
+              onClick={toggleShowMatches}
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all"
+              style={{ background: "#1C1C24", color: showMatches ? "#34C759" : "#48484A" }}
+            >
+              {showMatches ? <Eye size={12} /> : <EyeOff size={12} />}
+              {showMatches ? "Masquer" : "Afficher"}
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {showMatches && <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {FEATURED_MATCHES.map((match, i) => (
               <motion.div
                 key={match.id}
@@ -148,7 +177,12 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
                 )}
               </motion.div>
             ))}
-          </div>
+          </div>}
+          {!showMatches && (
+            <p className="text-center text-[11px] py-4" style={{ color: "#48484A" }}>
+              Bannière matchs masquée. Activez dans les Paramètres.
+            </p>
+          )}
         </motion.div>
       </div>
     </div>
