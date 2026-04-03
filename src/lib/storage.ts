@@ -15,7 +15,9 @@ export interface PlaylistFavorites {
 function getPlaylistFavorites(): PlaylistFavorites {
   const def: PlaylistFavorites = { channels: {}, vod: {}, series: {} };
   try {
-    return { ...def, ...JSON.parse(localStorage.getItem(FAVORITES_KEY) || "null") } || def;
+    const stored = localStorage.getItem(FAVORITES_KEY);
+    if (!stored) return def;
+    return { ...def, ...JSON.parse(stored) };
   } catch { return def; }
 }
 
