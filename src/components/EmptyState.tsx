@@ -100,18 +100,24 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
                   )}
                 </div>
 
-                {/* Teams + score */}
+                {/* Teams + score with logos */}
                 <div className="flex items-center justify-between mb-4">
-                  <p className="flex-1 text-[15px] font-bold" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {match.team1Logo && <img src={match.team1Logo} alt="" className="h-7 w-7 object-contain" />}
+                    <p className="text-[14px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+                  </div>
                   {match.score ? (
-                    <span className="mx-2 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums"
+                    <span className="mx-2 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums shrink-0"
                       style={{ background: "rgba(255,109,0,0.12)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>
                       {match.score}
                     </span>
                   ) : (
-                    <span className="mx-2 text-xs" style={{ color: "#48484A" }}>vs</span>
+                    <span className="mx-2 text-xs shrink-0" style={{ color: "#48484A" }}>vs</span>
                   )}
-                  <p className="flex-1 text-[15px] font-bold text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+                  <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+                    <p className="text-[14px] font-bold text-right truncate" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+                    {match.team2Logo && <img src={match.team2Logo} alt="" className="h-7 w-7 object-contain" />}
+                  </div>
                 </div>
 
                 {/* Bottom info */}
