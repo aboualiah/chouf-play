@@ -244,30 +244,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           initHlsPlayer(rawUrl);
         }
       } else if (isMpegTS) {
-        // For MPEG-TS, always try native first
+        // For MPEG-TS, try native first, then fallback to mpegts.js
         tryNativeFirst(rawUrl, () => {
           if (cancelled) return;
-          // Fallback: try mpegts.js
-          if (window.mpegts && window.mpegts.isSupported()) {
-            console.log("CHOUF: Trying mpegts.js");
-            try {
-              const player = window.mpegts.createPlayer({
-                type: 'mpegts', url: isMixed ? withCorsProxy(rawUrl) : rawUrl,
-                isLive: true, cors: true, hasAudio: true, hasVideo: true,
-              }, {
-                enableWorker: true, enableStashBuffer: false,
-                stashInitialSize: 128, liveBufferLatencyChasing: true,
-              });
-              mpegtsRef.current = player;
-              player.on(window.mpegts.Events.ERROR, (type: any, detail: any) => {
-                if (!cancelled) { setError('Erreur: ' + detail); setLoading(false); }
-              });
-              player.attachMediaElement(video);
-              player.load();
-              player.play();
-              video.addEventListener('playing', startPlay, { once: true });
-            } catch (e) {
-              console.warn("CHOUF: mpegts.js failed:", e);
+          tryMpegtsPlayer(rawUrl);
+        });
               onStreamError();
             }
           } else {
