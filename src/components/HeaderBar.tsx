@@ -1,6 +1,8 @@
-import { Search, LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WeatherWidget } from "./WeatherWidget";
+import { SearchOverlay } from "./SearchOverlay";
+import { Channel } from "@/lib/channels";
 
 interface HeaderBarProps {
   searchQuery: string;
@@ -10,6 +12,10 @@ interface HeaderBarProps {
   activeTab: string;
   onTabSelect: (tab: string) => void;
   compact?: boolean;
+  allChannels?: Channel[];
+  allVod?: Channel[];
+  allSeries?: Channel[];
+  onPlay?: (ch: Channel) => void;
 }
 
 const TABS = [
@@ -30,24 +36,19 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay }: HeaderBarProps) {
   const now = useClock();
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });
 
+  const handlePlay = onPlay || (() => {});
+
   if (compact) {
     return (
       <div className="flex items-center gap-2 flex-1">
-        <div className="flex flex-1 items-center gap-2 rounded-xl px-3 py-1.5" style={{ background: "#1C1C24" }}>
-          <Search size={14} style={{ color: "#48484A" }} />
-          <input
-            value={searchQuery}
-            onChange={e => onSearchChange(e.target.value)}
-            placeholder="Rechercher..."
-            className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#48484A]"
-            style={{ color: "#F5F5F7" }}
-          />
-        </div>
+        <SearchOverlay query={searchQuery} onQueryChange={onSearchChange}
+          allChannels={allChannels} allVod={allVod} allSeries={allSeries}
+          onPlay={handlePlay} onTabSelect={onTabSelect} compact />
         <WeatherWidget />
       </div>
     );
@@ -79,17 +80,10 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         ))}
       </div>
 
-      {/* Search */}
-      <div className="flex flex-1 max-w-sm items-center gap-2 rounded-xl px-3 py-2 mx-auto" style={{ background: "#1C1C24", border: "1px solid #242430" }}>
-        <Search size={15} style={{ color: "#48484A" }} />
-        <input
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          placeholder="Rechercher une chaîne..."
-          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#48484A]"
-          style={{ color: "#F5F5F7" }}
-        />
-      </div>
+      {/* Search with overlay */}
+      <SearchOverlay query={searchQuery} onQueryChange={onSearchChange}
+        allChannels={allChannels} allVod={allVod} allSeries={allSeries}
+        onPlay={handlePlay} onTabSelect={onTabSelect} />
 
       {/* View toggle + weather + clock */}
       <div className="flex items-center gap-3">

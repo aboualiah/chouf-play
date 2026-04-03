@@ -10,6 +10,9 @@ import { PlaylistModal } from "@/components/PlaylistModal";
 import { DashboardCards } from "@/components/DashboardCards";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
+import { FilmsGrid } from "@/components/FilmsGrid";
+import { SeriesGrid } from "@/components/SeriesGrid";
+import { RadioList, RadioMiniPlayer, useRadioPlayer } from "@/components/RadioPlayer";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, loadPlaylistsAsync, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
@@ -40,6 +43,9 @@ export default function Index() {
   const [demoLoaded, setDemoLoaded] = useState(false);
   const [showEpg, setShowEpg] = useState(false);
 
+  // Radio player hook
+  const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
+
   useEffect(() => {
     if (!splash) return;
     const t = setTimeout(() => {
@@ -49,12 +55,10 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [splash]);
 
-  // Load playlists from IndexedDB on mount
   useEffect(() => {
     loadPlaylistsAsync().then(p => { if (p.length > 0) setPlaylists(p); });
   }, []);
 
-  // Handle addPlaylist query param from Dashboard
   useEffect(() => {
     if (searchParams.get("addPlaylist") && !splash) {
       setPlaylistModalOpen(true);
@@ -87,6 +91,7 @@ export default function Index() {
       case "films": return allVod;
       case "series": return allSeries;
       case "favorites": return [...allChannels, ...allVod, ...allSeries].filter(c => favorites.includes(c.id));
+      case "radio": return allChannels.filter(c => c.category?.toLowerCase().includes("radio"));
       default: return allChannels;
     }
   }, [activeTab, allChannels, allVod, allSeries, favorites]);
@@ -106,11 +111,19 @@ export default function Index() {
   }, []);
 
   const handlePlay = useCallback((channel: Channel) => {
+    // Stop radio when playing video
+    if (radioPlaying) stopRadio();
     setActiveChannel(channel);
     addRecent(channel.id);
     setShowEpg(false);
     if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile]);
+  }, [isMobile, radioPlaying, stopRadio]);
+
+  const handleRadioSelect = useCallback((station: Channel) => {
+    // Stop video when playing radio
+    setActiveChannel(null);
+    playRadio(station);
+  }, [playRadio]);
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
@@ -208,6 +221,65 @@ export default function Index() {
     { color: "#007AFF", glow: "rgba(0,122,255,0.4)", label: "Options", action: () => {} },
   ];
 
+  // Determine which content view to render
+  const renderContent = () => {
+    if (activeTab === "films" && allVod.length > 0) {
+      return <FilmsGrid films={filteredChannels} favorites={favorites} onPlay={handlePlay} onToggleFavorite={handleToggleFavorite} />;
+    }
+    if (activeTab === "series" && allSeries.length > 0) {
+      return <SeriesGrid series={filteredChannels} favorites={favorites} onPlay={handlePlay} onToggleFavorite={handleToggleFavorite} />;
+    }
+    if (activeTab === "radio") {
+      return <RadioList channels={allChannels} activeStation={radioStation} onSelect={handleRadioSelect} />;
+    }
+    return (
+      <>
+        {activeTab === "live" && playlists.length > 0 && !activeCategory && (
+          <DashboardCards
+            playlists={playlists}
+            allChannels={allChannels}
+            allVod={allVod}
+            allSeries={allSeries}
+            onTabSelect={handleTabSelect}
+            onPlay={handlePlay}
+            activePlaylistId={activePlaylistId}
+            onPlaylistSelect={setActivePlaylistId}
+          />
+        )}
+        {activeTab === "live" && (
+          <div className="flex items-center gap-2 px-5 py-3">
+            {[
+              { id: "all", label: "Toutes", icon: Radio },
+              { id: "favorites", label: "Favoris", icon: Star },
+              { id: "recent", label: "Récentes", icon: Clock },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setActiveSubTab(t.id)}
+                className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
+                style={activeSubTab === t.id
+                  ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
+                  : { color: "#86868B", border: "1px solid #1C1C24" }
+                }
+              >
+                <t.icon size={13} />
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <ChannelGrid
+          channels={filteredChannels}
+          favorites={favorites}
+          activeChannelId={activeChannel?.id}
+          onPlay={handlePlay}
+          onToggleFavorite={handleToggleFavorite}
+          viewMode={viewMode}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       <SplashScreen show={splash} />
@@ -241,47 +313,40 @@ export default function Index() {
                   <Menu size={18} />
                 </button>
                 <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                  activeTab={activeTab} onTabSelect={handleTabSelect} compact />
+                  activeTab={activeTab} onTabSelect={handleTabSelect} compact
+                  allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
               </div>
             )}
 
             {/* Desktop header */}
             {!isMobile && !activeChannel && (
               <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                activeTab={activeTab} onTabSelect={handleTabSelect} />
+                activeTab={activeTab} onTabSelect={handleTabSelect}
+                allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
             )}
 
             <div className="flex flex-1 overflow-hidden">
               <AnimatePresence mode="popLayout">
                 {activeChannel ? (
                   <motion.div key="player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-1">
-                    {/* Split view channel list — 340-380px */}
+                    {/* Split view channel list */}
                     <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#131318", borderColor: "#1C1C24" }}>
                       <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
                         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Chaînes ({filteredChannels.length})</p>
                         <div className="flex items-center gap-1 rounded-lg px-2 py-1" style={{ background: "#1C1C24" }}>
-                          <input
-                            placeholder="Filtrer..."
-                            className="bg-transparent text-[10px] w-20 outline-none placeholder:text-[#48484A]"
-                            style={{ color: "#F5F5F7" }}
-                          />
+                          <input placeholder="Filtrer..." className="bg-transparent text-[10px] w-20 outline-none placeholder:text-[#48484A]" style={{ color: "#F5F5F7" }} />
                         </div>
                       </div>
                       {filteredChannels.map((ch, i) => (
-                        <button
-                          key={ch.id}
-                          onClick={() => handlePlay(ch)}
+                        <button key={ch.id} onClick={() => handlePlay(ch)}
                           className="flex items-center gap-3 px-4 py-2.5 text-left transition-all hover:bg-[#1C1C24] group"
-                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" } : { borderLeft: "3px solid transparent" }}
-                        >
+                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" } : { borderLeft: "3px solid transparent" }}>
                           <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>{i + 1}</span>
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
                             {ch.logo ? (
                               <img src={ch.logo} loading="lazy" className="h-6 w-6 rounded object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                             ) : (
-                              <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>
-                                {ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                              </span>
+                              <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>{ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -311,45 +376,29 @@ export default function Index() {
                             onNext={handleNextChannel}
                           />
                         </div>
-                        {/* EPG Panel */}
                         <AnimatePresence>
                           {showEpg && (
                             <motion.div
-                              initial={{ width: 0, opacity: 0 }}
-                              animate={{ width: 300, opacity: 1 }}
-                              exit={{ width: 0, opacity: 0 }}
+                              initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
                               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                              className="hidden lg:flex overflow-hidden border-l"
-                              style={{ borderColor: "#1C1C24" }}
-                            >
+                              className="hidden lg:flex overflow-hidden border-l" style={{ borderColor: "#1C1C24" }}>
                               <EpgPanel channel={activeChannel} onClose={() => setShowEpg(false)} />
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </div>
-                      {/* Now playing bar with 4 color pastilles */}
+                      {/* Now playing bar */}
                       <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
                         <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: "#34C759", boxShadow: "0 0 8px rgba(52,199,89,0.5)" }} />
                         <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: "#F5F5F7" }}>{activeChannel.name}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,109,0,0.1)", color: "#FF6D00" }}>
-                          {activeChannel.category}
-                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,109,0,0.1)", color: "#FF6D00" }}>{activeChannel.category}</span>
                         <div className="flex gap-2 ml-2">
                           {COLOR_PASTILLES.map((dot, i) => (
-                            <button
-                              key={i}
-                              onClick={dot.action}
-                              className="group relative"
-                              title={dot.label}
-                            >
-                              <div
-                                className="h-3.5 w-3.5 rounded-full transition-transform hover:scale-125"
-                                style={{ background: dot.color, boxShadow: `0 0 8px ${dot.glow}` }}
-                              />
+                            <button key={i} onClick={dot.action} className="group relative" title={dot.label}>
+                              <div className="h-3.5 w-3.5 rounded-full transition-transform hover:scale-125"
+                                style={{ background: dot.color, boxShadow: `0 0 8px ${dot.glow}` }} />
                               <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-medium px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                                style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-                                {dot.label}
-                              </span>
+                                style={{ background: "#1C1C24", color: "#F5F5F7" }}>{dot.label}</span>
                             </button>
                           ))}
                         </div>
@@ -362,59 +411,24 @@ export default function Index() {
                   </motion.div>
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="flex-1 overflow-y-auto scrollbar-thin">
-                    {/* Dashboard cards when content is loaded */}
-                    {activeTab === "live" && playlists.length > 0 && !activeCategory && (
-                      <DashboardCards
-                        playlists={playlists}
-                        allChannels={allChannels}
-                        allVod={allVod}
-                        allSeries={allSeries}
-                        onTabSelect={handleTabSelect}
-                        onPlay={handlePlay}
-                        activePlaylistId={activePlaylistId}
-                        onPlaylistSelect={setActivePlaylistId}
-                      />
-                    )}
-                    {/* Sub-tab filters for Live TV */}
-                    {activeTab === "live" && (
-                      <div className="flex items-center gap-2 px-5 py-3">
-                        {[
-                          { id: "all", label: "Toutes", icon: Radio },
-                          { id: "favorites", label: "Favoris", icon: Star },
-                          { id: "recent", label: "Récentes", icon: Clock },
-                        ].map(t => (
-                          <button
-                            key={t.id}
-                            onClick={() => setActiveSubTab(t.id)}
-                            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
-                            style={activeSubTab === t.id
-                              ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
-                              : { color: "#86868B", border: "1px solid #1C1C24" }
-                            }
-                          >
-                            <t.icon size={13} />
-                            <span>{t.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <ChannelGrid
-                      channels={filteredChannels}
-                      favorites={favorites}
-                      activeChannelId={activeChannel?.id}
-                      onPlay={handlePlay}
-                      onToggleFavorite={handleToggleFavorite}
-                      viewMode={viewMode}
-                    />
+                    className="flex-1 overflow-y-auto scrollbar-thin" style={{ paddingBottom: radioStation ? 56 : 0 }}>
+                    {renderContent()}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
           </div>
-
         </div>
       )}
+
+      {/* Radio mini player */}
+      <AnimatePresence>
+        {radioStation && (
+          <RadioMiniPlayer station={radioStation} playing={radioPlaying}
+            onToggle={toggleRadio} onClose={stopRadio}
+            volume={radioVolume} onVolumeChange={setRadioVolume} />
+        )}
+      </AnimatePresence>
 
       <PlaylistModal
         open={playlistModalOpen}
