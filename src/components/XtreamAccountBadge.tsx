@@ -12,34 +12,39 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
 
   const info = playlist.xtreamAccountInfo;
   const mac = playlist.xtreamMac || "—";
+
+  // Debug: log raw account info
+  console.log("[XtreamBadge] accountInfo:", JSON.stringify(info));
   
   // Handle exp_date: could be string timestamp, number, or date string
   let expiresAt: Date | null = null;
   if (info?.exp_date) {
     const raw = info.exp_date;
+    console.log("[XtreamBadge] raw exp_date:", raw, "type:", typeof raw);
     const num = Number(raw);
     if (!Number.isNaN(num) && num > 0) {
       // Unix timestamp (seconds or milliseconds)
       expiresAt = new Date(num > 1e12 ? num : num * 1000);
-    } else if (typeof raw === "string") {
+    } else if (typeof raw === "string" && raw.length > 0) {
       expiresAt = new Date(raw);
     }
   }
+  
   const isValidExpiry = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime());
-  const daysRemaining = isValidExpiry ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : null;
+  const daysRemaining = isValidExpiry ? Math.ceil((expiresAt!.getTime() - Date.now()) / 86400000) : null;
   const isExpired = daysRemaining !== null ? daysRemaining < 0 : info?.status?.toLowerCase() === "expired";
   const isWarning = daysRemaining !== null && daysRemaining >= 0 && daysRemaining < 7;
-  
+
   const statusEmoji = isExpired ? "🔴" : isWarning ? "🟠" : "🟢";
-  const statusLabel = isExpired ? "Expiré" : "Actif";
+  const statusLabel = isExpired ? "Expiré" : info?.status || "Actif";
   const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759";
   const expiresLabel = isValidExpiry
-    ? expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : "—";
+    ? expiresAt!.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : info?.exp_date ? `Raw: ${info.exp_date}` : "—";
 
-  // Progress bar: days remaining out of total subscription
+  // Progress bar
   const createdAt = info?.created_at ? new Date(Number(info.created_at) * 1000) : null;
-  const totalDays = createdAt && isValidExpiry ? Math.ceil((expiresAt.getTime() - createdAt.getTime()) / 86400000) : null;
+  const totalDays = createdAt && isValidExpiry ? Math.ceil((expiresAt!.getTime() - createdAt.getTime()) / 86400000) : null;
   const progressPct = totalDays && daysRemaining !== null ? Math.max(0, Math.min(100, ((totalDays - Math.max(daysRemaining, 0)) / totalDays) * 100)) : null;
 
   const handleCopyMac = () => {
@@ -102,7 +107,7 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
               className="h-full rounded-full transition-all"
               style={{
                 width: `${progressPct}%`,
-                background: isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : `linear-gradient(90deg, #34C759, #34C759)`,
+                background: isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759",
               }}
             />
           </div>
