@@ -1,5 +1,6 @@
 import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, Radio, Star, Clock, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Channel, getCategories } from "@/lib/channels";
 import { useState } from "react";
 import { TvIcon } from "./TvIcon";
