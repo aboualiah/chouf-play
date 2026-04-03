@@ -1,12 +1,13 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import { Badge } from "@/components/ui/badge";
 import { XtreamAccountBadge } from "./XtreamAccountBadge";
 import { QRCodePortal } from "./QRCodePortal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -28,8 +29,8 @@ const NAV_ITEMS = [
   { id: "films", label: "Films", icon: Film },
   { id: "series", label: "Séries", icon: Clapperboard },
   { id: "favorites", label: "Favoris", icon: Heart },
+  { id: "radio", label: "Radio", icon: Radio },
 ];
-
 
 export function AppSidebar({
   channels, favorites, activeCategory, activeTab,
@@ -43,46 +44,69 @@ export function AppSidebar({
   const categories = getCategories(channels);
   const navigate = useNavigate();
 
+  // Collapsed mode with tooltips
   if (collapsed) {
     return (
-      <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "#131318", borderColor: "#1C1C24" }}>
-        <button onClick={onToggleCollapse} className="mb-6">
-          <ChoufPlayLogo size={36} showCP={false} />
-        </button>
-        <nav className="flex flex-col items-center gap-1.5">
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => onTabSelect(item.id)}
-              className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                activeTab === item.id
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              style={activeTab === item.id ? { background: "hsl(24 100% 50% / 0.1)" } : {}}
-            >
-              <item.icon size={20} />
-            </button>
-          ))}
-        </nav>
-        <div className="mt-auto flex flex-col items-center gap-1.5">
-          <button onClick={() => navigate("/dashboard")} className="flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground transition-colors">
-            <LayoutDashboard size={18} />
-          </button>
-          <button onClick={() => navigate("/settings")} className="flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground transition-colors">
-            <Settings size={18} />
-          </button>
-        </div>
-      </aside>
+      <TooltipProvider delayDuration={200}>
+        <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={onToggleCollapse} className="mb-6 transition-transform hover:scale-110">
+                <Menu size={20} style={{ color: "#C9A84C" }} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right"><p>Ouvrir le menu</p></TooltipContent>
+          </Tooltip>
+
+          <nav className="flex flex-col items-center gap-1">
+            {NAV_ITEMS.map(item => (
+              <Tooltip key={item.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onTabSelect(item.id)}
+                    className="flex h-11 w-11 items-center justify-center rounded-xl transition-all"
+                    style={activeTab === item.id
+                      ? { background: "rgba(255,109,0,0.12)", color: "#FF6D00" }
+                      : { color: "#86868B" }
+                    }
+                  >
+                    <item.icon size={20} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>{item.label}</p></TooltipContent>
+              </Tooltip>
+            ))}
+          </nav>
+
+          <div className="mt-auto flex flex-col items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => navigate("/dashboard")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[#86868B] hover:text-[#F5F5F7] transition-colors">
+                  <LayoutDashboard size={18} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Dashboard</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => navigate("/settings")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[#86868B] hover:text-[#F5F5F7] transition-colors">
+                  <Settings size={18} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Paramètres</p></TooltipContent>
+            </Tooltip>
+          </div>
+        </aside>
+      </TooltipProvider>
     );
   }
 
   return (
-    <aside className="flex h-screen w-[260px] flex-col border-r overflow-hidden" style={{ background: "#131318", borderColor: "#1C1C24" }}>
+    <aside className="flex h-screen w-[260px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3.5">
-        <button onClick={onToggleCollapse} className="shrink-0">
-          <ChoufPlayLogo size={40} showCP={false} />
+        <button onClick={onToggleCollapse} className="shrink-0 transition-transform hover:scale-110" title="Réduire">
+          <Menu size={20} style={{ color: "#C9A84C" }} />
         </button>
         <div className="min-w-0">
           <h1 className="text-base leading-tight">
@@ -106,16 +130,14 @@ export function AppSidebar({
                 key={item.id}
                 onClick={() => onTabSelect(item.id)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] transition-all ${
-                  activeTab === item.id
-                    ? "font-semibold"
-                    : "font-medium hover:bg-[#1C1C24]"
+                  activeTab === item.id ? "font-semibold" : "font-medium hover:bg-[#1C1C24]"
                 }`}
-                style={activeTab === item.id ? { background: "hsl(24 100% 50% / 0.1)", color: "#FF6D00" } : { color: "#86868B" }}
+                style={activeTab === item.id ? { background: "rgba(255,109,0,0.1)", color: "#FF6D00" } : { color: "#86868B" }}
               >
-                <item.icon size={17} />
+                <item.icon size={17} style={activeTab === item.id ? { filter: "drop-shadow(0 0 4px rgba(255,109,0,0.4))" } : {}} />
                 <span>{item.label}</span>
                 {count != null && count > 0 && (
-                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "hsl(24 100% 50% / 0.15)", color: "#FF6D00" }}>
+                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "rgba(255,109,0,0.15)", color: "#FF6D00" }}>
                     {count}
                   </span>
                 )}
@@ -124,9 +146,7 @@ export function AppSidebar({
           })}
         </nav>
 
-        {/* Separator */}
         <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
-
 
         {/* Categories */}
         {activeTab === "live" && (
@@ -140,12 +160,10 @@ export function AppSidebar({
               {catOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
             {catOpen && (
-              <div className="mt-0.5 space-y-0.5">
+              <div className="mt-0.5 space-y-0.5 max-h-48 overflow-y-auto scrollbar-thin">
                 <button
                   onClick={() => onCategorySelect(null)}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${
-                    !activeCategory ? "font-medium" : "hover:bg-[#1C1C24]"
-                  }`}
+                  className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${!activeCategory ? "font-medium" : "hover:bg-[#1C1C24]"}`}
                   style={!activeCategory ? { color: "#FF6D00" } : { color: "#86868B" }}
                 >
                   <span>Toutes</span>
@@ -157,9 +175,7 @@ export function AppSidebar({
                     <button
                       key={cat}
                       onClick={() => onCategorySelect(cat)}
-                      className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${
-                        activeCategory === cat ? "font-medium" : "hover:bg-[#1C1C24]"
-                      }`}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${activeCategory === cat ? "font-medium" : "hover:bg-[#1C1C24]"}`}
                       style={activeCategory === cat ? { color: "#FF6D00" } : { color: "#86868B" }}
                     >
                       <span className="truncate">{cat}</span>
@@ -172,7 +188,6 @@ export function AppSidebar({
           </div>
         )}
 
-        {/* Separator */}
         <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
 
         {/* Mes Listes */}
