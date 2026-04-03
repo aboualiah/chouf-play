@@ -77,11 +77,19 @@ const DEMO_MATCHES: Match[] = [
   { id: "m12", sportIcon: "🏉", league: "Six Nations", team1: "France", team2: "England", status: "upcoming", timeLabel: "6 jours" },
 ];
 
+function TeamLogo({ src, name }: { src?: string; name: string }) {
+  return src ? (
+    <img src={src} alt={name} className="h-8 w-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+  ) : (
+    <span className="text-[11px] font-bold" style={{ color: "#86868B" }}>{name.slice(0, 3).toUpperCase()}</span>
+  );
+}
+
 const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
   match: Match; hasReminder: boolean; onToggleReminder: () => void;
 }) => (
     <div
-      className="flex-shrink-0 w-[260px] rounded-2xl p-4 transition-all"
+      className="flex-shrink-0 w-[270px] rounded-2xl p-4 transition-all"
       style={{
         background: "linear-gradient(135deg, #1C1C24, #131318)",
         border: match.status === "live" ? "1.5px solid rgba(255, 109, 0, 0.6)" : "1px solid rgba(56, 56, 68, 0.5)",
@@ -90,9 +98,12 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
       }}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#86868B" }}>
-          {match.sportIcon} {match.league}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {match.leagueLogo && <img src={match.leagueLogo} alt="" className="h-4 w-4 object-contain" />}
+          <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#86868B" }}>
+            {match.league}
+          </span>
+        </div>
       {match.status === "live" && (
         <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255, 59, 48, 0.15)", color: "#FF3B30" }}>
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
@@ -100,14 +111,21 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
         </span>
       )}
     </div>
+    {/* Teams with logos */}
     <div className="flex items-center justify-between mb-3">
-      <p className="flex-1 text-[14px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <TeamLogo src={match.team1Logo} name={match.team1} />
+        <p className="text-[13px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+      </div>
       {match.score ? (
-        <span className="mx-3 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums" style={{ background: "rgba(255, 109, 0, 0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
+        <span className="mx-2 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums shrink-0" style={{ background: "rgba(255, 109, 0, 0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
       ) : (
-        <span className="mx-3 text-xs font-medium" style={{ color: "#86868B" }}>vs</span>
+        <span className="mx-2 text-xs shrink-0" style={{ color: "#86868B" }}>vs</span>
       )}
-      <p className="flex-1 text-[14px] font-bold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+      <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+        <p className="text-[13px] font-bold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+        <TeamLogo src={match.team2Logo} name={match.team2} />
+      </div>
     </div>
     <div className="flex items-center justify-between text-[11px] mb-3">
       <span className="font-semibold" style={{ color: match.status === "live" ? "#FF6D00" : "#B0B0B5" }}>{match.timeLabel}</span>
