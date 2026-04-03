@@ -1,10 +1,12 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, AlertTriangle } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, QrCode } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import { Badge } from "@/components/ui/badge";
+import { XtreamAccountBadge } from "./XtreamAccountBadge";
+import { QRCodePortal } from "./QRCodePortal";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -44,30 +46,9 @@ export function AppSidebar({
   const [catOpen, setCatOpen] = useState(true);
   const [listsOpen, setListsOpen] = useState(true);
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
+  const [qrOpen, setQrOpen] = useState(false);
   const categories = getCategories(channels);
   const navigate = useNavigate();
-
-  const getXtreamMeta = (playlist: Playlist) => {
-    if (!playlist.isXtream) return null;
-    const info = playlist.xtreamAccountInfo;
-    const expiresAt = info?.exp_date ? new Date(Number(info.exp_date) * 1000) : null;
-    const isValidExpiry = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime());
-    const daysRemaining = isValidExpiry ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : null;
-    const isExpired = daysRemaining !== null ? daysRemaining < 0 : info?.status?.toLowerCase() === "expired";
-    const isWarning = daysRemaining !== null && daysRemaining >= 0 && daysRemaining < 7;
-    const statusLabel = isExpired ? "Expiré" : "Actif";
-    const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759";
-
-    return {
-      mac: playlist.xtreamMac,
-      maxConnections: info?.max_connections || "—",
-      expiresLabel: isValidExpiry ? expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—",
-      daysRemaining,
-      statusLabel,
-      statusColor,
-      isWarning,
-    };
-  };
 
   if (collapsed) {
     return (
@@ -260,30 +241,7 @@ export function AppSidebar({
                           </span>
                         )}
                       </div>
-                      {(() => {
-                        const xtreamMeta = getXtreamMeta(p);
-                        if (!xtreamMeta) return null;
-
-                        return (
-                          <div className="mt-1.5 rounded-xl px-2.5 py-2" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
-                            <div className="flex items-center justify-between gap-2 text-[10px]">
-                              <span style={{ color: xtreamMeta.statusColor }}>{isNaN(0) ? '' : xtreamMeta.statusColor === '#34C759' ? '🟢' : xtreamMeta.statusColor === '#FF3B30' ? '🔴' : '🟠'} {xtreamMeta.statusLabel}</span>
-                              <span style={{ color: "#48484A" }}>Max {xtreamMeta.maxConnections}</span>
-                            </div>
-                            <div className="mt-1 text-[10px]" style={{ color: "#86868B" }}>MAC {xtreamMeta.mac || "—"}</div>
-                            <div className="mt-1 flex items-center justify-between gap-2 text-[10px]" style={{ color: xtreamMeta.isWarning ? "#FF9F0A" : "#86868B" }}>
-                              <span>Expire le {xtreamMeta.expiresLabel}</span>
-                              <span>{xtreamMeta.daysRemaining !== null ? `${Math.max(xtreamMeta.daysRemaining, 0)} j` : "—"}</span>
-                            </div>
-                            {xtreamMeta.isWarning && (
-                              <div className="mt-1 flex items-center gap-1 text-[10px]" style={{ color: "#FF9F0A" }}>
-                                <AlertTriangle size={10} />
-                                <span>Expiration proche</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                      <XtreamAccountBadge playlist={p} />
                     </div>
                   </div>
                 </div>
@@ -295,6 +253,14 @@ export function AppSidebar({
               >
                 <Plus size={14} />
                 <span>Ajouter une liste</span>
+              </button>
+              <button
+                onClick={() => setQrOpen(true)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                style={{ color: "#C9A84C" }}
+              >
+                <QrCode size={14} />
+                <span>Ajouter à distance</span>
               </button>
             </div>
           )}
@@ -316,6 +282,7 @@ export function AppSidebar({
           <span>Paramètres</span>
         </button>
       </div>
+      <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
     </aside>
   );
 }
