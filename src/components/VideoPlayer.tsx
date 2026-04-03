@@ -98,9 +98,10 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     return cleanup;
   }, [channel.url, hideControlsAfterDelay]);
 
-  // Load mpegts.js from CDN
+  // Load mpegts.js from CDN and ensure it's ready before playback
   useEffect(() => {
-    if (!(window as any).mpegts) {
+    const w = window as any;
+    if (!w.mpegts && !document.querySelector('script[src*="mpegts.js"]')) {
       const script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.js";
       script.async = true;
