@@ -108,7 +108,7 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {showMatches && <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {FEATURED_MATCHES.map((match, i) => (
               <motion.div
                 key={match.id}
