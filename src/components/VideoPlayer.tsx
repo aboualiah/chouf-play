@@ -86,14 +86,14 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     setError(null);
     setLoading(true);
 
-    const url = channel.url;
-    const streamType = detectStreamType(url);
+    const rawUrl = channel.url;
+    const streamType = detectStreamType(rawUrl);
     const isHLS = streamType === 'hls';
     const isMpegTS = streamType === 'mpegts';
+    const url = getStreamUrl(rawUrl);
+    const isMixedProxy = needsMixedContentProxy(rawUrl);
 
-    // === DEBUG LOGS ===
-    console.log("CHOUF DEBUG: URL = " + url);
-    console.log("CHOUF: URL=" + url + " type=" + streamType);
+    console.log("CHOUF: URL=" + rawUrl + " type=" + streamType + " proxied=" + isMixedProxy);
 
     const startPlay = () => {
       if (cancelled) return;
