@@ -7,7 +7,7 @@ import { HeaderBar } from "@/components/HeaderBar";
 import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
-import { MatchCarousel } from "@/components/MatchCarousel";
+import { DashboardCards } from "@/components/DashboardCards";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
