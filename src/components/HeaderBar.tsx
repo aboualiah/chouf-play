@@ -1,4 +1,4 @@
-import { Search, LayoutGrid, List, Sun, CloudRain } from "lucide-react";
+import { Search, LayoutGrid, List } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface HeaderBarProps {
@@ -6,19 +6,17 @@ interface HeaderBarProps {
   onSearchChange: (q: string) => void;
   viewMode: "grid" | "list";
   onViewModeChange: (m: "grid" | "list") => void;
+  activeTab: string;
+  onTabSelect: (tab: string) => void;
   compact?: boolean;
 }
 
-function useWeather() {
-  const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
-  useEffect(() => {
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current_weather=true")
-      .then(r => r.json())
-      .then(d => setWeather({ temp: Math.round(d.current_weather.temperature), code: d.current_weather.weathercode }))
-      .catch(() => {});
-  }, []);
-  return weather;
-}
+const TABS = [
+  { id: "live", label: "TV en direct" },
+  { id: "films", label: "Films" },
+  { id: "series", label: "Séries" },
+  { id: "favorites", label: "Favoris" },
+];
 
 function useClock() {
   const [now, setNow] = useState(new Date());
@@ -29,69 +27,88 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, compact }: HeaderBarProps) {
-  const weather = useWeather();
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact }: HeaderBarProps) {
   const now = useClock();
-
-  const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
+  const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });
 
   if (compact) {
     return (
       <div className="flex items-center gap-2 flex-1">
-        <div className="flex flex-1 items-center gap-2 rounded-lg bg-secondary px-3 py-1.5">
-          <Search size={14} className="text-muted-foreground" />
+        <div className="flex flex-1 items-center gap-2 rounded-xl px-3 py-1.5" style={{ background: "#1C1C24" }}>
+          <Search size={14} style={{ color: "#48484A" }} />
           <input
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Rechercher..."
-            className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#48484A]"
+            style={{ color: "#F5F5F7" }}
           />
-        </div>
-        <div className="flex rounded-lg bg-secondary p-0.5">
-          <button onClick={() => onViewModeChange("grid")} className={`rounded-md p-1 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
-            <LayoutGrid size={14} />
-          </button>
-          <button onClick={() => onViewModeChange("list")} className={`rounded-md p-1 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
-            <List size={14} />
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <header className="flex items-center gap-4 border-b border-border bg-card/50 px-5 py-3 backdrop-blur-sm">
-      <div className="flex flex-1 items-center gap-2 rounded-lg bg-secondary px-3 py-2">
-        <Search size={16} className="text-muted-foreground" />
+    <header
+      className="flex items-center gap-4 px-5 py-2.5"
+      style={{
+        background: "rgba(10, 10, 15, 0.8)",
+        backdropFilter: "blur(12px)",
+        borderBottom: "1px solid #1C1C24",
+      }}
+    >
+      {/* Tabs */}
+      <div className="flex items-center gap-0.5">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => onTabSelect(tab.id)}
+            className="relative px-3 py-2 text-[13px] font-medium transition-colors"
+            style={{ color: activeTab === tab.id ? "#FF6D00" : "#86868B" }}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <div className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ background: "#FF6D00" }} />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="flex flex-1 max-w-sm items-center gap-2 rounded-xl px-3 py-2 mx-auto" style={{ background: "#1C1C24", border: "1px solid #242430" }}>
+        <Search size={15} style={{ color: "#48484A" }} />
         <input
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Rechercher une chaîne..."
-          className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#48484A]"
+          style={{ color: "#F5F5F7" }}
         />
       </div>
 
-      <div className="flex rounded-lg bg-secondary p-0.5">
-        <button onClick={() => onViewModeChange("grid")} className={`rounded-md p-1.5 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
-          <LayoutGrid size={16} />
-        </button>
-        <button onClick={() => onViewModeChange("list")} className={`rounded-md p-1.5 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
-          <List size={16} />
-        </button>
-      </div>
-
-      {weather && (
-        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-          {weather.code <= 3 ? <Sun size={16} className="text-warning" /> : <CloudRain size={16} className="text-info" />}
-          <span>{weather.temp}°C</span>
-          <span className="text-[10px]">Bruxelles</span>
+      {/* View toggle + clock */}
+      <div className="flex items-center gap-3">
+        <div className="flex rounded-lg p-0.5" style={{ background: "#1C1C24" }}>
+          <button
+            onClick={() => onViewModeChange("grid")}
+            className="rounded-md p-1.5 transition-colors"
+            style={viewMode === "grid" ? { background: "#242430", color: "#F5F5F7" } : { color: "#48484A" }}
+          >
+            <LayoutGrid size={15} />
+          </button>
+          <button
+            onClick={() => onViewModeChange("list")}
+            className="rounded-md p-1.5 transition-colors"
+            style={viewMode === "list" ? { background: "#242430", color: "#F5F5F7" } : { color: "#48484A" }}
+          >
+            <List size={15} />
+          </button>
         </div>
-      )}
-
-      <div className="hidden sm:block text-right">
-        <p className="text-sm font-semibold tabular-nums text-foreground">{time}</p>
-        <p className="text-[10px] capitalize text-muted-foreground">{date}</p>
+        <div className="text-right hidden sm:block">
+          <p className="text-[13px] font-bold tabular-nums" style={{ color: "#F5F5F7", fontFamily: "monospace" }}>{time}</p>
+          <p className="text-[10px] capitalize" style={{ color: "#48484A" }}>{date}</p>
+        </div>
       </div>
     </header>
   );
