@@ -35,8 +35,6 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState(1);
-  const [showDebug, setShowDebug] = useState(true);
-  const [debugInfo, setDebugInfo] = useState({ url: '', type: '', mpegts: '', hlsjs: '', method: '' });
 
   const hideControlsAfterDelay = useCallback(() => {
     clearTimeout(hideTimer.current);
@@ -77,19 +75,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
 
     // === DEBUG LOGS ===
     console.log("CHOUF DEBUG: URL = " + url);
-    console.log("CHOUF DEBUG: Stream type = " + streamType);
-    console.log("CHOUF DEBUG: mpegts available = " + !!window.mpegts);
-    console.log("CHOUF DEBUG: mpegts supported = " + (window.mpegts?.isSupported?.() || false));
-    console.log("CHOUF DEBUG: HLS.js (import) available = true, supported = " + Hls.isSupported());
-    
-    setDebugInfo({
-      url,
-      type: streamType.toUpperCase(),
-      mpegts: window.mpegts ? "OUI (supported: " + (window.mpegts.isSupported?.() ? "OUI" : "NON") + ")" : "NON",
-      hlsjs: "OUI (supported: " + (Hls.isSupported() ? "OUI" : "NON") + ")",
-      method: '...'
-    });
-    setShowDebug(true);
+    console.log("CHOUF: URL=" + url + " type=" + streamType);
 
     const startPlay = () => { setLoading(false); setPlaying(true); };
     const onStreamError = () => { setLoading(false); setError('Impossible de lire ce flux'); };
@@ -101,44 +87,35 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       v.play().catch(onErr);
     };
 
-    // Safety timeout
     const safetyTimeout = setTimeout(() => setLoading(false), 8000);
 
-    // Small delay to ensure CDN scripts are loaded
     const initTimer = setTimeout(() => {
       if (isHLS) {
         if (Hls.isSupported()) {
-          setDebugInfo(p => ({ ...p, method: 'HLS.js' }));
           const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
           hlsRef.current = hls;
           hls.loadSource(url);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); startPlay(); });
           hls.on(Hls.Events.ERROR, (_, d) => {
-            if (d.fatal) { hls.destroy(); hlsRef.current = null; setDebugInfo(p => ({ ...p, method: 'DIRECT (fallback HLS)' })); tryDirect(video, url, startPlay, onStreamError); }
+            if (d.fatal) { hls.destroy(); hlsRef.current = null; tryDirect(video, url, startPlay, onStreamError); }
           });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          setDebugInfo(p => ({ ...p, method: 'Native HLS' }));
           video.src = url;
           video.addEventListener("playing", startPlay, { once: true });
           video.play().catch(() => {});
         } else {
-          setDebugInfo(p => ({ ...p, method: 'DIRECT (no HLS support)' }));
           tryDirect(video, url, startPlay, onStreamError);
         }
       } else if (isMpegTS && window.mpegts && window.mpegts.isSupported()) {
-        setDebugInfo(p => ({ ...p, method: 'mpegts.js (CORS proxy)' }));
-        // Test direct first, fallback to CORS proxy
         (async () => {
           let playUrl = url;
           try {
             const test = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
             if (!test.ok) throw new Error('not ok');
-            console.log("[VideoPlayer] Direct access OK for:", url);
           } catch {
             playUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
             console.log("[VideoPlayer] Using CORS proxy for:", playUrl);
-            setDebugInfo(p => ({ ...p, method: 'mpegts.js (via corsproxy.io)' }));
           }
           try {
             const player = window.mpegts.createPlayer({
@@ -160,14 +137,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
             video.addEventListener('playing', startPlay, { once: true });
           } catch (e) {
             console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
-            setDebugInfo(p => ({ ...p, method: 'DIRECT (mpegts failed)' }));
             tryDirect(video, url, startPlay, onStreamError);
           }
         })();
       } else {
-        const reason = isMpegTS ? 'mpegts.js NOT available' : 'direct stream';
-        setDebugInfo(p => ({ ...p, method: 'DIRECT (' + reason + ')' }));
-        if (isMpegTS) console.warn("[VideoPlayer] mpegts.js not available, trying direct for:", url);
+        if (isMpegTS) console.warn("[VideoPlayer] mpegts.js not available");
         tryDirect(video, url, startPlay, onStreamError);
       }
     }, 300);
@@ -232,25 +206,6 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       style={{ background: "#0A0A0F" }}
       onMouseMove={hideControlsAfterDelay}
     >
-      {/* DEBUG OVERLAY - TEMPORAIRE */}
-      {showDebug && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, zIndex: 999,
-          background: 'black', color: '#00ff00', fontFamily: 'monospace',
-          padding: '12px', fontSize: '10px', lineHeight: '1.6'
-        }}>
-          <div>🔍 URL du flux: {debugInfo.url}</div>
-          <div>📡 Type détecté: {debugInfo.type}</div>
-          <div>📦 mpegts.js disponible: {debugInfo.mpegts}</div>
-          <div>📦 HLS.js disponible: {debugInfo.hlsjs}</div>
-          <div>🎬 Méthode utilisée: {debugInfo.method}</div>
-          <button onClick={() => setShowDebug(false)} style={{
-            position: 'absolute', top: 4, right: 4, background: '#FF3B30',
-            color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer',
-            padding: '2px 6px', fontSize: '10px'
-          }}>X</button>
-        </div>
-      )}
       {/* Back button */}
       <button
         onClick={onBack}
