@@ -8,6 +8,7 @@ import { lazy, Suspense } from "react";
 const Index = lazy(() => import("./pages/Index"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DemoChannels = lazy(() => import("./pages/DemoChannels"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const NotFound = lazy(() => import("./pages/NotFound"));
