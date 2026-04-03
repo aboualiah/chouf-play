@@ -127,22 +127,43 @@ export async function loadXtreamPlaylist(
 
   onProgress?.("Chargement des chaînes TV...");
 
-  // Fetch live streams + categories in parallel
+  // Fetch all endpoints in parallel
   const [liveStreamsRaw, liveCatsRaw, vodStreamsRaw, vodCatsRaw, seriesRaw, seriesCatsRaw] = await Promise.allSettled([
-    fetchJson(`${base}&action=get_live_streams`),
-    fetchJson(`${base}&action=get_live_categories`),
-    fetchJson(`${base}&action=get_vod_streams`),
-    fetchJson(`${base}&action=get_vod_categories`),
-    fetchJson(`${base}&action=get_series`),
-    fetchJson(`${base}&action=get_series_categories`),
+    fetchJson(`${base}&action=get_live_streams`).catch(() => []),
+    fetchJson(`${base}&action=get_live_categories`).catch(() => []),
+    fetchJson(`${base}&action=get_vod_streams`).catch(() => []),
+    fetchJson(`${base}&action=get_vod_categories`).catch(() => []),
+    fetchJson(`${base}&action=get_series`).catch(() => []),
+    fetchJson(`${base}&action=get_series_categories`).catch(() => []),
   ]);
 
-  const liveStreams = liveStreamsRaw.status === "fulfilled" ? liveStreamsRaw.value : [];
-  const liveCats = liveCatsRaw.status === "fulfilled" ? liveCatsRaw.value : [];
-  const vodStreams = vodStreamsRaw.status === "fulfilled" ? vodStreamsRaw.value : [];
-  const vodCats = vodCatsRaw.status === "fulfilled" ? vodCatsRaw.value : [];
-  const seriesStreams = seriesRaw.status === "fulfilled" ? seriesRaw.value : [];
-  const seriesCats = seriesCatsRaw.status === "fulfilled" ? seriesCatsRaw.value : [];
+  onProgress?.("Traitement des données...");
+
+  const getValue = (r: PromiseSettledResult<any>) => {
+    if (r.status === "fulfilled") {
+      const v = r.value;
+      // Some servers return an object instead of array
+      if (Array.isArray(v)) return v;
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        // Try to find an array in the response
+        const keys = Object.keys(v);
+        for (const k of keys) {
+          if (Array.isArray(v[k])) return v[k];
+        }
+      }
+      return [];
+    }
+    return [];
+  };
+
+  const liveStreams = getValue(liveStreamsRaw);
+  const liveCats = getValue(liveCatsRaw);
+  const vodStreams = getValue(vodStreamsRaw);
+  const vodCats = getValue(vodCatsRaw);
+  const seriesStreams = getValue(seriesRaw);
+  const seriesCats = getValue(seriesCatsRaw);
+
+  console.log(`Xtream loaded: ${liveStreams.length} live, ${vodStreams.length} VOD, ${seriesStreams.length} series`);
 
   // Build category maps
   const liveCatMap: Record<string, string> = {};
