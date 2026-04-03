@@ -243,11 +243,11 @@ export function AppSidebar({
 
       {/* Bottom */}
       <div className="border-t border-border px-3 py-3 space-y-0.5">
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/dashboard")} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
           <LayoutDashboard size={18} />
           <span>Dashboard</span>
         </button>
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/settings")} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
           <Settings size={18} />
           <span>Paramètres</span>
         </button>
