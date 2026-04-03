@@ -8,9 +8,9 @@ interface EmptyStateProps {
 }
 
 const COMPETITION_LOGOS: Record<string, string> = {
-  "Champions League": "https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League_logo_2024.svg/120px-UEFA_Champions_League_logo_2024.svg.png",
-  "Ligue 1": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ligue1_Uber_Eats_%282024%29.svg/120px-Ligue1_Uber_Eats_%282024%29.svg.png",
-  "NBA": "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/120px-National_Basketball_Association_logo.svg.png",
+  "Champions League": "https://img.icons8.com/color/48/uefa-champions-league.png",
+  "Ligue 1": "https://img.icons8.com/color/48/ligue-1.png",
+  "NBA": "https://img.icons8.com/color/48/nba.png",
 };
 
 const FEATURED_MATCHES = [
