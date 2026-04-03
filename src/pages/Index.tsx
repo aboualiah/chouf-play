@@ -33,7 +33,7 @@ export default function Index() {
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
-  const [demoLoaded, setDemoLoaded] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(true);
   const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
