@@ -63,11 +63,20 @@ const LEAGUE_IDS: Record<string, number> = {
 
 const LEAGUE_LOGO_MAP: Record<string, string> = {
   "Champions League": LOGOS.ucl,
+  "UEFA Champions League": LOGOS.ucl,
   "Ligue 1": LOGOS.ligue1,
+  "French Ligue 1": LOGOS.ligue1,
   "Premier League": LOGOS.pl,
+  "English Premier League": LOGOS.pl,
   "La Liga": LOGOS.laliga,
+  "Spanish La Liga": LOGOS.laliga,
   "Serie A": LOGOS.seriea,
+  "Italian Serie A": LOGOS.seriea,
   "Bundesliga": LOGOS.bundesliga,
+  "German Bundesliga": LOGOS.bundesliga,
+  "Botola Pro": LOGOS.botola,
+  "NBA": LOGOS.nba,
+  "UFC": LOGOS.ufc,
 };
 
 const FALLBACK_MATCHES: Match[] = [
