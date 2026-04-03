@@ -127,24 +127,6 @@ export function AppSidebar({
         {/* Separator */}
         <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
 
-        {/* Sub tabs for Live */}
-        {activeTab === "live" && (
-          <div className="mb-2 space-y-0.5">
-            {SUB_TABS.map(t => (
-              <button
-                key={t.id}
-                onClick={() => onSubTabSelect(t.id)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-[12px] transition-all ${
-                  activeSubTab === t.id ? "font-medium" : "hover:bg-[#1C1C24]"
-                }`}
-                style={activeSubTab === t.id ? { color: "#FF6D00" } : { color: "#48484A" }}
-              >
-                <t.icon size={14} />
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Categories */}
         {activeTab === "live" && (
