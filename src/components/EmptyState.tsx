@@ -65,19 +65,29 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
           ))}
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA - Ajouter + À distance côte à côte */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="flex flex-col items-center gap-2 mt-8 px-6">
-          <button onClick={onAddPlaylist}
-            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-gradient-orange glow-orange-soft"
-            style={{ color: "#F5F5F7" }}>
-            <Plus size={18} />
-            Ajouter une playlist
-          </button>
+          className="flex flex-col items-center gap-3 mt-8 px-6">
+          <div className="flex items-center gap-3">
+            <button onClick={onAddPlaylist}
+              className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-gradient-orange glow-orange-soft"
+              style={{ color: "#F5F5F7" }}>
+              <Plus size={18} />
+              Ajouter une playlist
+            </button>
+            <button onClick={() => setQrOpen(true)}
+              className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #C9A84C, #A8893A)", color: "#F5F5F7" }}>
+              <QrCode size={18} />
+              À distance
+            </button>
+          </div>
           <p className="text-xs text-center" style={{ color: "#48484A" }}>
             M3U, URL ou Xtream Codes
           </p>
         </motion.div>
+
+        <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
 
         {/* 3 Match Banners */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
