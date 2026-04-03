@@ -115,7 +115,7 @@ export function AppSidebar({
             <div className="flex gap-1 rounded-lg bg-secondary p-1">
               {SUB_TABS.map(t => (
                 <button key={t.id} className="flex-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground"
-                  data-active={activeCategory === null && t.id === "all" || (t.id === "favorites" && activeTab === "favorites") ? true : undefined}
+                  data-active={(activeCategory === null && t.id === "all") ? true : undefined}
                 >
                   {t.label}
                 </button>
