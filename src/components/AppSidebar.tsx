@@ -30,11 +30,6 @@ const NAV_ITEMS = [
   { id: "favorites", label: "Favoris", icon: Heart },
 ];
 
-const SUB_TABS = [
-  { id: "all", label: "Toutes les chaînes", icon: Radio },
-  { id: "favorites", label: "Favoris", icon: Star },
-  { id: "recent", label: "Récentes", icon: Clock },
-];
 
 export function AppSidebar({
   channels, favorites, activeCategory, activeTab, activeSubTab,
