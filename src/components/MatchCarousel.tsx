@@ -16,18 +16,64 @@ interface Match {
   channel?: string;
 }
 
+interface Match {
+  id: string;
+  sportIcon: string;
+  league: string;
+  leagueLogo?: string;
+  team1: string;
+  team1Logo?: string;
+  team2: string;
+  team2Logo?: string;
+  status: "live" | "upcoming";
+  timeLabel: string;
+  score?: string;
+  channel?: string;
+}
+
+// Team & league logos (Wikipedia commons)
+const LOGOS = {
+  // Leagues
+  ucl: "https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/UEFA_Champions_League_logo_2024.svg/120px-UEFA_Champions_League_logo_2024.svg.png",
+  ligue1: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ligue1_Uber_Eats_%282024%29.svg/120px-Ligue1_Uber_Eats_%282024%29.svg.png",
+  pl: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/120px-Premier_League_Logo.svg.png",
+  laliga: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/LaLiga.svg/120px-LaLiga.svg.png",
+  seriea: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Serie_A_logo_2022.svg/120px-Serie_A_logo_2022.svg.png",
+  nba: "https://upload.wikimedia.org/wikipedia/en/thumb/0/03/National_Basketball_Association_logo.svg/120px-National_Basketball_Association_logo.svg.png",
+  ufc: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UFC_Logo.svg/120px-UFC_Logo.svg.png",
+  // Teams
+  psg: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/80px-Paris_Saint-Germain_F.C..svg.png",
+  om: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Olympique_Marseille_logo.svg/80px-Olympique_Marseille_logo.svg.png",
+  real: "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/80px-Real_Madrid_CF.svg.png",
+  mancity: "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/80px-Manchester_City_FC_badge.svg.png",
+  arsenal: "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/80px-Arsenal_FC.svg.png",
+  liverpool: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/80px-Liverpool_FC.svg.png",
+  barca: "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/80px-FC_Barcelona_%28crest%29.svg.png",
+  atletico: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/Atletico_Madrid_Logo_2024.svg/80px-Atletico_Madrid_Logo_2024.svg.png",
+  inter: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/80px-FC_Internazionale_Milano_2021.svg.png",
+  acmilan: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/80px-Logo_of_AC_Milan.svg.png",
+  bayern: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg/80px-FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg.png",
+  bvb: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/80px-Borussia_Dortmund_logo.svg.png",
+  wydad: "https://upload.wikimedia.org/wikipedia/en/thumb/3/39/Wydad_AC_%28logo%29.svg/80px-Wydad_AC_%28logo%29.svg.png",
+  raja: "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Raja_Club_Athletic_logo.svg/80px-Raja_Club_Athletic_logo.svg.png",
+  lakers: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Los_Angeles_Lakers_logo.svg/80px-Los_Angeles_Lakers_logo.svg.png",
+  celtics: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8f/Boston_Celtics.svg/80px-Boston_Celtics.svg.png",
+  lyon: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e2/Olympique_Lyonnais_%28logo%29.svg/80px-Olympique_Lyonnais_%28logo%29.svg.png",
+  monaco: "https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/AS_Monaco_FC.svg/80px-AS_Monaco_FC.svg.png",
+};
+
 const DEMO_MATCHES: Match[] = [
-  { id: "m1", sportIcon: "⚽", league: "Ligue 1", team1: "OL Lyon", team2: "AS Monaco", status: "live", timeLabel: "EN COURS", score: "1-2", channel: "beIN Sports 1" },
-  { id: "m2", sportIcon: "⚽", league: "Ligue 1", team1: "PSG", team2: "OM", status: "upcoming", timeLabel: "dans 3h", channel: "beIN Sports 1" },
-  { id: "m3", sportIcon: "⚽", league: "Champions League", team1: "Real Madrid", team2: "Man City", status: "upcoming", timeLabel: "demain", channel: "RMC Sport 1" },
-  { id: "m4", sportIcon: "⚽", league: "Premier League", team1: "Arsenal", team2: "Liverpool", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 2" },
-  { id: "m5", sportIcon: "⚽", league: "La Liga", team1: "Barcelona", team2: "Atletico", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 3" },
-  { id: "m6", sportIcon: "⚽", league: "Serie A", team1: "Inter", team2: "AC Milan", status: "upcoming", timeLabel: "3 jours" },
-  { id: "m7", sportIcon: "⚽", league: "Bundesliga", team1: "Bayern", team2: "Dortmund", status: "upcoming", timeLabel: "4 jours" },
-  { id: "m8", sportIcon: "⚽", league: "Botola Pro", team1: "Wydad", team2: "Raja", status: "upcoming", timeLabel: "demain" },
-  { id: "m9", sportIcon: "🏀", league: "NBA", team1: "Lakers", team2: "Celtics", status: "upcoming", timeLabel: "8h", channel: "beIN Sports 4" },
+  { id: "m1", sportIcon: "⚽", league: "Ligue 1", leagueLogo: LOGOS.ligue1, team1: "OL Lyon", team1Logo: LOGOS.lyon, team2: "AS Monaco", team2Logo: LOGOS.monaco, status: "live", timeLabel: "67'", score: "1-2", channel: "beIN Sports 1" },
+  { id: "m2", sportIcon: "⚽", league: "Ligue 1", leagueLogo: LOGOS.ligue1, team1: "PSG", team1Logo: LOGOS.psg, team2: "OM", team2Logo: LOGOS.om, status: "upcoming", timeLabel: "dans 3h", channel: "beIN Sports 1" },
+  { id: "m3", sportIcon: "⚽", league: "Champions League", leagueLogo: LOGOS.ucl, team1: "Real Madrid", team1Logo: LOGOS.real, team2: "Man City", team2Logo: LOGOS.mancity, status: "upcoming", timeLabel: "demain", channel: "RMC Sport 1" },
+  { id: "m4", sportIcon: "⚽", league: "Premier League", leagueLogo: LOGOS.pl, team1: "Arsenal", team1Logo: LOGOS.arsenal, team2: "Liverpool", team2Logo: LOGOS.liverpool, status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 2" },
+  { id: "m5", sportIcon: "⚽", league: "La Liga", leagueLogo: LOGOS.laliga, team1: "Barcelona", team1Logo: LOGOS.barca, team2: "Atletico", team2Logo: LOGOS.atletico, status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 3" },
+  { id: "m6", sportIcon: "⚽", league: "Serie A", leagueLogo: LOGOS.seriea, team1: "Inter", team1Logo: LOGOS.inter, team2: "AC Milan", team2Logo: LOGOS.acmilan, status: "upcoming", timeLabel: "3 jours" },
+  { id: "m7", sportIcon: "⚽", league: "Bundesliga", team1: "Bayern", team1Logo: LOGOS.bayern, team2: "Dortmund", team2Logo: LOGOS.bvb, status: "upcoming", timeLabel: "4 jours" },
+  { id: "m8", sportIcon: "⚽", league: "Botola Pro", team1: "Wydad", team1Logo: LOGOS.wydad, team2: "Raja", team2Logo: LOGOS.raja, status: "upcoming", timeLabel: "demain" },
+  { id: "m9", sportIcon: "🏀", league: "NBA", leagueLogo: LOGOS.nba, team1: "Lakers", team1Logo: LOGOS.lakers, team2: "Celtics", team2Logo: LOGOS.celtics, status: "upcoming", timeLabel: "8h", channel: "beIN Sports 4" },
   { id: "m10", sportIcon: "🎾", league: "Roland Garros", team1: "Djokovic", team2: "Alcaraz", status: "upcoming", timeLabel: "5 jours" },
-  { id: "m11", sportIcon: "🥊", league: "UFC", team1: "Makhachev", team2: "Oliveira", status: "upcoming", timeLabel: "7 jours" },
+  { id: "m11", sportIcon: "🥊", league: "UFC", leagueLogo: LOGOS.ufc, team1: "Makhachev", team2: "Oliveira", status: "upcoming", timeLabel: "7 jours" },
   { id: "m12", sportIcon: "🏉", league: "Six Nations", team1: "France", team2: "England", status: "upcoming", timeLabel: "6 jours" },
 ];
 
