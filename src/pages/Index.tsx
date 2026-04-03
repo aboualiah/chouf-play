@@ -31,7 +31,7 @@ export default function Index() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
