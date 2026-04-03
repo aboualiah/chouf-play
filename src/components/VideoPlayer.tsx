@@ -62,111 +62,72 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !channel?.url) return;
 
     cleanup();
     setError(null);
     setLoading(true);
 
-    const streamType = detectStreamType(channel.url);
+    const url = channel.url;
+    const isHLS = url.includes('.m3u8');
+    const isMpegTS = /\/\d+\.ts$/.test(url) || /\/\d+$/.test(url) || /\/live\/[^/]+\/[^/]+\/\d+/.test(url) || url.endsWith('.ts');
 
-    const onPlaying = () => { setLoading(false); setPlaying(true); };
-    video.addEventListener("playing", onPlaying, { once: true });
+    const startPlay = () => { setLoading(false); setPlaying(true); };
+    const onStreamError = () => { setLoading(false); setError('Impossible de lire ce flux'); };
+
+    const tryDirect = (v: HTMLVideoElement, u: string, onOk: () => void, onErr: () => void) => {
+      v.src = u;
+      v.onplaying = onOk;
+      v.onerror = onErr;
+      v.play().catch(onErr);
+    };
 
     // Safety timeout
     const safetyTimeout = setTimeout(() => setLoading(false), 8000);
 
-    const tryMpegts = (url: string) => {
-      if (window.mpegts && window.mpegts.isSupported()) {
-        const player = window.mpegts.createPlayer({
-          type: "mpegts",
-          url: url,
-          isLive: true,
-        });
-        mpegtsRef.current = player;
-        player.attachMediaElement(video);
-        player.load();
-        player.play();
+    // Small delay to ensure CDN scripts are loaded
+    const initTimer = setTimeout(() => {
+      if (isHLS) {
+        if (Hls.isSupported()) {
+          const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
+          hlsRef.current = hls;
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); startPlay(); });
+          hls.on(Hls.Events.ERROR, (_, d) => {
+            if (d.fatal) { hls.destroy(); hlsRef.current = null; tryDirect(video, url, startPlay, onStreamError); }
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = url;
+          video.addEventListener("playing", startPlay, { once: true });
+          video.play().catch(() => {});
+        } else {
+          tryDirect(video, url, startPlay, onStreamError);
+        }
+      } else if (isMpegTS && window.mpegts && window.mpegts.isSupported()) {
+        try {
+          console.log("[VideoPlayer] Using mpegts.js for:", url);
+          const player = window.mpegts.createPlayer({ type: 'mpegts', url, isLive: true });
+          mpegtsRef.current = player;
+          player.attachMediaElement(video);
+          player.load();
+          player.play();
+          video.addEventListener('playing', startPlay, { once: true });
+        } catch (e) {
+          console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
+          tryDirect(video, url, startPlay, onStreamError);
+        }
       } else {
-        // mpegts not available, try direct
-        video.src = url;
-        video.play().catch(() => setError("Format non supporté par ce navigateur"));
+        if (isMpegTS) console.warn("[VideoPlayer] mpegts.js not available, trying direct for:", url);
+        tryDirect(video, url, startPlay, onStreamError);
       }
-    };
-
-    const tryHlsFallback = (url: string) => {
-      const hlsUrl = url.replace(/\.ts$/, ".m3u8");
-      if (Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
-        hlsRef.current = hls;
-        hls.loadSource(hlsUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          if (data.fatal) {
-            hls.destroy();
-            hlsRef.current = null;
-            // Last resort: direct src
-            video.src = url;
-            video.play().catch(() => setError("Impossible de lire ce flux"));
-          }
-        });
-      } else {
-        video.src = url;
-        video.play().catch(() => setError("Impossible de lire ce flux"));
-      }
-    };
-
-    if (streamType === "mpegts") {
-      // Primary: mpegts.js for .ts streams (Xtream)
-      if (window.mpegts) {
-        tryMpegts(channel.url);
-      } else {
-        // Wait for mpegts.js CDN script to load
-        let attempts = 0;
-        const waitInterval = setInterval(() => {
-          attempts++;
-          if (window.mpegts || attempts > 30) {
-            clearInterval(waitInterval);
-            if (window.mpegts) {
-              tryMpegts(channel.url);
-            } else {
-              tryHlsFallback(channel.url);
-            }
-          }
-        }, 200);
-      }
-    } else if (streamType === "hls") {
-      if (Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
-        hlsRef.current = hls;
-        hls.loadSource(channel.url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          if (data.fatal) {
-            hls.destroy();
-            hlsRef.current = null;
-            tryMpegts(channel.url);
-          }
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = channel.url;
-        video.play().catch(() => {});
-      } else {
-        video.src = channel.url;
-        video.play().catch(() => setError("HLS non supporté"));
-      }
-    } else {
-      video.src = channel.url;
-      video.play().catch(() => setError("Impossible de lire ce flux"));
-    }
+    }, 300);
 
     hideControlsAfterDelay();
 
     return () => {
       clearTimeout(safetyTimeout);
-      video.removeEventListener("playing", onPlaying);
+      clearTimeout(initTimer);
       cleanup();
     };
   }, [channel.url, hideControlsAfterDelay, cleanup]);
