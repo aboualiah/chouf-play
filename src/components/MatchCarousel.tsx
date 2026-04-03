@@ -87,7 +87,7 @@ const FALLBACK_MATCHES: Match[] = [
   { id: "m5", sportIcon: "⚽", league: "La Liga", leagueLogo: LOGOS.laliga, team1: "Barcelona", team1Logo: LOGOS.barca, team2: "Atletico", team2Logo: LOGOS.atletico, status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 3" },
   { id: "m6", sportIcon: "⚽", league: "Serie A", leagueLogo: LOGOS.seriea, team1: "Inter", team1Logo: LOGOS.inter, team2: "AC Milan", team2Logo: LOGOS.acmilan, status: "upcoming", timeLabel: "3 jours" },
   { id: "m7", sportIcon: "⚽", league: "Bundesliga", leagueLogo: LOGOS.bundesliga, team1: "Bayern", team1Logo: LOGOS.bayern, team2: "Dortmund", team2Logo: LOGOS.bvb, status: "upcoming", timeLabel: "4 jours" },
-  { id: "m8", sportIcon: "⚽", league: "Botola Pro", team1: "Wydad", team1Logo: LOGOS.wydad, team2: "Raja", team2Logo: LOGOS.raja, status: "upcoming", timeLabel: "demain" },
+  { id: "m8", sportIcon: "⚽", league: "Botola Pro", leagueLogo: LOGOS.botola, team1: "Wydad", team1Logo: LOGOS.wydad, team2: "Raja", team2Logo: LOGOS.raja, status: "upcoming", timeLabel: "demain" },
   { id: "m9", sportIcon: "🏀", league: "NBA", leagueLogo: LOGOS.nba, team1: "Lakers", team1Logo: LOGOS.lakers, team2: "Celtics", team2Logo: LOGOS.celtics, status: "upcoming", timeLabel: "8h", channel: "beIN Sports 4" },
   { id: "m10", sportIcon: "🎾", league: "Roland Garros", team1: "Djokovic", team2: "Alcaraz", status: "upcoming", timeLabel: "5 jours" },
   { id: "m11", sportIcon: "🥊", league: "UFC", leagueLogo: LOGOS.ufc, team1: "Makhachev", team2: "Oliveira", status: "upcoming", timeLabel: "7 jours" },
