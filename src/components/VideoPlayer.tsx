@@ -230,25 +230,6 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       style={{ background: "#0A0A0F" }}
       onMouseMove={hideControlsAfterDelay}
     >
-      {/* DEBUG OVERLAY - TEMPORAIRE */}
-      {showDebug && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, zIndex: 999,
-          background: 'black', color: '#00ff00', fontFamily: 'monospace',
-          padding: '12px', fontSize: '10px', lineHeight: '1.6'
-        }}>
-          <div>🔍 URL du flux: {debugInfo.url}</div>
-          <div>📡 Type détecté: {debugInfo.type}</div>
-          <div>📦 mpegts.js disponible: {debugInfo.mpegts}</div>
-          <div>📦 HLS.js disponible: {debugInfo.hlsjs}</div>
-          <div>🎬 Méthode utilisée: {debugInfo.method}</div>
-          <button onClick={() => setShowDebug(false)} style={{
-            position: 'absolute', top: 4, right: 4, background: '#FF3B30',
-            color: 'white', border: 'none', borderRadius: 3, cursor: 'pointer',
-            padding: '2px 6px', fontSize: '10px'
-          }}>X</button>
-        </div>
-      )}
       {/* Back button */}
       <button
         onClick={onBack}
