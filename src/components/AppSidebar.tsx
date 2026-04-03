@@ -263,30 +263,7 @@ export function AppSidebar({
                           </span>
                         )}
                       </div>
-                      {(() => {
-                        const xtreamMeta = getXtreamMeta(p);
-                        if (!xtreamMeta) return null;
-
-                        return (
-                          <div className="mt-1.5 rounded-xl px-2.5 py-2" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
-                            <div className="flex items-center justify-between gap-2 text-[10px]">
-                              <span style={{ color: xtreamMeta.statusColor }}>{isNaN(0) ? '' : xtreamMeta.statusColor === '#34C759' ? '🟢' : xtreamMeta.statusColor === '#FF3B30' ? '🔴' : '🟠'} {xtreamMeta.statusLabel}</span>
-                              <span style={{ color: "#48484A" }}>Max {xtreamMeta.maxConnections}</span>
-                            </div>
-                            <div className="mt-1 text-[10px]" style={{ color: "#86868B" }}>MAC {xtreamMeta.mac || "—"}</div>
-                            <div className="mt-1 flex items-center justify-between gap-2 text-[10px]" style={{ color: xtreamMeta.isWarning ? "#FF9F0A" : "#86868B" }}>
-                              <span>Expire le {xtreamMeta.expiresLabel}</span>
-                              <span>{xtreamMeta.daysRemaining !== null ? `${Math.max(xtreamMeta.daysRemaining, 0)} j` : "—"}</span>
-                            </div>
-                            {xtreamMeta.isWarning && (
-                              <div className="mt-1 flex items-center gap-1 text-[10px]" style={{ color: "#FF9F0A" }}>
-                                <AlertTriangle size={10} />
-                                <span>Expiration proche</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                      <XtreamAccountBadge playlist={p} />
                     </div>
                   </div>
                 </div>
