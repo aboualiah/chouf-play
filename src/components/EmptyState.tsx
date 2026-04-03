@@ -95,9 +95,14 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
               >
                 {/* League header */}
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#48484A" }}>
-                    {match.icon} {match.league}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {COMPETITION_LOGOS[match.league] && (
+                      <img src={COMPETITION_LOGOS[match.league]} alt="" className="h-4 w-4 object-contain" />
+                    )}
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#48484A" }}>
+                      {match.league}
+                    </span>
+                  </div>
                   {match.status === "live" && (
                     <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255,59,48,0.15)", color: "#FF3B30" }}>
                       <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />

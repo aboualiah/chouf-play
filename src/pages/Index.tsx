@@ -47,6 +47,11 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [splash]);
 
+  // Load playlists from IndexedDB on mount
+  useEffect(() => {
+    loadPlaylistsAsync().then(p => { if (p.length > 0) setPlaylists(p); });
+  }, []);
+
   // Handle addPlaylist query param from Dashboard
   useEffect(() => {
     if (searchParams.get("addPlaylist") && !splash) {
