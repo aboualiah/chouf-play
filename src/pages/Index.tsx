@@ -363,7 +363,19 @@ export default function Index() {
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
-                    {/* Match carousel only on landing/empty, not in channel list */}
+                    {/* Dashboard cards when content is loaded */}
+                    {activeTab === "live" && playlists.length > 0 && !activeCategory && (
+                      <DashboardCards
+                        playlists={playlists}
+                        allChannels={allChannels}
+                        allVod={allVod}
+                        allSeries={allSeries}
+                        onTabSelect={handleTabSelect}
+                        onPlay={handlePlay}
+                        activePlaylistId={activePlaylistId}
+                        onPlaylistSelect={setActivePlaylistId}
+                      />
+                    )}
                     {/* Sub-tab filters for Live TV */}
                     {activeTab === "live" && (
                       <div className="flex items-center gap-2 px-5 py-3">
