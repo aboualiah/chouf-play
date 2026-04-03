@@ -1,5 +1,6 @@
 import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, Radio, Star, Clock, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Channel, getCategories } from "@/lib/channels";
 import { useState } from "react";
 import { TvIcon } from "./TvIcon";
@@ -49,6 +50,7 @@ export function AppSidebar({
   channels, favorites, activeCategory, activeTab, onCategorySelect,
   onTabSelect, onAddPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
+  const navigate = useNavigate();
   const [catOpen, setCatOpen] = useState(true);
   const categories = getCategories(channels);
 
@@ -241,11 +243,11 @@ export function AppSidebar({
 
       {/* Bottom */}
       <div className="border-t border-border px-3 py-3 space-y-0.5">
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/dashboard")} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
           <LayoutDashboard size={18} />
           <span>Dashboard</span>
         </button>
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        <button onClick={() => navigate("/settings")} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
           <Settings size={18} />
           <span>Paramètres</span>
         </button>

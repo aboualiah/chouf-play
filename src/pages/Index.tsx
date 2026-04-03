@@ -10,43 +10,51 @@ import { DEMO_CHANNELS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, addRecent, getRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 export default function Index() {
   const [splash, setSplash] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("live");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
-  const [recentIds] = useState<string[]>(getRecent());
 
   useEffect(() => {
     const t = setTimeout(() => setSplash(false), 3000);
     return () => clearTimeout(t);
   }, []);
 
-  // All channels including Xtream
+  // Close mobile drawer on tab/category change
+  const handleTabSelect = useCallback((tab: string) => {
+    setActiveTab(tab);
+    setActiveCategory(null);
+    if (isMobile) setMobileDrawerOpen(false);
+  }, [isMobile]);
+
+  const handleCategorySelect = useCallback((cat: string | null) => {
+    setActiveCategory(cat);
+    if (isMobile) setMobileDrawerOpen(false);
+  }, [isMobile]);
+
   const allChannels = useMemo(() => {
     const extra = playlists.flatMap(p => p.channels);
     return [...DEMO_CHANNELS, ...extra];
   }, [playlists]);
 
-  // All VOD
-  const allVod = useMemo(() => {
-    return playlists.flatMap(p => p.vodStreams || []);
-  }, [playlists]);
+  const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []), [playlists]);
+  const allSeries = useMemo(() => playlists.flatMap(p => p.series || []), [playlists]);
 
-  // All Series
-  const allSeries = useMemo(() => {
-    return playlists.flatMap(p => p.series || []);
-  }, [playlists]);
-
-  // Content based on active tab
   const contentForTab = useMemo(() => {
     switch (activeTab) {
       case "films": return allVod;
@@ -58,18 +66,13 @@ export default function Index() {
 
   const filteredChannels = useMemo(() => {
     let chs = contentForTab;
-
-    if (activeCategory) {
-      chs = chs.filter(c => c.category === activeCategory);
-    }
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+    if (activeCategory) chs = chs.filter(c => c.category === activeCategory);
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
       chs = chs.filter(c => c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q));
     }
-
     return chs;
-  }, [contentForTab, activeCategory, searchQuery]);
+  }, [contentForTab, activeCategory, debouncedSearch]);
 
   const handleToggleFavorite = useCallback((id: string) => {
     const ch = [...allChannels, ...allVod, ...allSeries].find(c => c.id === id);
@@ -80,7 +83,8 @@ export default function Index() {
   const handlePlay = useCallback((channel: Channel) => {
     setActiveChannel(channel);
     addRecent(channel.id);
-  }, []);
+    if (isMobile) setMobileDrawerOpen(false);
+  }, [isMobile]);
 
   const handlePlaylistLoaded = useCallback((name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => {
     const newPlaylist: Playlist = {
@@ -100,7 +104,6 @@ export default function Index() {
     savePlaylists(updated);
   }, [playlists]);
 
-  // Keyboard shortcuts
   const handlePrevChannel = useCallback(() => {
     if (!activeChannel) return;
     const idx = filteredChannels.findIndex(c => c.id === activeChannel.id);
@@ -131,27 +134,80 @@ export default function Index() {
     } : undefined,
   });
 
+  const sidebarContent = (
+    <AppSidebar
+      channels={activeTab === "films" ? allVod : activeTab === "series" ? allSeries : allChannels}
+      favorites={favorites}
+      activeCategory={activeCategory}
+      activeTab={activeTab}
+      onCategorySelect={handleCategorySelect}
+      onTabSelect={handleTabSelect}
+      onAddPlaylist={() => setPlaylistModalOpen(true)}
+      playlists={playlists}
+      collapsed={!isMobile && sidebarCollapsed}
+      onToggleCollapse={() => isMobile ? setMobileDrawerOpen(false) : setSidebarCollapsed(!sidebarCollapsed)}
+    />
+  );
+
   return (
     <>
       <SplashScreen show={splash} />
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden bg-background">
-          <AppSidebar
-            channels={activeTab === "films" ? allVod : activeTab === "series" ? allSeries : allChannels}
-            favorites={favorites}
-            activeCategory={activeCategory}
-            activeTab={activeTab}
-            onCategorySelect={setActiveCategory}
-            onTabSelect={(tab) => { setActiveTab(tab); setActiveCategory(null); }}
-            onAddPlaylist={() => setPlaylistModalOpen(true)}
-            playlists={playlists}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-          />
+          {/* Desktop sidebar */}
+          <div className="hidden md:flex">
+            {sidebarContent}
+          </div>
+
+          {/* Mobile drawer overlay */}
+          <AnimatePresence>
+            {isMobile && mobileDrawerOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+                  onClick={() => setMobileDrawerOpen(false)}
+                />
+                <motion.div
+                  initial={{ x: -280 }}
+                  animate={{ x: 0 }}
+                  exit={{ x: -280 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                  className="fixed left-0 top-0 z-50 h-full"
+                >
+                  {sidebarContent}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <div className="flex flex-1 flex-col overflow-hidden">
-            {!activeChannel && (
+            {/* Mobile header with hamburger */}
+            {isMobile && !activeChannel && (
+              <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2">
+                <button
+                  onClick={() => setMobileDrawerOpen(true)}
+                  className="rounded-lg bg-secondary p-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Menu size={18} />
+                </button>
+                <div className="flex-1">
+                  <HeaderBar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    compact
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Desktop header */}
+            {!isMobile && !activeChannel && (
               <HeaderBar
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -170,8 +226,7 @@ export default function Index() {
                     exit={{ opacity: 0 }}
                     className="flex flex-1"
                   >
-                    {/* Split view: channel list + player */}
-                    <div className="hidden w-72 flex-col border-r border-border bg-card md:flex overflow-y-auto scrollbar-thin">
+                    <div className="hidden w-72 flex-col border-r border-border bg-card lg:flex overflow-y-auto scrollbar-thin">
                       <div className="p-3 border-b border-border">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Chaînes</p>
                       </div>

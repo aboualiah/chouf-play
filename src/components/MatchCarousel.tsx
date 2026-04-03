@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Bell, BellOff, Play } from "lucide-react";
+import React from "react";
+import { getMatchSettings } from "@/pages/Settings";
 
 interface Match {
   id: string;
@@ -44,18 +46,90 @@ function toggleReminder(matchId: string): string[] {
   return r;
 }
 
+const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
+  match: Match;
+  hasReminder: boolean;
+  onToggleReminder: () => void;
+}) => (
+  <div
+    className={`flex-shrink-0 w-[240px] sm:w-[260px] rounded-xl border bg-card p-3 sm:p-4 transition-all ${
+      match.status === "live"
+        ? "border-primary/60 shadow-[0_0_20px_hsl(24_100%_50%/0.15)]"
+        : "border-border hover:border-border/80"
+    }`}
+    style={{ scrollSnapAlign: "start" }}
+  >
+    <div className="flex items-center justify-between mb-2 sm:mb-3">
+      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+        {match.sportIcon} {match.league}
+      </span>
+      {match.status === "live" && (
+        <span className="flex items-center gap-1 rounded-full bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
+          <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+          LIVE
+        </span>
+      )}
+    </div>
+    <div className="flex items-center justify-between mb-2 sm:mb-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{match.team1}</p>
+      </div>
+      {match.score ? (
+        <span className="mx-2 sm:mx-3 rounded-lg bg-primary/15 px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold text-primary tabular-nums">{match.score}</span>
+      ) : (
+        <span className="mx-2 text-xs text-muted-foreground">vs</span>
+      )}
+      <div className="flex-1 min-w-0 text-right">
+        <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{match.team2}</p>
+      </div>
+    </div>
+    <div className="flex items-center justify-between text-[11px]">
+      <span className={`font-medium ${match.status === "live" ? "text-primary" : "text-muted-foreground"}`}>{match.timeLabel}</span>
+      {match.channel && <span className="flex items-center gap-1 text-muted-foreground truncate ml-2">📺 {match.channel}</span>}
+    </div>
+    <div className="mt-2 sm:mt-3">
+      {match.status === "live" ? (
+        <button className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-95">
+          <Play size={12} fill="currentColor" />
+          Regarder
+        </button>
+      ) : (
+        <button
+          onClick={onToggleReminder}
+          className={`flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors active:scale-95 ${
+            hasReminder ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {hasReminder ? <BellOff size={12} /> : <Bell size={12} />}
+          {hasReminder ? "Rappel activé" : "Rappel"}
+        </button>
+      )}
+    </div>
+  </div>
+));
+MatchCard.displayName = "MatchCard";
+
 export function MatchCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [reminders, setReminders] = useState<string[]>(getReminders());
+
+  const settings = useMemo(() => getMatchSettings(), []);
+
+  const filteredMatches = useMemo(() => {
+    if (!settings.showBanner) return [];
+    return DEMO_MATCHES.filter(m => settings.competitions[m.league] !== false);
+  }, [settings]);
+
+  if (filteredMatches.length === 0) return null;
 
   const scroll = (dir: number) => {
     scrollRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
 
   return (
-    <div className="relative px-4 pt-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+    <div className="relative px-3 sm:px-4 pt-3 sm:pt-4">
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-2">
           <span className="text-base">⚽</span> Matchs à venir
         </h3>
         <div className="flex gap-1">
@@ -68,81 +142,14 @@ export function MatchCarousel() {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-thin pb-2" style={{ scrollSnapType: "x mandatory" }}>
-        {DEMO_MATCHES.map(match => (
-          <div
+      <div ref={scrollRef} className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-thin pb-2" style={{ scrollSnapType: "x mandatory" }}>
+        {filteredMatches.map(match => (
+          <MatchCard
             key={match.id}
-            className={`flex-shrink-0 w-[260px] rounded-xl border bg-card p-4 transition-all ${
-              match.status === "live"
-                ? "border-primary/60 shadow-[0_0_20px_hsl(24_100%_50%/0.15)]"
-                : "border-border hover:border-border/80"
-            }`}
-            style={{ scrollSnapAlign: "start" }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                {match.sportIcon} {match.league}
-              </span>
-              {match.status === "live" && (
-                <span className="flex items-center gap-1 rounded-full bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
-                  <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
-                  LIVE
-                </span>
-              )}
-            </div>
-
-            {/* Teams */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{match.team1}</p>
-              </div>
-              {match.score ? (
-                <span className="mx-3 rounded-lg bg-primary/15 px-3 py-1 text-sm font-bold text-primary tabular-nums">
-                  {match.score}
-                </span>
-              ) : (
-                <span className="mx-3 text-xs text-muted-foreground">vs</span>
-              )}
-              <div className="flex-1 min-w-0 text-right">
-                <p className="text-sm font-semibold text-foreground truncate">{match.team2}</p>
-              </div>
-            </div>
-
-            {/* Time + Channel */}
-            <div className="flex items-center justify-between text-[11px]">
-              <span className={`font-medium ${match.status === "live" ? "text-primary" : "text-muted-foreground"}`}>
-                {match.timeLabel}
-              </span>
-              {match.channel && (
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  📺 {match.channel}
-                </span>
-              )}
-            </div>
-
-            {/* Action button */}
-            <div className="mt-3">
-              {match.status === "live" ? (
-                <button className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
-                  <Play size={12} fill="currentColor" />
-                  Regarder
-                </button>
-              ) : (
-                <button
-                  onClick={() => setReminders(toggleReminder(match.id))}
-                  className={`flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors ${
-                    reminders.includes(match.id)
-                      ? "bg-primary/15 text-primary"
-                      : "bg-secondary text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {reminders.includes(match.id) ? <BellOff size={12} /> : <Bell size={12} />}
-                  {reminders.includes(match.id) ? "Rappel activé" : "Rappel"}
-                </button>
-              )}
-            </div>
-          </div>
+            match={match}
+            hasReminder={reminders.includes(match.id)}
+            onToggleReminder={() => setReminders(toggleReminder(match.id))}
+          />
         ))}
       </div>
     </div>
