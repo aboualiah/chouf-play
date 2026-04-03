@@ -12,12 +12,6 @@ interface EmptyStateProps {
 
 export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
   const [qrOpen, setQrOpen] = useState(false);
-  const [matchSettings, setMatchSettings] = useState(getMatchSettings);
-  const [showMatches, setShowMatches] = useState(matchSettings.showBanner);
-
-  const toggleShowMatches = () => {
-    setShowMatches(v => !v);
-  };
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto scrollbar-thin">
