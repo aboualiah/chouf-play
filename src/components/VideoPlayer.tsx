@@ -127,20 +127,43 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           tryDirect(video, url, startPlay, onStreamError);
         }
       } else if (isMpegTS && window.mpegts && window.mpegts.isSupported()) {
-        setDebugInfo(p => ({ ...p, method: 'mpegts.js' }));
-        try {
-          console.log("[VideoPlayer] Using mpegts.js for:", url);
-          const player = window.mpegts.createPlayer({ type: 'mpegts', url, isLive: true });
-          mpegtsRef.current = player;
-          player.attachMediaElement(video);
-          player.load();
-          player.play();
-          video.addEventListener('playing', startPlay, { once: true });
-        } catch (e) {
-          console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
-          setDebugInfo(p => ({ ...p, method: 'DIRECT (mpegts failed)' }));
-          tryDirect(video, url, startPlay, onStreamError);
-        }
+        setDebugInfo(p => ({ ...p, method: 'mpegts.js (CORS proxy)' }));
+        // Test direct first, fallback to CORS proxy
+        (async () => {
+          let playUrl = url;
+          try {
+            const test = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
+            if (!test.ok) throw new Error('not ok');
+            console.log("[VideoPlayer] Direct access OK for:", url);
+          } catch {
+            playUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+            console.log("[VideoPlayer] Using CORS proxy for:", playUrl);
+            setDebugInfo(p => ({ ...p, method: 'mpegts.js (via corsproxy.io)' }));
+          }
+          try {
+            const player = window.mpegts.createPlayer({
+              type: 'mpegts', url: playUrl, isLive: true,
+              cors: true, hasAudio: true, hasVideo: true,
+            }, {
+              enableWorker: true, enableStashBuffer: false,
+              stashInitialSize: 128, liveBufferLatencyChasing: true,
+            });
+            mpegtsRef.current = player;
+            player.on(window.mpegts.Events.ERROR, (type: any, detail: any, info: any) => {
+              console.error('CHOUF mpegts error:', type, detail, info);
+              setError('Erreur de lecture: ' + detail);
+              setLoading(false);
+            });
+            player.attachMediaElement(video);
+            player.load();
+            player.play();
+            video.addEventListener('playing', startPlay, { once: true });
+          } catch (e) {
+            console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
+            setDebugInfo(p => ({ ...p, method: 'DIRECT (mpegts failed)' }));
+            tryDirect(video, url, startPlay, onStreamError);
+          }
+        })();
       } else {
         const reason = isMpegTS ? 'mpegts.js NOT available' : 'direct stream';
         setDebugInfo(p => ({ ...p, method: 'DIRECT (' + reason + ')' }));
