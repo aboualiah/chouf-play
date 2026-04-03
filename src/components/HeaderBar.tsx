@@ -1,5 +1,6 @@
 import { Search, LayoutGrid, List } from "lucide-react";
 import { useEffect, useState } from "react";
+import { WeatherWidget } from "./WeatherWidget";
 
 interface HeaderBarProps {
   searchQuery: string;
@@ -17,6 +18,8 @@ const TABS = [
   { id: "series", label: "Séries" },
   { id: "favorites", label: "Favoris" },
 ];
+
+const APPLE_FONT = "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
 
 function useClock() {
   const [now, setNow] = useState(new Date());
@@ -45,6 +48,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
             style={{ color: "#F5F5F7" }}
           />
         </div>
+        <WeatherWidget />
       </div>
     );
   }
@@ -87,7 +91,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         />
       </div>
 
-      {/* View toggle + clock */}
+      {/* View toggle + weather + clock */}
       <div className="flex items-center gap-3">
         <div className="flex rounded-lg p-0.5" style={{ background: "#1C1C24" }}>
           <button
@@ -105,9 +109,12 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
             <List size={15} />
           </button>
         </div>
+
+        <WeatherWidget />
+
         <div className="text-right hidden sm:block">
-          <p className="text-[13px] font-bold tabular-nums" style={{ color: "#F5F5F7", fontFamily: "monospace" }}>{time}</p>
-          <p className="text-[10px] capitalize" style={{ color: "#48484A" }}>{date}</p>
+          <p className="text-[14px] font-semibold tabular-nums tracking-tight" style={{ color: "#F5F5F7", fontFamily: APPLE_FONT, letterSpacing: "-0.02em" }}>{time}</p>
+          <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: APPLE_FONT }}>{date}</p>
         </div>
       </div>
     </header>
