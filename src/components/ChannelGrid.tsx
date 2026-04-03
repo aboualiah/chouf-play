@@ -1,6 +1,6 @@
 import { Channel, CATEGORY_GRADIENTS } from "@/lib/channels";
-import { Heart, Play } from "lucide-react";
-import React from "react";
+import { Heart, Play, Loader2 } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 interface ChannelGridProps {
   channels: Channel[];
@@ -14,6 +14,9 @@ interface ChannelGridProps {
 function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
+
+const GRID_BATCH_SIZE = 40;
+const LIST_BATCH_SIZE = 120;
 
 const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite }: {
   ch: Channel; isFav: boolean; isActive: boolean;
@@ -72,6 +75,34 @@ const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite 
 ChannelCard.displayName = "ChannelCard";
 
 export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onToggleFavorite, viewMode }: ChannelGridProps) {
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const batchSize = viewMode === "list" ? LIST_BATCH_SIZE : GRID_BATCH_SIZE;
+  const [visibleCount, setVisibleCount] = useState(batchSize);
+
+  useEffect(() => {
+    setVisibleCount(batchSize);
+  }, [channels, viewMode, batchSize]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || visibleCount >= channels.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((current) => Math.min(current + batchSize, channels.length));
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, channels.length, batchSize]);
+
+  const visibleChannels = useMemo(() => channels.slice(0, visibleCount), [channels, visibleCount]);
+  const hasMore = visibleCount < channels.length;
+
   if (channels.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
@@ -83,7 +114,7 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
   if (viewMode === "list") {
     return (
       <div className="space-y-0.5 p-3">
-        {channels.map(ch => (
+        {visibleChannels.map(ch => (
           <div
             key={ch.id}
             onClick={() => onPlay(ch)}
@@ -106,22 +137,48 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
             </button>
           </div>
         ))}
+        {hasMore && (
+          <div ref={sentinelRef} className="flex items-center justify-center py-4">
+            <button
+              onClick={() => setVisibleCount((current) => Math.min(current + batchSize, channels.length))}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-medium"
+              style={{ background: "#131318", color: "#86868B", border: "1px solid #1C1C24" }}
+            >
+              <Loader2 size={14} className="animate-spin" />
+              {visibleCount} / {channels.length}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
-      {channels.map(ch => (
-        <ChannelCard
-          key={ch.id}
-          ch={ch}
-          isFav={favorites.includes(ch.id)}
-          isActive={activeChannelId === ch.id}
-          onPlay={() => onPlay(ch)}
-          onToggleFavorite={() => onToggleFavorite(ch.id)}
-        />
-      ))}
+    <div className="p-3">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
+        {visibleChannels.map(ch => (
+          <ChannelCard
+            key={ch.id}
+            ch={ch}
+            isFav={favorites.includes(ch.id)}
+            isActive={activeChannelId === ch.id}
+            onPlay={() => onPlay(ch)}
+            onToggleFavorite={() => onToggleFavorite(ch.id)}
+          />
+        ))}
+      </div>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-4">
+          <button
+            onClick={() => setVisibleCount((current) => Math.min(current + batchSize, channels.length))}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-medium"
+            style={{ background: "#131318", color: "#86868B", border: "1px solid #1C1C24" }}
+          >
+            <Loader2 size={14} className="animate-spin" />
+            Charger plus ({visibleCount} / {channels.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 }
