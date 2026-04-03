@@ -35,7 +35,7 @@ export default function Index() {
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
-  const [demoLoaded, setDemoLoaded] = useState(true);
+  const [demoLoaded, setDemoLoaded] = useState(false);
   const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
@@ -337,7 +337,7 @@ export default function Index() {
                   </motion.div>
                 ) : !hasContent ? (
                   <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1">
-                    <EmptyState onAddPlaylist={() => setPlaylistModalOpen(true)} onLoadDemo={handleLoadDemo} />
+                    <EmptyState onAddPlaylist={() => setPlaylistModalOpen(true)} onLoadDemo={handleLoadDemo} onPlayDemo={handlePlay} />
                   </motion.div>
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}

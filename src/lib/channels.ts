@@ -28,6 +28,7 @@ export const DEMO_CHANNELS: Channel[] = [
   // 📰 Info AR
   { id: "d14", name: "France 24 AR", category: "Info AR", url: "https://stream.france24.com/live/france24_ar/france24_ar.m3u8", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/2/24/France_24_logo_2018.svg/200px-France_24_logo_2018.svg.png", type: "live" },
   { id: "d15", name: "DW عربي", category: "Info AR", url: "https://dwamdstream106.akamaized.net/hls/live/2015530/dwstream106/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Deutsche_Welle_symbol_2012.svg/200px-Deutsche_Welle_symbol_2012.svg.png", type: "live" },
+  { id: "d16", name: "Al Jazeera AR", category: "Info AR", url: "https://live-hls-web-aja.getaj.net/AJA/01.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Aljazeera_eng.svg/200px-Aljazeera_eng.svg.png", type: "live" },
   // 🏅 Sport & Culture
   { id: "d17", name: "Red Bull TV", category: "Sport", url: "https://rbmn-live.akamaized.net/hls/live/590964/BossRu498worwor/master_264.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/Red_Bull_TV_logo.svg/200px-Red_Bull_TV_logo.svg.png", type: "live" },
   { id: "d19", name: "NHK World", category: "Culture", url: "https://nhkworld.webcdn.stream.ne.jp/www11/nhkworld-tv/domestic/263942/live_wa_s.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/NHK_World-Japan_Logo.svg/200px-NHK_World-Japan_Logo.svg.png", type: "live" },
