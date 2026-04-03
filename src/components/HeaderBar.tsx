@@ -1,4 +1,4 @@
-import { Search, LayoutGrid, List, Cloud, Sun, CloudRain } from "lucide-react";
+import { Search, LayoutGrid, List, Sun, CloudRain } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface HeaderBarProps {
@@ -6,6 +6,7 @@ interface HeaderBarProps {
   onSearchChange: (q: string) => void;
   viewMode: "grid" | "list";
   onViewModeChange: (m: "grid" | "list") => void;
+  compact?: boolean;
 }
 
 function useWeather() {
@@ -28,16 +29,39 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, compact }: HeaderBarProps) {
   const weather = useWeather();
   const now = useClock();
 
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2 flex-1">
+        <div className="flex flex-1 items-center gap-2 rounded-lg bg-secondary px-3 py-1.5">
+          <Search size={14} className="text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={e => onSearchChange(e.target.value)}
+            placeholder="Rechercher..."
+            className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+        <div className="flex rounded-lg bg-secondary p-0.5">
+          <button onClick={() => onViewModeChange("grid")} className={`rounded-md p-1 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
+            <LayoutGrid size={14} />
+          </button>
+          <button onClick={() => onViewModeChange("list")} className={`rounded-md p-1 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
+            <List size={14} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <header className="flex items-center gap-4 border-b border-border bg-card/50 px-5 py-3 backdrop-blur-sm">
-      {/* Search */}
       <div className="flex flex-1 items-center gap-2 rounded-lg bg-secondary px-3 py-2">
         <Search size={16} className="text-muted-foreground" />
         <input
@@ -48,33 +72,24 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         />
       </div>
 
-      {/* View toggle */}
       <div className="flex rounded-lg bg-secondary p-0.5">
-        <button
-          onClick={() => onViewModeChange("grid")}
-          className={`rounded-md p-1.5 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-        >
+        <button onClick={() => onViewModeChange("grid")} className={`rounded-md p-1.5 transition-colors ${viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
           <LayoutGrid size={16} />
         </button>
-        <button
-          onClick={() => onViewModeChange("list")}
-          className={`rounded-md p-1.5 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
-        >
+        <button onClick={() => onViewModeChange("list")} className={`rounded-md p-1.5 transition-colors ${viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground"}`}>
           <List size={16} />
         </button>
       </div>
 
-      {/* Weather */}
       {weather && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
           {weather.code <= 3 ? <Sun size={16} className="text-warning" /> : <CloudRain size={16} className="text-info" />}
           <span>{weather.temp}°C</span>
           <span className="text-[10px]">Bruxelles</span>
         </div>
       )}
 
-      {/* Clock */}
-      <div className="text-right">
+      <div className="hidden sm:block text-right">
         <p className="text-sm font-semibold tabular-nums text-foreground">{time}</p>
         <p className="text-[10px] capitalize text-muted-foreground">{date}</p>
       </div>
