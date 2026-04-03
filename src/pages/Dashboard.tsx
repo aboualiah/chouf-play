@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft, Plus, Trash2, RefreshCw, Smartphone, Monitor, Link2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getPlaylists, savePlaylists, Playlist } from "@/lib/storage";
+import { getPlaylists, savePlaylists, loadPlaylistsAsync, Playlist } from "@/lib/storage";
 import { toast } from "sonner";
 
 const PIN_KEY = "chouf_dashboard_pin";
@@ -27,14 +27,15 @@ export default function Dashboard() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [linkCode] = useState(getLinkCode());
 
-  const refreshPlaylists = useCallback(() => {
-    setPlaylists(getPlaylists());
+  const refreshPlaylists = useCallback(async () => {
+    const stored = await loadPlaylistsAsync();
+    setPlaylists(stored.length > 0 ? stored : getPlaylists());
   }, []);
 
   useEffect(() => {
     if (authenticated) {
       refreshPlaylists();
-      const interval = setInterval(refreshPlaylists, 3000);
+      const interval = setInterval(() => { refreshPlaylists(); }, 3000);
       return () => clearInterval(interval);
     }
   }, [authenticated, refreshPlaylists]);
