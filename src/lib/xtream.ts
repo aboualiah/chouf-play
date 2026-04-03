@@ -27,7 +27,11 @@ export interface XtreamPlaylistData {
   mac: string;
 }
 
-const CORS_PROXY = (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) => url,
+];
 
 /**
  * Detect if a URL contains Xtream credentials
