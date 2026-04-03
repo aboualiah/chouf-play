@@ -50,6 +50,7 @@ export function AppSidebar({
   channels, favorites, activeCategory, activeTab, onCategorySelect,
   onTabSelect, onAddPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
+  const navigate = useNavigate();
   const [catOpen, setCatOpen] = useState(true);
   const categories = getCategories(channels);
 
