@@ -7,6 +7,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
 import { MatchCarousel } from "@/components/MatchCarousel";
 import { EmptyState } from "@/components/EmptyState";
+import { EpgPanel } from "@/components/EpgPanel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
@@ -33,6 +34,7 @@ export default function Index() {
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
+  const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setSplash(false), 5000);
@@ -85,12 +87,13 @@ export default function Index() {
   const handlePlay = useCallback((channel: Channel) => {
     setActiveChannel(channel);
     addRecent(channel.id);
+    setShowEpg(false);
     if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile]);
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
-    toast.success("24 chaînes démo chargées");
+    toast.success("15 chaînes démo chargées");
   }, []);
 
   const handlePlaylistLoaded = useCallback((name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => {
@@ -167,6 +170,13 @@ export default function Index() {
     />
   );
 
+  const COLOR_PASTILLES = [
+    { color: "#FF3B30", glow: "rgba(255,59,48,0.4)", label: "Favoris", action: () => activeChannel && handleToggleFavorite(activeChannel.id) },
+    { color: "#34C759", glow: "rgba(52,199,89,0.4)", label: "EPG", action: () => setShowEpg(!showEpg) },
+    { color: "#FFD60A", glow: "rgba(255,214,10,0.4)", label: "Listes", action: () => setActiveChannel(null) },
+    { color: "#007AFF", glow: "rgba(0,122,255,0.4)", label: "Options", action: () => {} },
+  ];
+
   return (
     <>
       <SplashScreen show={splash} />
@@ -214,22 +224,29 @@ export default function Index() {
               <AnimatePresence mode="wait">
                 {activeChannel ? (
                   <motion.div key="player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-1">
-                    {/* Split view channel list */}
-                    <div className="hidden w-[340px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#131318", borderColor: "#1C1C24" }}>
-                      <div className="p-3" style={{ borderBottom: "1px solid #1C1C24" }}>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Chaînes</p>
+                    {/* Split view channel list — 340-380px */}
+                    <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#131318", borderColor: "#1C1C24" }}>
+                      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Chaînes ({filteredChannels.length})</p>
+                        <div className="flex items-center gap-1 rounded-lg px-2 py-1" style={{ background: "#1C1C24" }}>
+                          <input
+                            placeholder="Filtrer..."
+                            className="bg-transparent text-[10px] w-20 outline-none placeholder:text-[#48484A]"
+                            style={{ color: "#F5F5F7" }}
+                          />
+                        </div>
                       </div>
                       {filteredChannels.map((ch, i) => (
                         <button
                           key={ch.id}
                           onClick={() => handlePlay(ch)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#1C1C24]"
-                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.06)", borderLeft: "2px solid #FF6D00" } : {}}
+                          className="flex items-center gap-3 px-4 py-2.5 text-left transition-all hover:bg-[#1C1C24] group"
+                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" } : { borderLeft: "3px solid transparent" }}
                         >
-                          <span className="text-[10px] font-mono w-5 text-right" style={{ color: "#48484A" }}>{i + 1}</span>
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: "#1C1C24" }}>
+                          <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>{i + 1}</span>
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
                             {ch.logo ? (
-                              <img src={ch.logo} loading="lazy" className="h-6 w-6 rounded object-contain" alt="" />
+                              <img src={ch.logo} loading="lazy" className="h-6 w-6 rounded object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                             ) : (
                               <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>
                                 {ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
@@ -237,40 +254,72 @@ export default function Index() {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[12px] font-medium truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
+                            <p className="text-[12px] font-medium truncate" style={{ color: activeChannel?.id === ch.id ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
                             <p className="text-[10px]" style={{ color: "#48484A" }}>{ch.category}</p>
                           </div>
                           {activeChannel?.id === ch.id && (
-                            <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
+                            <div className="flex items-center gap-1.5">
+                              <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
+                              <span className="text-[8px] font-bold" style={{ color: "#FF3B30" }}>LIVE</span>
+                            </div>
                           )}
                         </button>
                       ))}
                     </div>
 
-                    {/* Player */}
-                    <div className="flex flex-1 flex-col">
-                      <div className="flex-1">
-                        <VideoPlayer
-                          channel={activeChannel}
-                          isFavorite={favorites.includes(activeChannel.id)}
-                          onBack={() => setActiveChannel(null)}
-                          onToggleFavorite={() => handleToggleFavorite(activeChannel.id)}
-                          onPrev={handlePrevChannel}
-                          onNext={handleNextChannel}
-                        />
+                    {/* Player + EPG */}
+                    <div className="flex flex-1 flex-col min-w-0">
+                      <div className="flex flex-1 overflow-hidden">
+                        <div className="flex-1">
+                          <VideoPlayer
+                            channel={activeChannel}
+                            isFavorite={favorites.includes(activeChannel.id)}
+                            onBack={() => setActiveChannel(null)}
+                            onToggleFavorite={() => handleToggleFavorite(activeChannel.id)}
+                            onPrev={handlePrevChannel}
+                            onNext={handleNextChannel}
+                          />
+                        </div>
+                        {/* EPG Panel */}
+                        <AnimatePresence>
+                          {showEpg && (
+                            <motion.div
+                              initial={{ width: 0, opacity: 0 }}
+                              animate={{ width: 300, opacity: 1 }}
+                              exit={{ width: 0, opacity: 0 }}
+                              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                              className="hidden lg:flex overflow-hidden border-l"
+                              style={{ borderColor: "#1C1C24" }}
+                            >
+                              <EpgPanel channel={activeChannel} onClose={() => setShowEpg(false)} />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                      {/* Now playing bar */}
-                      <div className="flex items-center gap-3 px-4 py-2" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
-                        <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759" }} />
-                        <span className="text-[12px] font-medium flex-1 truncate" style={{ color: "#F5F5F7" }}>{activeChannel.name}</span>
-                        <div className="flex gap-2">
-                          {[
-                            { color: "#FF3B30", glow: "rgba(255,59,48,0.3)" },
-                            { color: "#34C759", glow: "rgba(52,199,89,0.3)" },
-                            { color: "#FFD60A", glow: "rgba(255,214,10,0.3)" },
-                            { color: "#007AFF", glow: "rgba(0,122,255,0.3)" },
-                          ].map((dot, i) => (
-                            <div key={i} className="h-3 w-3 rounded-full" style={{ background: dot.color, boxShadow: `0 0 6px ${dot.glow}` }} />
+                      {/* Now playing bar with 4 color pastilles */}
+                      <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
+                        <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: "#34C759", boxShadow: "0 0 8px rgba(52,199,89,0.5)" }} />
+                        <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: "#F5F5F7" }}>{activeChannel.name}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,109,0,0.1)", color: "#FF6D00" }}>
+                          {activeChannel.category}
+                        </span>
+                        <div className="flex gap-2 ml-2">
+                          {COLOR_PASTILLES.map((dot, i) => (
+                            <button
+                              key={i}
+                              onClick={dot.action}
+                              className="group relative"
+                              title={dot.label}
+                            >
+                              <div
+                                className="h-3.5 w-3.5 rounded-full transition-transform hover:scale-125"
+                                style={{ background: dot.color, boxShadow: `0 0 8px ${dot.glow}` }}
+                              />
+                              <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-medium px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                style={{ background: "#1C1C24", color: "#F5F5F7" }}>
+                                {dot.label}
+                              </span>
+                            </button>
                           ))}
                         </div>
                       </div>
