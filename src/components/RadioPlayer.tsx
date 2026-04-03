@@ -91,19 +91,7 @@ export function RadioList({ channels, activeStation, onSelect }: {
     [channels]
   );
 
-  if (radioChannels.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center flex-1 p-8 gap-3">
-        <Radio size={40} style={{ color: "#48484A" }} />
-        <p className="text-[13px]" style={{ color: "#48484A" }}>Aucune station radio trouvée</p>
-        <p className="text-[11px] text-center" style={{ color: "#48484A" }}>
-          Les stations radio apparaîtront ici quand votre playlist contient des catégories "Radio"
-        </p>
-      </div>
-    );
-  }
-
-  // Group by category
+  // Group by category - must be before any early returns
   const grouped = useMemo(() => {
     const map = new Map<string, Channel[]>();
     radioChannels.forEach(c => {
