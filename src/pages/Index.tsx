@@ -10,7 +10,7 @@ import { MatchCarousel } from "@/components/MatchCarousel";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
-import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, addRecent, Playlist } from "@/lib/storage";
+import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, loadPlaylistsAsync, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [splash, setSplash] = useState(true);
+  const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -39,8 +39,17 @@ export default function Index() {
   const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 5000);
+    if (!splash) return;
+    const t = setTimeout(() => {
+      setSplash(false);
+      sessionStorage.setItem("chouf_splash_done", "1");
+    }, 5000);
     return () => clearTimeout(t);
+  }, [splash]);
+
+  // Load playlists from IndexedDB on mount
+  useEffect(() => {
+    loadPlaylistsAsync().then(p => { if (p.length > 0) setPlaylists(p); });
   }, []);
 
   // Handle addPlaylist query param from Dashboard
