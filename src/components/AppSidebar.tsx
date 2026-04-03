@@ -43,8 +43,8 @@ export function AppSidebar({
         animate={{ width: 64 }}
         className="flex h-screen flex-col border-r border-border bg-card py-4"
       >
-        <button onClick={onToggleCollapse} className="mx-auto mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-orange">
-          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        <button onClick={onToggleCollapse} className="mx-auto mb-6">
+          <TvIcon size={40} showStand={false} />
         </button>
         <nav className="flex flex-col items-center gap-2">
           {NAV_ITEMS.map(item => (
