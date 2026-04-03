@@ -3,6 +3,7 @@ import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ChoufPlayLogo from "./ChoufPlayLogo";
 
 interface AppSidebarProps {
   channels: Channel[];
