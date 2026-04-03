@@ -5,6 +5,9 @@ const FAVORITES_KEY = "chouf_favorites_v3";
 const PLAYLISTS_KEY = "chouf_playlists_v3";
 const RECENT_KEY = "chouf_recent";
 const REMINDERS_KEY = "chouf_match_reminders";
+const IDB_NAME = "chouf_db";
+const IDB_STORE = "playlists";
+const IDB_VERSION = 1;
 
 // ======== Favorites ========
 export function getFavorites(): string[] {
@@ -20,7 +23,7 @@ export function toggleFavorite(channelId: string): string[] {
   return favs;
 }
 
-// ======== Playlists ========
+// ======== Playlists (IndexedDB with localStorage fallback) ========
 export interface Playlist {
   id: string;
   name: string;
@@ -34,16 +37,47 @@ export interface Playlist {
   series?: Channel[];
 }
 
-export function getPlaylists(): Playlist[] {
-  try { return JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]"); } catch { return []; }
+function openIDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
 }
 
-export function savePlaylists(playlists: Playlist[]) {
+// Async save to IndexedDB
+export async function savePlaylistsAsync(playlists: Playlist[]): Promise<void> {
   try {
-    // Try saving as-is first
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const store = tx.objectStore(IDB_STORE);
+    store.clear();
+    for (const p of playlists) {
+      store.put(p);
+    }
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    // Keep a lightweight index in localStorage for fast sync reads
+    const index = playlists.map(p => ({ id: p.id, name: p.name, addedAt: p.addedAt, isXtream: p.isXtream, channelCount: p.channels.length, vodCount: p.vodStreams?.length || 0, seriesCount: p.series?.length || 0 }));
+    try { localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(index)); } catch {}
+  } catch {
+    // Fallback to localStorage
+    savePlaylistsLocalStorage(playlists);
+  }
+}
+
+function savePlaylistsLocalStorage(playlists: Playlist[]) {
+  try {
     localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
-  } catch (e) {
-    // localStorage quota exceeded — strip logos to reduce size
+  } catch {
     console.warn("localStorage quota exceeded, stripping logos...");
     try {
       const stripped = playlists.map(p => ({
@@ -53,9 +87,7 @@ export function savePlaylists(playlists: Playlist[]) {
         series: p.series?.map(c => ({ ...c, logo: undefined })),
       }));
       localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(stripped));
-    } catch (e2) {
-      // Still too large — keep only channel names/urls (no logos, minimal data)
-      console.warn("Still too large, keeping minimal data...");
+    } catch {
       const minimal = playlists.map(p => ({
         ...p,
         channels: p.channels.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId })),
@@ -65,6 +97,39 @@ export function savePlaylists(playlists: Playlist[]) {
       localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(minimal));
     }
   }
+}
+
+// Sync wrapper for backward compat
+export function savePlaylists(playlists: Playlist[]) {
+  savePlaylistsAsync(playlists).catch(console.error);
+}
+
+// Async load from IndexedDB
+export async function loadPlaylistsAsync(): Promise<Playlist[]> {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const store = tx.objectStore(IDB_STORE);
+    const req = store.getAll();
+    return new Promise((resolve, reject) => {
+      req.onsuccess = () => {
+        const result = req.result as Playlist[];
+        resolve(result.length > 0 ? result : getPlaylistsFromLocalStorage());
+      };
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return getPlaylistsFromLocalStorage();
+  }
+}
+
+function getPlaylistsFromLocalStorage(): Playlist[] {
+  try { return JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]"); } catch { return []; }
+}
+
+// Sync fallback (reads localStorage only — for initial render)
+export function getPlaylists(): Playlist[] {
+  return getPlaylistsFromLocalStorage();
 }
 
 // ======== Recents ========

@@ -39,9 +39,13 @@ export default function Index() {
   const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setSplash(false), 5000);
+    if (!splash) return;
+    const t = setTimeout(() => {
+      setSplash(false);
+      sessionStorage.setItem("chouf_splash_done", "1");
+    }, 5000);
     return () => clearTimeout(t);
-  }, []);
+  }, [splash]);
 
   // Handle addPlaylist query param from Dashboard
   useEffect(() => {
