@@ -71,8 +71,25 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     setLoading(true);
 
     const url = channel.url;
-    const isHLS = url.includes('.m3u8');
-    const isMpegTS = /\/\d+\.ts$/.test(url) || /\/\d+$/.test(url) || /\/live\/[^/]+\/[^/]+\/\d+/.test(url) || url.endsWith('.ts');
+    const streamType = detectStreamType(url);
+    const isHLS = streamType === 'hls';
+    const isMpegTS = streamType === 'mpegts';
+
+    // === DEBUG LOGS ===
+    console.log("CHOUF DEBUG: URL = " + url);
+    console.log("CHOUF DEBUG: Stream type = " + streamType);
+    console.log("CHOUF DEBUG: mpegts available = " + !!window.mpegts);
+    console.log("CHOUF DEBUG: mpegts supported = " + (window.mpegts?.isSupported?.() || false));
+    console.log("CHOUF DEBUG: HLS.js (import) available = true, supported = " + Hls.isSupported());
+    
+    setDebugInfo({
+      url,
+      type: streamType.toUpperCase(),
+      mpegts: window.mpegts ? "OUI (supported: " + (window.mpegts.isSupported?.() ? "OUI" : "NON") + ")" : "NON",
+      hlsjs: "OUI (supported: " + (Hls.isSupported() ? "OUI" : "NON") + ")",
+      method: '...'
+    });
+    setShowDebug(true);
 
     const startPlay = () => { setLoading(false); setPlaying(true); };
     const onStreamError = () => { setLoading(false); setError('Impossible de lire ce flux'); };
