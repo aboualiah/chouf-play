@@ -37,6 +37,31 @@ export interface Playlist {
   series?: Channel[];
 }
 
+function isLegacyFreeTvPlaylist(playlist: Partial<Playlist> | null | undefined) {
+  return /free\s*[- ]?tv|500\+?/i.test(playlist?.name || "");
+}
+
+function normalizePlaylist(playlist: Partial<Playlist>): Playlist {
+  return {
+    id: playlist.id || `pl_${Date.now()}`,
+    name: playlist.name || "Playlist",
+    channels: Array.isArray(playlist.channels) ? playlist.channels : [],
+    addedAt: typeof playlist.addedAt === "number" ? playlist.addedAt : Date.now(),
+    isXtream: !!playlist.isXtream,
+    xtreamCredentials: playlist.xtreamCredentials,
+    xtreamAccountInfo: playlist.xtreamAccountInfo ?? null,
+    xtreamMac: playlist.xtreamMac,
+    vodStreams: Array.isArray(playlist.vodStreams) ? playlist.vodStreams : [],
+    series: Array.isArray(playlist.series) ? playlist.series : [],
+  };
+}
+
+function sanitizePlaylists(playlists: Partial<Playlist>[]): Playlist[] {
+  return playlists
+    .filter((playlist): playlist is Partial<Playlist> => !!playlist && !isLegacyFreeTvPlaylist(playlist))
+    .map(normalizePlaylist);
+}
+
 function openIDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(IDB_NAME, IDB_VERSION);
@@ -54,11 +79,12 @@ function openIDB(): Promise<IDBDatabase> {
 // Async save to IndexedDB
 export async function savePlaylistsAsync(playlists: Playlist[]): Promise<void> {
   try {
+    const sanitized = sanitizePlaylists(playlists);
     const db = await openIDB();
     const tx = db.transaction(IDB_STORE, "readwrite");
     const store = tx.objectStore(IDB_STORE);
     store.clear();
-    for (const p of playlists) {
+    for (const p of sanitized) {
       store.put(p);
     }
     await new Promise<void>((resolve, reject) => {
@@ -66,7 +92,7 @@ export async function savePlaylistsAsync(playlists: Playlist[]): Promise<void> {
       tx.onerror = () => reject(tx.error);
     });
     // Keep a lightweight index in localStorage for fast sync reads
-    const index = playlists.map(p => ({ id: p.id, name: p.name, addedAt: p.addedAt, isXtream: p.isXtream, channelCount: p.channels.length, vodCount: p.vodStreams?.length || 0, seriesCount: p.series?.length || 0 }));
+    const index = sanitized.map(p => ({ id: p.id, name: p.name, addedAt: p.addedAt, isXtream: p.isXtream, channelCount: p.channels.length, vodCount: p.vodStreams?.length || 0, seriesCount: p.series?.length || 0, xtreamAccountInfo: p.xtreamAccountInfo, xtreamMac: p.xtreamMac }));
     try { localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(index)); } catch {}
   } catch {
     // Fallback to localStorage
@@ -76,11 +102,11 @@ export async function savePlaylistsAsync(playlists: Playlist[]): Promise<void> {
 
 function savePlaylistsLocalStorage(playlists: Playlist[]) {
   try {
-    localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
+    localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(sanitizePlaylists(playlists)));
   } catch {
     console.warn("localStorage quota exceeded, stripping logos...");
     try {
-      const stripped = playlists.map(p => ({
+      const stripped = sanitizePlaylists(playlists).map(p => ({
         ...p,
         channels: p.channels.map(c => ({ ...c, logo: undefined })),
         vodStreams: p.vodStreams?.map(c => ({ ...c, logo: undefined })),
@@ -88,7 +114,7 @@ function savePlaylistsLocalStorage(playlists: Playlist[]) {
       }));
       localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(stripped));
     } catch {
-      const minimal = playlists.map(p => ({
+      const minimal = sanitizePlaylists(playlists).map(p => ({
         ...p,
         channels: p.channels.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId })),
         vodStreams: p.vodStreams?.map(c => ({ id: c.id, name: c.name, category: c.category, url: c.url, type: c.type, streamId: c.streamId, playlistId: c.playlistId })),
@@ -113,7 +139,7 @@ export async function loadPlaylistsAsync(): Promise<Playlist[]> {
     const req = store.getAll();
     return new Promise((resolve, reject) => {
       req.onsuccess = () => {
-        const result = req.result as Playlist[];
+        const result = sanitizePlaylists(req.result as Playlist[]);
         resolve(result.length > 0 ? result : getPlaylistsFromLocalStorage());
       };
       req.onerror = () => reject(req.error);
@@ -124,7 +150,11 @@ export async function loadPlaylistsAsync(): Promise<Playlist[]> {
 }
 
 function getPlaylistsFromLocalStorage(): Playlist[] {
-  try { return JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]"); } catch { return []; }
+  try {
+    return sanitizePlaylists(JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || "[]"));
+  } catch {
+    return [];
+  }
 }
 
 // Sync fallback (reads localStorage only — for initial render)
