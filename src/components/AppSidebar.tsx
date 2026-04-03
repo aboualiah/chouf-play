@@ -249,6 +249,10 @@ export function AppSidebar({
 
       {/* Bottom nav */}
       <div className="border-t px-2.5 py-2 space-y-0.5" style={{ borderColor: "#1C1C24" }}>
+        <button onClick={() => navigate("/demo")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#FF6D00" }}>
+          <Radio size={17} />
+          <span>Chaînes Démo</span>
+        </button>
         <button onClick={() => navigate("/dashboard")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
           <LayoutDashboard size={17} />
           <span>Dashboard</span>
