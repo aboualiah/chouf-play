@@ -121,13 +121,16 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       if (isHLS) {
         if (Hls.isSupported()) {
           const initHls = (videoUrl: string, retryWithProxy = false) => {
+            const useProxy = retryWithProxy || isMixedProxy;
             const hls = new Hls({
               enableWorker: true,
               lowLatencyMode: true,
               maxBufferLength: 30,
               xhrSetup: (xhr, xhrUrl) => {
-                if (retryWithProxy && !xhrUrl.startsWith(CORS_PROXY)) {
-                  xhr.open('GET', withCorsProxy(xhrUrl), true);
+                if (useProxy && !xhrUrl.startsWith(CORS_PROXY)) {
+                  const proxied = xhrUrl.startsWith('http://') || retryWithProxy
+                    ? withCorsProxy(xhrUrl) : xhrUrl;
+                  if (proxied !== xhrUrl) xhr.open('GET', proxied, true);
                 }
               },
             });
