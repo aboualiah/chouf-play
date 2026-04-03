@@ -10,7 +10,7 @@ import { MatchCarousel } from "@/components/MatchCarousel";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
-import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, addRecent, Playlist } from "@/lib/storage";
+import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, loadPlaylistsAsync, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDebounce } from "@/hooks/useDebounce";
