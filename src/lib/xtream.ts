@@ -34,32 +34,30 @@ interface CorsProxy {
 
 const CORS_PROXIES: CorsProxy[] = [
   { name: "direct", buildUrl: (url: string) => url },
-  { name: "codetabs", buildUrl: (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` },
   { name: "allorigins", buildUrl: (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
   { name: "corsproxy", buildUrl: (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}` },
+  { name: "codetabs", buildUrl: (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` },
 ];
 
-// Track which proxy last succeeded to prioritize it
 let lastWorkingProxy: string | null = null;
 
 function getProxyOrder(url: string): CorsProxy[] {
   const isHttp = url.startsWith("http://");
-  // For HTTP urls, skip direct (mixed content blocked)
-  let proxies = isHttp ? CORS_PROXIES.filter(p => p.name !== "direct") : [...CORS_PROXIES];
-  
-  // Prioritize last working proxy
+  const proxies = isHttp ? CORS_PROXIES.filter((proxy) => proxy.name !== "direct") : [...CORS_PROXIES];
+
   if (lastWorkingProxy) {
-    const idx = proxies.findIndex(p => p.name === lastWorkingProxy);
-    if (idx > 0) {
-      const [winner] = proxies.splice(idx, 1);
+    const winnerIndex = proxies.findIndex((proxy) => proxy.name === lastWorkingProxy);
+    if (winnerIndex > 0) {
+      const [winner] = proxies.splice(winnerIndex, 1);
       proxies.unshift(winner);
     }
   }
+
   return proxies;
 }
 
 function extractFirstJsonValue(text: string): string | null {
-  const startCandidates = [text.indexOf("{"), text.indexOf("[")].filter(i => i >= 0);
+  const startCandidates = [text.indexOf("{"), text.indexOf("[")].filter((index) => index >= 0);
   if (startCandidates.length === 0) return null;
 
   const start = Math.min(...startCandidates);
@@ -69,119 +67,179 @@ function extractFirstJsonValue(text: string): string | null {
   let inString = false;
   let escaped = false;
 
-  for (let i = start; i < text.length; i++) {
+  for (let i = start; i < text.length; i += 1) {
     const char = text[i];
+
     if (inString) {
-      if (escaped) { escaped = false; continue; }
-      if (char === "\\") { escaped = true; continue; }
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char === "\\") {
+        escaped = true;
+        continue;
+      }
       if (char === '"') inString = false;
       continue;
     }
-    if (char === '"') { inString = true; continue; }
-    if (char === openChar) depth++;
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === openChar) depth += 1;
     if (char === closeChar) {
-      depth--;
+      depth -= 1;
       if (depth === 0) return text.slice(start, i + 1);
     }
   }
+
   return null;
 }
 
-function parseJsonPayload(text: string): any | null {
+function parseJsonPayload(text: string): unknown | null {
   const trimmed = text.trim();
-  if (!trimmed || trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) return null;
+  if (!trimmed) return null;
 
-  const segments = [trimmed];
-  const mdIdx = trimmed.indexOf("Markdown Content:");
-  if (mdIdx >= 0) segments.unshift(trimmed.slice(mdIdx + "Markdown Content:".length).trim());
-
-  for (const segment of segments) {
-    const jsonCandidate = extractFirstJsonValue(segment);
-    if (!jsonCandidate) continue;
-    try { return JSON.parse(jsonCandidate); } catch { continue; }
-  }
-  return null;
-}
-
-export function detectXtreamUrl(url: string): XtreamCredentials | null {
   try {
-    const u = new URL(url);
-    const username = u.searchParams.get("username");
-    const password = u.searchParams.get("password");
-    if (username && password) {
-      return { server: `${u.protocol}//${u.host}`, username, password };
+    return JSON.parse(trimmed);
+  } catch {
+    const extracted = extractFirstJsonValue(trimmed);
+    if (!extracted) return null;
+    try {
+      return JSON.parse(extracted);
+    } catch {
+      return null;
     }
-  } catch {}
-
-  const match = url.match(/(?:https?:\/\/[^/]+).*?username=([^&]+).*?password=([^&]+)/);
-  if (match) {
-    const serverMatch = url.match(/(https?:\/\/[^/]+)/);
-    if (serverMatch) return { server: serverMatch[1], username: match[1], password: match[2] };
   }
-  return null;
 }
 
-/** Fetch JSON from a URL, trying proxies sequentially */
-async function fetchJson(url: string): Promise<any> {
+function isHtmlPayload(text: string): boolean {
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith("<!doctype") || trimmed.startsWith("<html") || trimmed.includes("<body") || trimmed.includes("cloudflare");
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function normalizeArrayPayload(value: unknown): any[] {
+  if (Array.isArray(value)) return value;
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+
+    for (const nested of Object.values(record)) {
+      if (Array.isArray(nested)) return nested;
+    }
+
+    const objectValues = Object.values(record);
+    if (objectValues.length > 0 && objectValues.every((item) => item && typeof item === "object" && !Array.isArray(item))) {
+      return objectValues as any[];
+    }
+  }
+
+  return [];
+}
+
+async function fetchOnce(url: string, accept: string, timeoutMs: number): Promise<string> {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: accept },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const text = await response.text();
+    if (!text.trim()) {
+      throw new Error("Réponse vide");
+    }
+
+    return text;
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
+}
+
+export async function fetchTextWithProxy(url: string, accept = "text/plain, */*"): Promise<string> {
   let lastError: Error | null = null;
+
   for (const proxy of getProxyOrder(url)) {
     try {
-      const res = await fetch(proxy.buildUrl(url), {
-        headers: { Accept: "application/json, text/plain, */*" },
-      });
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (!text || text.trim() === "") continue;
+      const proxiedUrl = proxy.buildUrl(url);
+      const text = await fetchOnce(proxiedUrl, accept, proxy.name === "direct" ? 10000 : 15000);
 
-      // Check for proxy rate limit responses
-      const parsed = parseJsonPayload(text);
-      if (parsed !== null) {
-        // Skip proxy error responses
-        if (parsed.code === 429 || parsed.ok === false) continue;
-        lastWorkingProxy = proxy.name;
-        return parsed;
+      if (isHtmlPayload(text)) {
+        throw new Error(`Payload HTML via ${proxy.name}`);
       }
-    } catch (e) {
-      lastError = e as Error;
+
+      lastWorkingProxy = proxy.name;
+      return text;
+    } catch (error) {
+      lastError = error as Error;
     }
   }
-  throw lastError || new Error("All proxies failed");
+
+  throw lastError || new Error("Impossible de contacter le serveur");
 }
 
-/** Fetch M3U content as fallback */
-async function fetchM3UContent(url: string): Promise<string | null> {
-  for (const proxy of getProxyOrder(url)) {
-    try {
-      const res = await fetch(proxy.buildUrl(url), {
-        headers: { Accept: "text/plain, */*" },
-      });
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (text && (text.includes("#EXTM3U") || text.includes("#EXTINF"))) {
-        lastWorkingProxy = proxy.name;
-        return text;
-      }
-    } catch { continue; }
+async function fetchJson(url: string): Promise<any> {
+  const text = await fetchTextWithProxy(url, "application/json, text/plain, */*");
+  const parsed = parseJsonPayload(text);
+
+  if (parsed === null) {
+    throw new Error("JSON invalide");
   }
+
+  return parsed;
+}
+
+async function fetchM3UContent(url: string): Promise<string | null> {
+  try {
+    const text = await fetchTextWithProxy(
+      url,
+      "application/x-mpegURL, application/vnd.apple.mpegurl, text/plain, */*",
+    );
+
+    if (text.includes("#EXTM3U") || text.includes("#EXTINF")) {
+      return text;
+    }
+  } catch {
+    return null;
+  }
+
   return null;
 }
 
-/** Parse M3U content into channels */
 function parseM3UToChannels(content: string, playlistId: string): Channel[] {
   const lines = content.split("\n");
   const channels: Channel[] = [];
-  let name = "", category = "", logo = "";
+  let name = "";
+  let category = "Autres";
+  let logo = "";
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
+
     if (line.startsWith("#EXTINF")) {
       const nameMatch = line.match(/,(.+)$/);
-      name = nameMatch ? nameMatch[1].trim() : "Sans nom";
       const groupMatch = line.match(/group-title="([^"]+)"/);
-      category = groupMatch ? groupMatch[1] : "Autres";
       const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+
+      name = nameMatch ? nameMatch[1].trim() : "Sans nom";
+      category = groupMatch ? groupMatch[1] : "Autres";
       logo = logoMatch ? logoMatch[1] : "";
-    } else if (line && !line.startsWith("#")) {
+      continue;
+    }
+
+    if (line && !line.startsWith("#")) {
       channels.push({
         id: `xt_live_${playlistId}_${channels.length}`,
         name: name || `Chaîne ${channels.length + 1}`,
@@ -191,9 +249,13 @@ function parseM3UToChannels(content: string, playlistId: string): Channel[] {
         type: "live",
         playlistId,
       });
-      name = ""; category = ""; logo = "";
+
+      name = "";
+      category = "Autres";
+      logo = "";
     }
   }
+
   return channels;
 }
 
@@ -205,8 +267,30 @@ function generateMac(): string {
 function getOrCreateMac(playlistId: string): string {
   const key = `chouf_mac_${playlistId}`;
   let mac = localStorage.getItem(key);
-  if (!mac) { mac = generateMac(); localStorage.setItem(key, mac); }
+
+  if (!mac) {
+    mac = generateMac();
+    localStorage.setItem(key, mac);
+  }
+
   return mac;
+}
+
+export function detectXtreamUrl(url: string): XtreamCredentials | null {
+  try {
+    const urlObj = new URL(url);
+    const username = urlObj.searchParams.get("username");
+    const password = urlObj.searchParams.get("password");
+    const server = `${urlObj.protocol}//${urlObj.host}`;
+
+    if (username && password) {
+      return { server, username, password };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 export function buildLiveUrl(creds: XtreamCredentials, streamId: string | number): string {
@@ -221,144 +305,163 @@ export function buildSeriesUrl(creds: XtreamCredentials, streamId: string | numb
   return `${creds.server}/series/${creds.username}/${creds.password}/${streamId}.${ext || "mp4"}`;
 }
 
-function delay(ms: number) { return new Promise(r => setTimeout(r, ms)); }
-
 export async function loadXtreamPlaylist(
   creds: XtreamCredentials,
   playlistId: string,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
 ): Promise<XtreamPlaylistData> {
   const base = `${creds.server}/player_api.php?username=${creds.username}&password=${creds.password}`;
   const mac = getOrCreateMac(playlistId);
 
   onProgress?.("Connexion au serveur...");
 
-  // Fetch account info
   let accountInfo: XtreamAccountInfo | null = null;
   try {
-    const info = await fetchJson(base);
-    if (info?.user_info) accountInfo = info.user_info;
+    const infoResponse = await fetchJson(base);
+    accountInfo = (infoResponse?.user_info ?? infoResponse ?? null) as XtreamAccountInfo | null;
+  } catch {
+    accountInfo = null;
+  }
+
+  let liveStreams: any[] = [];
+  let liveCategories: any[] = [];
+  let vodStreams: any[] = [];
+  let vodCategories: any[] = [];
+  let seriesStreams: any[] = [];
+  let seriesCategories: any[] = [];
+
+  onProgress?.("Chargement chaînes...");
+  try {
+    liveStreams = normalizeArrayPayload(await fetchJson(`${base}&action=get_live_streams`));
+  } catch {}
+  await wait(250);
+
+  try {
+    liveCategories = normalizeArrayPayload(await fetchJson(`${base}&action=get_live_categories`));
+  } catch {}
+  await wait(250);
+
+  onProgress?.("Chargement films...");
+  try {
+    vodStreams = normalizeArrayPayload(await fetchJson(`${base}&action=get_vod_streams`));
+  } catch {}
+  await wait(250);
+
+  try {
+    vodCategories = normalizeArrayPayload(await fetchJson(`${base}&action=get_vod_categories`));
+  } catch {}
+  await wait(250);
+
+  onProgress?.("Chargement séries...");
+  try {
+    seriesStreams = normalizeArrayPayload(await fetchJson(`${base}&action=get_series`));
+  } catch {}
+  await wait(250);
+
+  try {
+    seriesCategories = normalizeArrayPayload(await fetchJson(`${base}&action=get_series_categories`));
   } catch {}
 
-  onProgress?.("Chargement des chaînes TV...");
-
-  // SEQUENTIAL fetching to avoid proxy rate limits (429)
-  let liveStreams: any[] = [];
-  let liveCats: any[] = [];
-  let vodStreams: any[] = [];
-  let vodCats: any[] = [];
-  let seriesStreams: any[] = [];
-  let seriesCats: any[] = [];
-
-  try { liveStreams = await fetchJson(`${base}&action=get_live_streams`); } catch {}
-  await delay(300);
-  try { liveCats = await fetchJson(`${base}&action=get_live_categories`); } catch {}
-  await delay(300);
-
-  onProgress?.("Chargement des films...");
-  try { vodStreams = await fetchJson(`${base}&action=get_vod_streams`); } catch {}
-  await delay(300);
-  try { vodCats = await fetchJson(`${base}&action=get_vod_categories`); } catch {}
-  await delay(300);
-
-  onProgress?.("Chargement des séries...");
-  try { seriesStreams = await fetchJson(`${base}&action=get_series`); } catch {}
-  await delay(300);
-  try { seriesCats = await fetchJson(`${base}&action=get_series_categories`); } catch {}
-
-  // Normalize arrays
-  const toArray = (v: any): any[] => {
-    if (Array.isArray(v)) return v;
-    if (v && typeof v === "object") {
-      for (const k of Object.keys(v)) {
-        if (Array.isArray(v[k])) return v[k];
-      }
-    }
-    return [];
-  };
-
-  liveStreams = toArray(liveStreams);
-  liveCats = toArray(liveCats);
-  vodStreams = toArray(vodStreams);
-  vodCats = toArray(vodCats);
-  seriesStreams = toArray(seriesStreams);
-  seriesCats = toArray(seriesCats);
-
-  // If API returned nothing, try M3U fallback
   if (liveStreams.length === 0 && vodStreams.length === 0 && seriesStreams.length === 0) {
-    onProgress?.("Tentative via M3U...");
+    onProgress?.("Tentative via playlist M3U...");
     const m3uUrl = `${creds.server}/get.php?username=${creds.username}&password=${creds.password}&type=m3u_plus&output=ts`;
     const m3uContent = await fetchM3UContent(m3uUrl);
+
     if (m3uContent) {
-      const parsed = parseM3UToChannels(m3uContent, playlistId);
-      if (parsed.length > 0) {
-        console.log(`M3U fallback loaded: ${parsed.length} channels`);
+      const parsedChannels = parseM3UToChannels(m3uContent, playlistId);
+      if (parsedChannels.length > 0) {
         return {
-          credentials: creds, accountInfo,
-          liveChannels: parsed,
-          liveCategories: [...new Set(parsed.map(c => c.category))].map(c => ({ category_id: c, category_name: c })),
-          vodStreams: [], vodCategories: [],
-          series: [], seriesCategories: [],
+          credentials: creds,
+          accountInfo,
+          liveChannels: parsedChannels,
+          liveCategories: [...new Set(parsedChannels.map((channel) => channel.category || "Autres"))].map((category) => ({
+            category_id: category,
+            category_name: category,
+          })),
+          vodStreams: [],
+          vodCategories: [],
+          series: [],
+          seriesCategories: [],
           mac,
         };
       }
     }
   }
 
-  onProgress?.("Traitement des données...");
-  console.log(`Xtream loaded: ${liveStreams.length} live, ${vodStreams.length} VOD, ${seriesStreams.length} series`);
+  const liveCategoryMap: Record<string, string> = {};
+  liveCategories.forEach((category: any) => {
+    liveCategoryMap[String(category.category_id ?? category.id ?? "")] = category.category_name || category.name || "Autres";
+  });
 
-  // Build category maps
-  const liveCatMap: Record<string, string> = {};
-  liveCats.forEach((c: any) => { liveCatMap[c.category_id] = c.category_name; });
-  const vodCatMap: Record<string, string> = {};
-  vodCats.forEach((c: any) => { vodCatMap[c.category_id] = c.category_name; });
-  const seriesCatMap: Record<string, string> = {};
-  seriesCats.forEach((c: any) => { seriesCatMap[c.category_id] = c.category_name; });
+  const vodCategoryMap: Record<string, string> = {};
+  vodCategories.forEach((category: any) => {
+    vodCategoryMap[String(category.category_id ?? category.id ?? "")] = category.category_name || category.name || "Autres";
+  });
 
-  const liveChannels: Channel[] = liveStreams.map((s: any) => ({
-    id: `xt_live_${playlistId}_${s.stream_id}`,
-    name: s.name || "Sans nom",
-    category: liveCatMap[s.category_id] || "Autres",
-    url: buildLiveUrl(creds, s.stream_id),
-    logo: s.stream_icon || undefined,
-    type: "live" as const,
-    streamId: s.stream_id,
-    playlistId,
-  }));
+  const seriesCategoryMap: Record<string, string> = {};
+  seriesCategories.forEach((category: any) => {
+    seriesCategoryMap[String(category.category_id ?? category.id ?? "")] = category.category_name || category.name || "Autres";
+  });
 
-  const vodChannels: Channel[] = vodStreams.map((s: any) => ({
-    id: `xt_vod_${playlistId}_${s.stream_id}`,
-    name: s.name || "Sans nom",
-    category: vodCatMap[s.category_id] || "Autres",
-    url: buildVodUrl(creds, s.stream_id, s.container_extension),
-    logo: s.stream_icon || undefined,
-    type: "vod" as const,
-    streamId: s.stream_id,
-    containerExtension: s.container_extension,
-    playlistId,
-  }));
+  const liveChannels: Channel[] = liveStreams
+    .filter((stream: any) => stream?.stream_id)
+    .map((stream: any) => ({
+      id: `xt_live_${playlistId}_${stream.stream_id}`,
+      name: stream.name || "Sans nom",
+      category: liveCategoryMap[String(stream.category_id ?? "")] || stream.category_name || "Autres",
+      url: buildLiveUrl(creds, stream.stream_id),
+      logo: stream.stream_icon || undefined,
+      type: "live",
+      streamId: stream.stream_id,
+      playlistId,
+    }));
 
-  const seriesChannels: Channel[] = seriesStreams.map((s: any) => ({
-    id: `xt_series_${playlistId}_${s.series_id}`,
-    name: s.name || "Sans nom",
-    category: seriesCatMap[s.category_id] || "Autres",
-    url: "",
-    logo: s.cover || undefined,
-    type: "series" as const,
-    streamId: s.series_id,
-    playlistId,
-    seriesInfo: { series_id: s.series_id },
-  }));
+  const vodChannels: Channel[] = vodStreams
+    .filter((stream: any) => stream?.stream_id)
+    .map((stream: any) => ({
+      id: `xt_vod_${playlistId}_${stream.stream_id}`,
+      name: stream.name || "Sans nom",
+      category: vodCategoryMap[String(stream.category_id ?? "")] || stream.category_name || "Autres",
+      url: buildVodUrl(creds, stream.stream_id, stream.container_extension),
+      logo: stream.stream_icon || undefined,
+      type: "vod",
+      streamId: stream.stream_id,
+      containerExtension: stream.container_extension,
+      playlistId,
+    }));
+
+  const seriesChannels: Channel[] = seriesStreams
+    .filter((stream: any) => stream?.series_id)
+    .map((stream: any) => ({
+      id: `xt_series_${playlistId}_${stream.series_id}`,
+      name: stream.name || "Sans nom",
+      category: seriesCategoryMap[String(stream.category_id ?? "")] || stream.category_name || "Autres",
+      url: "",
+      logo: stream.cover || undefined,
+      type: "series",
+      streamId: stream.series_id,
+      playlistId,
+      seriesInfo: { series_id: stream.series_id },
+    }));
 
   return {
-    credentials: creds, accountInfo,
+    credentials: creds,
+    accountInfo,
     liveChannels,
-    liveCategories: liveCats,
+    liveCategories: liveCategories.map((category: any) => ({
+      category_id: String(category.category_id ?? category.id ?? category.category_name ?? ""),
+      category_name: category.category_name || category.name || "Autres",
+    })),
     vodStreams: vodChannels,
-    vodCategories: vodCats,
+    vodCategories: vodCategories.map((category: any) => ({
+      category_id: String(category.category_id ?? category.id ?? category.category_name ?? ""),
+      category_name: category.category_name || category.name || "Autres",
+    })),
     series: seriesChannels,
-    seriesCategories: seriesCats,
+    seriesCategories: seriesCategories.map((category: any) => ({
+      category_id: String(category.category_id ?? category.id ?? category.category_name ?? ""),
+      category_name: category.category_name || category.name || "Autres",
+    })),
     mac,
   };
 }
@@ -366,27 +469,33 @@ export async function loadXtreamPlaylist(
 export async function loadSeriesEpisodes(
   creds: XtreamCredentials,
   seriesId: number | string,
-  playlistId: string
+  playlistId: string,
 ): Promise<{ season: string; episodes: Channel[] }[]> {
   const base = `${creds.server}/player_api.php?username=${creds.username}&password=${creds.password}`;
+
   try {
     const data = await fetchJson(`${base}&action=get_series_info&series_id=${seriesId}`);
     if (!data?.episodes) return [];
 
     const seasons: { season: string; episodes: Channel[] }[] = [];
-    for (const [seasonNum, eps] of Object.entries(data.episodes)) {
-      const episodes: Channel[] = (eps as any[]).map((ep: any) => ({
-        id: `xt_ep_${playlistId}_${ep.id}`,
-        name: ep.title || `Episode ${ep.episode_num}`,
-        category: `Saison ${seasonNum}`,
-        url: buildSeriesUrl(creds, ep.id, ep.container_extension),
-        type: "series" as const,
-        streamId: ep.id,
-        containerExtension: ep.container_extension,
+
+    for (const [seasonNumber, entries] of Object.entries(data.episodes)) {
+      const episodes: Channel[] = (entries as any[]).map((episode: any) => ({
+        id: `xt_ep_${playlistId}_${episode.id}`,
+        name: episode.title || `Episode ${episode.episode_num}`,
+        category: `Saison ${seasonNumber}`,
+        url: buildSeriesUrl(creds, episode.id, episode.container_extension),
+        type: "series",
+        streamId: episode.id,
+        containerExtension: episode.container_extension,
         playlistId,
       }));
-      seasons.push({ season: seasonNum, episodes });
+
+      seasons.push({ season: seasonNumber, episodes });
     }
+
     return seasons;
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
