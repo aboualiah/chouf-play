@@ -45,9 +45,7 @@ export default function ChoufPlayLogo({ size = 120, showCP = true, animate = fal
         </filter>
       </defs>
 
-      <rect width={s} height={s} rx={r} fill="#0A0A0F" />
-      <rect x="0.5" y="0.5" width={s - 1} height={s - 1} rx={r} fill="none"
-        stroke="#C9A84C" strokeWidth="0.5" strokeOpacity="0.15" />
+      {/* No background rect — transparent */}
       <ellipse cx={cx} cy={cy} rx={s * 0.3} ry={s * 0.2} fill="#FF6D00" fillOpacity="0.04" />
 
       {/* Antenna */}
