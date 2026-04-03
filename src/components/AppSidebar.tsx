@@ -276,6 +276,14 @@ export function AppSidebar({
                 <Plus size={14} />
                 <span>Ajouter une liste</span>
               </button>
+              <button
+                onClick={() => setQrOpen(true)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                style={{ color: "#C9A84C" }}
+              >
+                <QrCode size={14} />
+                <span>Ajouter à distance</span>
+              </button>
             </div>
           )}
         </div>
