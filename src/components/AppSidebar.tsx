@@ -246,22 +246,24 @@ export function AppSidebar({
                   </div>
                 </div>
               ))}
-              <button
-                onClick={onAddPlaylist}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
-                style={{ color: "#FF6D00" }}
-              >
-                <Plus size={14} />
-                <span>Ajouter une liste</span>
-              </button>
-              <button
-                onClick={() => setQrOpen(true)}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
-                style={{ color: "#C9A84C" }}
-              >
-                <QrCode size={14} />
-                <span>Ajouter à distance</span>
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={onAddPlaylist}
+                  className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                  style={{ color: "#FF6D00", border: "1px solid #1C1C24" }}
+                >
+                  <Plus size={14} />
+                  <span>Ajouter</span>
+                </button>
+                <button
+                  onClick={() => setQrOpen(true)}
+                  className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                  style={{ color: "#C9A84C", border: "1px solid #1C1C24" }}
+                >
+                  <QrCode size={14} />
+                  <span>À distance</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
