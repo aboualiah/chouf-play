@@ -14,9 +14,9 @@ const COMPETITION_LOGOS: Record<string, string> = {
 };
 
 const FEATURED_MATCHES = [
-  { id: "f1", icon: "⚽", league: "Champions League", team1: "Real Madrid", team1Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/80px-Real_Madrid_CF.svg.png", team2: "Man City", team2Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/80px-Manchester_City_FC_badge.svg.png", status: "live" as const, time: "67'", score: "2-1", channel: "RMC Sport 1" },
-  { id: "f2", icon: "⚽", league: "Ligue 1", team1: "PSG", team1Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/80px-Paris_Saint-Germain_F.C..svg.png", team2: "OM", team2Logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Olympique_Marseille_logo.svg/80px-Olympique_Marseille_logo.svg.png", status: "upcoming" as const, time: "Ce soir 21h", channel: "beIN Sports 1" },
-  { id: "f3", icon: "🏀", league: "NBA", team1: "Lakers", team1Logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Los_Angeles_Lakers_logo.svg/80px-Los_Angeles_Lakers_logo.svg.png", team2: "Celtics", team2Logo: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8f/Boston_Celtics.svg/80px-Boston_Celtics.svg.png", status: "upcoming" as const, time: "Demain 02h", channel: "beIN Sports 4" },
+  { id: "f1", icon: "⚽", league: "Champions League", team1: "Real Madrid", team1Logo: "https://img.icons8.com/color/48/real-madrid.png", team2: "Man City", team2Logo: "https://img.icons8.com/color/48/manchester-city.png", status: "live" as const, time: "67'", score: "2-1", channel: "RMC Sport 1" },
+  { id: "f2", icon: "⚽", league: "Ligue 1", team1: "PSG", team1Logo: "https://img.icons8.com/color/48/paris-saint-germain.png", team2: "OM", team2Logo: "https://img.icons8.com/color/48/olympique-de-marseille.png", status: "upcoming" as const, time: "Ce soir 21h", channel: "beIN Sports 1" },
+  { id: "f3", icon: "🏀", league: "NBA", team1: "Lakers", team1Logo: "https://img.icons8.com/color/48/los-angeles-lakers.png", team2: "Celtics", team2Logo: "https://img.icons8.com/color/48/boston-celtics.png", status: "upcoming" as const, time: "Demain 02h", channel: "beIN Sports 4" },
 ];
 
 export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {

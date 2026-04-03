@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Link, Upload, Server, Loader2, Tv, Globe } from "lucide-react";
+import { X, Link, Upload, Server, Loader2, Tv } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Channel } from "@/lib/channels";
 import { toast } from "sonner";
