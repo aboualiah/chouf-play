@@ -28,6 +28,17 @@ function withCorsProxy(url: string) {
   return `${CORS_PROXY}${encodeURIComponent(url)}`;
 }
 
+function getStreamUrl(originalUrl: string): string {
+  if (originalUrl.startsWith('http://') && window.location.protocol === 'https:') {
+    return withCorsProxy(originalUrl);
+  }
+  return originalUrl;
+}
+
+function needsMixedContentProxy(url: string): boolean {
+  return url.startsWith('http://') && window.location.protocol === 'https:';
+}
+
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,14 +86,14 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     setError(null);
     setLoading(true);
 
-    const url = channel.url;
-    const streamType = detectStreamType(url);
+    const rawUrl = channel.url;
+    const streamType = detectStreamType(rawUrl);
     const isHLS = streamType === 'hls';
     const isMpegTS = streamType === 'mpegts';
+    const url = getStreamUrl(rawUrl);
+    const isMixedProxy = needsMixedContentProxy(rawUrl);
 
-    // === DEBUG LOGS ===
-    console.log("CHOUF DEBUG: URL = " + url);
-    console.log("CHOUF: URL=" + url + " type=" + streamType);
+    console.log("CHOUF: URL=" + rawUrl + " type=" + streamType + " proxied=" + isMixedProxy);
 
     const startPlay = () => {
       if (cancelled) return;
@@ -110,13 +121,16 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       if (isHLS) {
         if (Hls.isSupported()) {
           const initHls = (videoUrl: string, retryWithProxy = false) => {
+            const useProxy = retryWithProxy || isMixedProxy;
             const hls = new Hls({
               enableWorker: true,
               lowLatencyMode: true,
               maxBufferLength: 30,
               xhrSetup: (xhr, xhrUrl) => {
-                if (retryWithProxy && !xhrUrl.startsWith(CORS_PROXY)) {
-                  xhr.open('GET', withCorsProxy(xhrUrl), true);
+                if (useProxy && !xhrUrl.startsWith(CORS_PROXY)) {
+                  const proxied = xhrUrl.startsWith('http://') || retryWithProxy
+                    ? withCorsProxy(xhrUrl) : xhrUrl;
+                  if (proxied !== xhrUrl) xhr.open('GET', proxied, true);
                 }
               },
             });
