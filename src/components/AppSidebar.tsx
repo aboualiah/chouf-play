@@ -32,8 +32,8 @@ const NAV_ITEMS = [
 
 
 export function AppSidebar({
-  channels, favorites, activeCategory, activeTab, activeSubTab,
-  onCategorySelect, onTabSelect, onSubTabSelect, onAddPlaylist,
+  channels, favorites, activeCategory, activeTab,
+  onCategorySelect, onTabSelect, onAddPlaylist,
   onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
   const [catOpen, setCatOpen] = useState(true);
