@@ -102,6 +102,18 @@ export function RadioList({ channels, activeStation, onSelect }: {
     return Array.from(map.entries());
   }, [radioChannels]);
 
+  if (radioChannels.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center flex-1 p-8 gap-3">
+        <Radio size={40} style={{ color: "#48484A" }} />
+        <p className="text-[13px]" style={{ color: "#48484A" }}>Aucune station radio trouvée</p>
+        <p className="text-[11px] text-center" style={{ color: "#48484A" }}>
+          Les stations radio apparaîtront ici quand votre playlist contient des catégories "Radio"
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin">
       <div className="flex items-center gap-2 px-5 py-3">
