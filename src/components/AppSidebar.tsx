@@ -304,6 +304,7 @@ export function AppSidebar({
           <span>Paramètres</span>
         </button>
       </div>
+      <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
     </aside>
   );
 }
