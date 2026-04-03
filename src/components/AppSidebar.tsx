@@ -2,6 +2,7 @@ import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, Chevron
 import { motion } from "framer-motion";
 import { Channel, getCategories } from "@/lib/channels";
 import { useState } from "react";
+import { TvIcon } from "./TvIcon";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -42,8 +43,8 @@ export function AppSidebar({
         animate={{ width: 64 }}
         className="flex h-screen flex-col border-r border-border bg-card py-4"
       >
-        <button onClick={onToggleCollapse} className="mx-auto mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-orange">
-          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        <button onClick={onToggleCollapse} className="mx-auto mb-6">
+          <TvIcon size={40} showStand={false} />
         </button>
         <nav className="flex flex-col items-center gap-2">
           {NAV_ITEMS.map(item => (
@@ -74,8 +75,8 @@ export function AppSidebar({
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
-        <button onClick={onToggleCollapse} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-orange glow-orange">
-          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        <button onClick={onToggleCollapse} className="shrink-0">
+          <TvIcon size={40} showStand={false} />
         </button>
         <div className="min-w-0">
           <h1 className="text-lg font-bold leading-tight text-foreground">CHOUF<span className="font-light text-primary">Play</span></h1>
