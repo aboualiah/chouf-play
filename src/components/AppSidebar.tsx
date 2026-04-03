@@ -75,8 +75,8 @@ export function AppSidebar({
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5">
-        <button onClick={onToggleCollapse} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-orange glow-orange">
-          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        <button onClick={onToggleCollapse} className="shrink-0">
+          <TvIcon size={40} showStand={false} />
         </button>
         <div className="min-w-0">
           <h1 className="text-lg font-bold leading-tight text-foreground">CHOUF<span className="font-light text-primary">Play</span></h1>
