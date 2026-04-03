@@ -126,17 +126,21 @@ export default function Index() {
       vodStreams: xtreamData?.vodStreams || [],
       series: xtreamData?.series || [],
     };
-    const updated = [...playlists, newPlaylist];
-    setPlaylists(updated);
-    savePlaylists(updated);
-  }, [playlists]);
+    setPlaylists(prev => {
+      const updated = [...prev, newPlaylist];
+      savePlaylists(updated);
+      return updated;
+    });
+  }, []);
 
   const handleDeletePlaylist = useCallback((id: string) => {
-    const updated = playlists.filter(p => p.id !== id);
-    setPlaylists(updated);
-    savePlaylists(updated);
+    setPlaylists(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      savePlaylists(updated);
+      return updated;
+    });
     toast.success("Playlist supprimée");
-  }, [playlists]);
+  }, []);
 
   const handlePrevChannel = useCallback(() => {
     if (!activeChannel) return;
