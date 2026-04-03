@@ -23,8 +23,9 @@ import { toast } from "sonner";
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("live");
   const [activeSubTab, setActiveSubTab] = useState("all");
