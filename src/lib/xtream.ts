@@ -60,9 +60,23 @@ export function detectXtreamUrl(url: string): XtreamCredentials | null {
 }
 
 async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(CORS_PROXY(url));
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  let lastError: Error | null = null;
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(proxy(url));
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (!text || text.trim() === '') continue;
+      try {
+        return JSON.parse(text);
+      } catch {
+        continue;
+      }
+    } catch (e) {
+      lastError = e as Error;
+    }
+  }
+  throw lastError || new Error("All proxies failed");
 }
 
 function generateMac(): string {

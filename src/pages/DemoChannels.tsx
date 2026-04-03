@@ -37,8 +37,8 @@ export default function DemoChannels() {
     <div className="flex h-screen flex-col" style={{ background: "#0A0A0F" }}>
       {/* Header */}
       <header className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid #1C1C24" }}>
-        <button onClick={() => navigate("/")} className="rounded-xl p-2" style={{ background: "#131318", color: "#86868B" }}>
-          <ArrowLeft size={18} />
+        <button onClick={() => navigate("/")} className="rounded-xl p-2.5 transition-all hover:scale-105 active:scale-95 group" style={{ background: "linear-gradient(135deg, #1C1C24, #242430)", border: "1px solid #2A2A36" }}>
+          <ArrowLeft size={18} className="transition-colors" style={{ color: "#FF6D00" }} />
         </button>
         <Radio size={18} style={{ color: "#FF6D00" }} />
         <h1 className="text-base font-bold" style={{ color: "#F5F5F7" }}>Chaînes Gratuites — Démo</h1>

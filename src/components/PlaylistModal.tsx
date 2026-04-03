@@ -233,9 +233,6 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
               <button onClick={() => { onLoadDemo(); onClose(); }} className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]" style={{ background: "#1C1C24", color: "#F5F5F7" }}>
                 <Tv size={14} /> Chaînes démo (24)
               </button>
-              <button className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]" style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-                <Globe size={14} /> Free-TV (500+)
-              </button>
             </div>
           </motion.div>
         </motion.div>
