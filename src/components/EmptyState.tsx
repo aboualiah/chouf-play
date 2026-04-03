@@ -89,7 +89,7 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
 
         <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
 
-        {/* 3 Match Banners */}
+        {/* 3 Match Banners with toggle */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
           className="mt-10 px-6 pb-12">
           <div className="flex items-center gap-2 mb-4">
@@ -98,6 +98,14 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
               Matchs en vedette
             </h3>
             <div className="h-px flex-1" style={{ background: "#1C1C24" }} />
+            <button
+              onClick={toggleShowMatches}
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all"
+              style={{ background: "#1C1C24", color: showMatches ? "#34C759" : "#48484A" }}
+            >
+              {showMatches ? <Eye size={12} /> : <EyeOff size={12} />}
+              {showMatches ? "Masquer" : "Afficher"}
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
