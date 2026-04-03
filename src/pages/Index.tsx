@@ -20,6 +20,7 @@ import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
