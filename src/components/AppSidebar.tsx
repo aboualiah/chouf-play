@@ -1,8 +1,9 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, Radio, Star, Clock } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, Radio, Star, Clock, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Channel, getCategories } from "@/lib/channels";
 import { useState } from "react";
 import { TvIcon } from "./TvIcon";
+import { Playlist } from "@/lib/storage";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -12,7 +13,7 @@ interface AppSidebarProps {
   onCategorySelect: (cat: string | null) => void;
   onTabSelect: (tab: string) => void;
   onAddPlaylist: () => void;
-  playlists: { id: string; name: string; channels: Channel[] }[];
+  playlists: Playlist[];
   collapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -28,6 +29,21 @@ const SUB_TABS = [
   { id: "favorites", label: "Favoris", icon: Star },
   { id: "recent", label: "Récentes", icon: Clock },
 ];
+
+function formatExpiry(expTimestamp: string | number | undefined) {
+  if (!expTimestamp) return null;
+  const exp = new Date(Number(expTimestamp) * 1000);
+  const now = new Date();
+  const diffMs = exp.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const dateStr = exp.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+
+  let color = "text-success";
+  if (diffDays < 0) color = "text-destructive";
+  else if (diffDays < 7) color = "text-warning";
+
+  return { dateStr, diffDays, color, expired: diffDays < 0 };
+}
 
 export function AppSidebar({
   channels, favorites, activeCategory, activeTab, onCategorySelect,
@@ -88,16 +104,26 @@ export function AppSidebar({
         {/* Main Nav */}
         <div className="mb-1">
           <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Navigation</p>
-          {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              onClick={() => onTabSelect(item.id)}
-              className={`mb-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </button>
-          ))}
+          {NAV_ITEMS.map(item => {
+            const count = item.id === "films"
+              ? playlists.reduce((s, p) => s + (p.vodStreams?.length || 0), 0)
+              : item.id === "series"
+                ? playlists.reduce((s, p) => s + (p.series?.length || 0), 0)
+                : null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabSelect(item.id)}
+                className={`mb-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+                {count != null && count > 0 && (
+                  <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">{count}</span>
+                )}
+              </button>
+            );
+          })}
           <button
             onClick={() => onTabSelect("favorites")}
             className={`mb-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === "favorites" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
@@ -126,7 +152,7 @@ export function AppSidebar({
         )}
 
         {/* Categories */}
-        {activeTab === "live" && (
+        {(activeTab === "live" || activeTab === "films" || activeTab === "series") && (
           <div className="mb-3">
             <button onClick={() => setCatOpen(!catOpen)} className="mb-1 flex w-full items-center justify-between px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               <span>Catégories</span>
@@ -148,7 +174,7 @@ export function AppSidebar({
                       onClick={() => onCategorySelect(cat)}
                       className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors ${activeCategory === cat ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
                     >
-                      <span>{cat}</span>
+                      <span className="truncate">{cat}</span>
                       <span className="text-[10px]">{count}</span>
                     </button>
                   );
@@ -161,13 +187,48 @@ export function AppSidebar({
         {/* Playlists */}
         <div>
           <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Mes Listes</p>
-          {playlists.map(p => (
-            <div key={p.id} className="mb-0.5 flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer">
-              <Radio size={14} />
-              <span className="truncate">{p.name}</span>
-              <span className="ml-auto text-[10px]">{p.channels.length}</span>
-            </div>
-          ))}
+          {playlists.map(p => {
+            const expiry = p.isXtream && p.xtreamAccountInfo ? formatExpiry(p.xtreamAccountInfo.exp_date) : null;
+            return (
+              <div key={p.id} className="mb-2 rounded-lg bg-secondary/50 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+                  <Radio size={14} className="shrink-0" />
+                  <span className="truncate flex-1">{p.name}</span>
+                  <span className="text-[10px]">{p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}</span>
+                </div>
+
+                {/* Xtream account info */}
+                {p.isXtream && (
+                  <div className="px-3 pb-2 space-y-0.5">
+                    {p.xtreamMac && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        📡 MAC: <span className="font-mono text-foreground/70">{p.xtreamMac}</span>
+                      </p>
+                    )}
+                    {p.xtreamAccountInfo && (
+                      <>
+                        <p className={`text-[10px] flex items-center gap-1 ${expiry?.color || "text-muted-foreground"}`}>
+                          {expiry?.expired ? (
+                            <><AlertTriangle size={10} className="text-destructive" /> Expiré</>
+                          ) : (
+                            <>🟢 Actif</>
+                          )}
+                          {expiry && (
+                            <span className="text-muted-foreground">
+                              {" "}| Exp: {expiry.dateStr} ({expiry.diffDays > 0 ? `${expiry.diffDays}j` : "expiré"})
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          🔗 Max: {p.xtreamAccountInfo.max_connections || "?"} connexions
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <button
             onClick={onAddPlaylist}
             className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-primary hover:bg-primary/10 transition-colors"

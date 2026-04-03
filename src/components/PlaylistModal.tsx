@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { X, Link, Upload, Server } from "lucide-react";
+import { X, Link, Upload, Server, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Channel } from "@/lib/channels";
 import { toast } from "sonner";
+import { detectXtreamUrl, loadXtreamPlaylist, XtreamPlaylistData } from "@/lib/xtream";
 
 interface PlaylistModalProps {
   open: boolean;
   onClose: () => void;
-  onPlaylistLoaded: (name: string, channels: Channel[]) => void;
+  onPlaylistLoaded: (name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => void;
 }
 
 function parseM3U(content: string): Channel[] {
@@ -15,6 +16,7 @@ function parseM3U(content: string): Channel[] {
   const channels: Channel[] = [];
   let currentName = "";
   let currentCategory = "";
+  let currentLogo = "";
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -23,15 +25,20 @@ function parseM3U(content: string): Channel[] {
       currentName = nameMatch ? nameMatch[1].trim() : "Sans nom";
       const groupMatch = line.match(/group-title="([^"]+)"/);
       currentCategory = groupMatch ? groupMatch[1] : "Autres";
+      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+      currentLogo = logoMatch ? logoMatch[1] : "";
     } else if (line && !line.startsWith("#")) {
       channels.push({
         id: `pl_${Date.now()}_${channels.length}`,
         name: currentName || `Chaîne ${channels.length + 1}`,
         category: currentCategory,
         url: line,
+        logo: currentLogo || undefined,
+        type: "live",
       });
       currentName = "";
       currentCategory = "";
+      currentLogo = "";
     }
   }
   return channels;
@@ -46,11 +53,36 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
   const [tab, setTab] = useState<"url" | "file" | "xtream">("url");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState("");
   const [xtream, setXtream] = useState({ server: "", user: "", pass: "" });
 
   const loadFromUrl = async () => {
     if (!url) return;
     setLoading(true);
+    setProgress("");
+
+    // Auto-detect Xtream URL
+    const creds = detectXtreamUrl(url);
+    if (creds) {
+      setProgress("Xtream détecté, connexion...");
+      try {
+        const playlistId = `xt_${Date.now()}`;
+        const data = await loadXtreamPlaylist(creds, playlistId, setProgress);
+        const totalCount = data.liveChannels.length + data.vodStreams.length + data.series.length;
+        toast.success(`${totalCount} éléments chargés (${data.liveChannels.length} TV, ${data.vodStreams.length} films, ${data.series.length} séries)`);
+        onPlaylistLoaded(creds.server.replace(/https?:\/\//, ""), data.liveChannels, data);
+        onClose();
+        return;
+      } catch {
+        toast.error("Erreur de connexion Xtream");
+      } finally {
+        setLoading(false);
+        setProgress("");
+      }
+      return;
+    }
+
+    // Regular M3U
     for (const proxy of CORS_PROXIES) {
       try {
         const res = await fetch(proxy(url));
@@ -89,26 +121,22 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
   const loadXtream = async () => {
     if (!xtream.server || !xtream.user || !xtream.pass) return;
     setLoading(true);
-    const base = xtream.server.replace(/\/$/, "");
-    const m3uUrl = `${base}/get.php?username=${xtream.user}&password=${xtream.pass}&type=m3u_plus&output=ts`;
-    setUrl(m3uUrl);
+    const server = xtream.server.replace(/\/$/, "");
+    const creds = { server, username: xtream.user, password: xtream.pass };
+
     try {
-      for (const proxy of CORS_PROXIES) {
-        try {
-          const res = await fetch(proxy(m3uUrl));
-          if (!res.ok) continue;
-          const text = await res.text();
-          const channels = parseM3U(text);
-          if (channels.length > 0) {
-            onPlaylistLoaded(xtream.server, channels);
-            toast.success(`${channels.length} chaînes chargées`);
-            onClose();
-            return;
-          }
-        } catch {}
-      }
+      const playlistId = `xt_${Date.now()}`;
+      const data = await loadXtreamPlaylist(creds, playlistId, setProgress);
+      const totalCount = data.liveChannels.length + data.vodStreams.length + data.series.length;
+      toast.success(`${totalCount} éléments chargés`);
+      onPlaylistLoaded(server.replace(/https?:\/\//, ""), data.liveChannels, data);
+      onClose();
+    } catch {
       toast.error("Connexion échouée");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+      setProgress("");
+    }
   };
 
   const TABS = [
@@ -161,15 +189,21 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
                 <input
                   value={url}
                   onChange={e => setUrl(e.target.value)}
-                  placeholder="https://example.com/playlist.m3u"
+                  placeholder="URL M3U ou Xtream (auto-détection)"
                   className="w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent focus:ring-primary placeholder:text-muted-foreground"
                 />
+                {url && detectXtreamUrl(url) && (
+                  <p className="text-[11px] text-primary flex items-center gap-1">
+                    <Server size={12} /> Xtream Codes détecté automatiquement
+                  </p>
+                )}
                 <button
                   onClick={loadFromUrl}
                   disabled={loading || !url}
-                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
+                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loading ? "Chargement..." : "Charger"}
+                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  {loading ? (progress || "Chargement...") : "Charger"}
                 </button>
               </div>
             )}
@@ -208,9 +242,10 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
                 <button
                   onClick={loadXtream}
                   disabled={loading || !xtream.server || !xtream.user || !xtream.pass}
-                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
+                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loading ? "Connexion..." : "Connexion"}
+                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  {loading ? (progress || "Connexion...") : "Connexion"}
                 </button>
               </div>
             )}
