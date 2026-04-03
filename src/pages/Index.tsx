@@ -7,7 +7,7 @@ import { HeaderBar } from "@/components/HeaderBar";
 import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
-import { MatchCarousel } from "@/components/MatchCarousel";
+import { DashboardCards } from "@/components/DashboardCards";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
@@ -23,8 +23,9 @@ import { toast } from "sonner";
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("live");
   const [activeSubTab, setActiveSubTab] = useState("all");
@@ -188,7 +189,15 @@ export default function Index() {
       onRefreshPlaylist={() => {}}
       playlists={playlists}
       collapsed={!isMobile && sidebarCollapsed}
-      onToggleCollapse={() => isMobile ? setMobileDrawerOpen(false) : setSidebarCollapsed(!sidebarCollapsed)}
+      onToggleCollapse={() => {
+        if (isMobile) {
+          setMobileDrawerOpen(false);
+        } else {
+          const next = !sidebarCollapsed;
+          setSidebarCollapsed(next);
+          localStorage.setItem("chouf_sidebar_collapsed", String(next));
+        }
+      }}
     />
   );
 
@@ -354,7 +363,19 @@ export default function Index() {
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
-                    {/* Match carousel only on landing/empty, not in channel list */}
+                    {/* Dashboard cards when content is loaded */}
+                    {activeTab === "live" && playlists.length > 0 && !activeCategory && (
+                      <DashboardCards
+                        playlists={playlists}
+                        allChannels={allChannels}
+                        allVod={allVod}
+                        allSeries={allSeries}
+                        onTabSelect={handleTabSelect}
+                        onPlay={handlePlay}
+                        activePlaylistId={activePlaylistId}
+                        onPlaylistSelect={setActivePlaylistId}
+                      />
+                    )}
                     {/* Sub-tab filters for Live TV */}
                     {activeTab === "live" && (
                       <div className="flex items-center gap-2 px-5 py-3">
