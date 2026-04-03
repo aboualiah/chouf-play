@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Radio, Star, Clock } from "lucide-react";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
@@ -180,10 +181,8 @@ export default function Index() {
       favorites={favorites}
       activeCategory={activeCategory}
       activeTab={activeTab}
-      activeSubTab={activeSubTab}
       onCategorySelect={handleCategorySelect}
       onTabSelect={handleTabSelect}
-      onSubTabSelect={setActiveSubTab}
       onAddPlaylist={() => setPlaylistModalOpen(true)}
       onDeletePlaylist={handleDeletePlaylist}
       onRefreshPlaylist={() => {}}
@@ -356,6 +355,29 @@ export default function Index() {
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
                     {activeTab === "live" && <MatchCarousel />}
+                    {/* Sub-tab filters for Live TV */}
+                    {activeTab === "live" && (
+                      <div className="flex items-center gap-2 px-5 py-3">
+                        {[
+                          { id: "all", label: "Toutes", icon: Radio },
+                          { id: "favorites", label: "Favoris", icon: Star },
+                          { id: "recent", label: "Récentes", icon: Clock },
+                        ].map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => setActiveSubTab(t.id)}
+                            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
+                            style={activeSubTab === t.id
+                              ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
+                              : { color: "#86868B", border: "1px solid #1C1C24" }
+                            }
+                          >
+                            <t.icon size={13} />
+                            <span>{t.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <ChannelGrid
                       channels={filteredChannels}
                       favorites={favorites}

@@ -1,4 +1,4 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, QrCode } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
@@ -13,10 +13,8 @@ interface AppSidebarProps {
   favorites: string[];
   activeCategory: string | null;
   activeTab: string;
-  activeSubTab: string;
   onCategorySelect: (cat: string | null) => void;
   onTabSelect: (tab: string) => void;
-  onSubTabSelect: (tab: string) => void;
   onAddPlaylist: () => void;
   onDeletePlaylist: (id: string) => void;
   onRefreshPlaylist: (id: string) => void;
@@ -32,15 +30,10 @@ const NAV_ITEMS = [
   { id: "favorites", label: "Favoris", icon: Heart },
 ];
 
-const SUB_TABS = [
-  { id: "all", label: "Toutes les chaînes", icon: Radio },
-  { id: "favorites", label: "Favoris", icon: Star },
-  { id: "recent", label: "Récentes", icon: Clock },
-];
 
 export function AppSidebar({
-  channels, favorites, activeCategory, activeTab, activeSubTab,
-  onCategorySelect, onTabSelect, onSubTabSelect, onAddPlaylist,
+  channels, favorites, activeCategory, activeTab,
+  onCategorySelect, onTabSelect, onAddPlaylist,
   onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
   const [catOpen, setCatOpen] = useState(true);
@@ -134,24 +127,6 @@ export function AppSidebar({
         {/* Separator */}
         <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
 
-        {/* Sub tabs for Live */}
-        {activeTab === "live" && (
-          <div className="mb-2 space-y-0.5">
-            {SUB_TABS.map(t => (
-              <button
-                key={t.id}
-                onClick={() => onSubTabSelect(t.id)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-[12px] transition-all ${
-                  activeSubTab === t.id ? "font-medium" : "hover:bg-[#1C1C24]"
-                }`}
-                style={activeSubTab === t.id ? { color: "#FF6D00" } : { color: "#48484A" }}
-              >
-                <t.icon size={14} />
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Categories */}
         {activeTab === "live" && (
@@ -272,7 +247,7 @@ export function AppSidebar({
       {/* Bottom nav */}
       <div className="border-t px-2.5 py-2 space-y-0.5" style={{ borderColor: "#1C1C24" }}>
         <button onClick={() => navigate("/demo")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#FF6D00" }}>
-          <Radio size={17} />
+          <Tv size={17} />
           <span>Chaînes Démo</span>
         </button>
         <button onClick={() => navigate("/dashboard")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
