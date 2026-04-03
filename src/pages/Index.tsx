@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
@@ -19,6 +20,7 @@ import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -33,13 +35,21 @@ export default function Index() {
   const [favorites, setFavorites] = useState<string[]>(getFavorites());
   const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
-  const [demoLoaded, setDemoLoaded] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(true);
   const [showEpg, setShowEpg] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setSplash(false), 5000);
     return () => clearTimeout(t);
   }, []);
+
+  // Handle addPlaylist query param from Dashboard
+  useEffect(() => {
+    if (searchParams.get("addPlaylist") && !splash) {
+      setPlaylistModalOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, splash, setSearchParams]);
 
   const handleTabSelect = useCallback((tab: string) => {
     setActiveTab(tab);
@@ -347,14 +357,15 @@ export default function Index() {
             </div>
           </div>
 
-          <PlaylistModal
-            open={playlistModalOpen}
-            onClose={() => setPlaylistModalOpen(false)}
-            onPlaylistLoaded={handlePlaylistLoaded}
-            onLoadDemo={handleLoadDemo}
-          />
         </div>
       )}
+
+      <PlaylistModal
+        open={playlistModalOpen}
+        onClose={() => setPlaylistModalOpen(false)}
+        onPlaylistLoaded={handlePlaylistLoaded}
+        onLoadDemo={handleLoadDemo}
+      />
     </>
   );
 }

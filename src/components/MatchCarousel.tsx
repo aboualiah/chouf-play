@@ -34,19 +34,19 @@ const DEMO_MATCHES: Match[] = [
 const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
   match: Match; hasReminder: boolean; onToggleReminder: () => void;
 }) => (
-  <div
-    className="flex-shrink-0 w-[260px] rounded-2xl p-4 transition-all"
-    style={{
-      background: "#131318",
-      border: match.status === "live" ? "1px solid rgba(255, 109, 0, 0.5)" : "1px solid rgba(28, 28, 36, 0.5)",
-      boxShadow: match.status === "live" ? "0 0 25px rgba(255, 109, 0, 0.12)" : "none",
-      scrollSnapAlign: "start",
-    }}
-  >
-    <div className="flex items-center justify-between mb-3">
-      <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#48484A" }}>
-        {match.sportIcon} {match.league}
-      </span>
+    <div
+      className="flex-shrink-0 w-[260px] rounded-2xl p-4 transition-all"
+      style={{
+        background: "linear-gradient(135deg, #1C1C24, #131318)",
+        border: match.status === "live" ? "1.5px solid rgba(255, 109, 0, 0.6)" : "1px solid rgba(56, 56, 68, 0.5)",
+        boxShadow: match.status === "live" ? "0 0 30px rgba(255, 109, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.03)" : "inset 0 1px 0 rgba(255,255,255,0.03)",
+        scrollSnapAlign: "start",
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#86868B" }}>
+          {match.sportIcon} {match.league}
+        </span>
       {match.status === "live" && (
         <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255, 59, 48, 0.15)", color: "#FF3B30" }}>
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
@@ -55,17 +55,17 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
       )}
     </div>
     <div className="flex items-center justify-between mb-3">
-      <p className="flex-1 text-[13px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+      <p className="flex-1 text-[14px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
       {match.score ? (
-        <span className="mx-3 rounded-lg px-3 py-1 text-sm font-bold tabular-nums" style={{ background: "rgba(255, 109, 0, 0.12)", color: "#FF6D00" }}>{match.score}</span>
+        <span className="mx-3 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums" style={{ background: "rgba(255, 109, 0, 0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
       ) : (
-        <span className="mx-3 text-xs" style={{ color: "#48484A" }}>vs</span>
+        <span className="mx-3 text-xs font-medium" style={{ color: "#86868B" }}>vs</span>
       )}
-      <p className="flex-1 text-[13px] font-semibold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+      <p className="flex-1 text-[14px] font-bold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
     </div>
     <div className="flex items-center justify-between text-[11px] mb-3">
-      <span className="font-medium" style={{ color: match.status === "live" ? "#FF6D00" : "#86868B" }}>{match.timeLabel}</span>
-      {match.channel && <span style={{ color: "#48484A" }}>📺 {match.channel}</span>}
+      <span className="font-semibold" style={{ color: match.status === "live" ? "#FF6D00" : "#B0B0B5" }}>{match.timeLabel}</span>
+      {match.channel && <span className="font-medium" style={{ color: "#86868B" }}>📺 {match.channel}</span>}
     </div>
     {match.status === "live" ? (
       <button className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-semibold text-white bg-gradient-orange active:scale-[0.97] transition-transform">

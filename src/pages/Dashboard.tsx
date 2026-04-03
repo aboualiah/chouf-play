@@ -173,7 +173,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold text-foreground">Mes Playlists</p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/?addPlaylist=1")}
               className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground active:scale-95 transition-transform"
             >
               <Plus size={14} />
