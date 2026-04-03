@@ -189,7 +189,15 @@ export default function Index() {
       onRefreshPlaylist={() => {}}
       playlists={playlists}
       collapsed={!isMobile && sidebarCollapsed}
-      onToggleCollapse={() => isMobile ? setMobileDrawerOpen(false) : setSidebarCollapsed(!sidebarCollapsed)}
+      onToggleCollapse={() => {
+        if (isMobile) {
+          setMobileDrawerOpen(false);
+        } else {
+          const next = !sidebarCollapsed;
+          setSidebarCollapsed(next);
+          localStorage.setItem("chouf_sidebar_collapsed", String(next));
+        }
+      }}
     />
   );
 
