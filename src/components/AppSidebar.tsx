@@ -50,28 +50,6 @@ export function AppSidebar({
   const categories = getCategories(channels);
   const navigate = useNavigate();
 
-  const getXtreamMeta = (playlist: Playlist) => {
-    if (!playlist.isXtream) return null;
-    const info = playlist.xtreamAccountInfo;
-    const expiresAt = info?.exp_date ? new Date(Number(info.exp_date) * 1000) : null;
-    const isValidExpiry = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime());
-    const daysRemaining = isValidExpiry ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : null;
-    const isExpired = daysRemaining !== null ? daysRemaining < 0 : info?.status?.toLowerCase() === "expired";
-    const isWarning = daysRemaining !== null && daysRemaining >= 0 && daysRemaining < 7;
-    const statusLabel = isExpired ? "Expiré" : "Actif";
-    const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759";
-
-    return {
-      mac: playlist.xtreamMac,
-      maxConnections: info?.max_connections || "—",
-      expiresLabel: isValidExpiry ? expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—",
-      daysRemaining,
-      statusLabel,
-      statusColor,
-      isWarning,
-    };
-  };
-
   if (collapsed) {
     return (
       <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "#131318", borderColor: "#1C1C24" }}>
