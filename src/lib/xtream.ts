@@ -294,7 +294,7 @@ export function detectXtreamUrl(url: string): XtreamCredentials | null {
 }
 
 export function buildLiveUrl(creds: XtreamCredentials, streamId: string | number): string {
-  return `${creds.server}/live/${creds.username}/${creds.password}/${streamId}.ts`;
+  return `${creds.server}/live/${creds.username}/${creds.password}/${streamId}.m3u8`;
 }
 
 export function buildVodUrl(creds: XtreamCredentials, streamId: string | number, ext: string): string {
