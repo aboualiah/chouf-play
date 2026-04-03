@@ -1,10 +1,12 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, AlertTriangle } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, QrCode } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import { Badge } from "@/components/ui/badge";
+import { XtreamAccountBadge } from "./XtreamAccountBadge";
+import { QRCodePortal } from "./QRCodePortal";
 
 interface AppSidebarProps {
   channels: Channel[];
