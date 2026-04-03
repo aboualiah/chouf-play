@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Link, Upload, Server, Loader2 } from "lucide-react";
+import { X, Link, Upload, Server, Loader2, Tv, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Channel } from "@/lib/channels";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ interface PlaylistModalProps {
   open: boolean;
   onClose: () => void;
   onPlaylistLoaded: (name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => void;
+  onLoadDemo: () => void;
 }
 
 function parseM3U(content: string): Channel[] {
@@ -45,11 +46,12 @@ function parseM3U(content: string): Channel[] {
 }
 
 const CORS_PROXIES = [
+  (url: string) => url,
   (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
   (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
 ];
 
-export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModalProps) {
+export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: PlaylistModalProps) {
   const [tab, setTab] = useState<"url" | "file" | "xtream">("url");
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,28 +63,23 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
     setLoading(true);
     setProgress("");
 
-    // Auto-detect Xtream URL
     const creds = detectXtreamUrl(url);
     if (creds) {
-      setProgress("Xtream détecté, connexion...");
+      setProgress("Xtream détecté...");
       try {
         const playlistId = `xt_${Date.now()}`;
         const data = await loadXtreamPlaylist(creds, playlistId, setProgress);
-        const totalCount = data.liveChannels.length + data.vodStreams.length + data.series.length;
-        toast.success(`${totalCount} éléments chargés (${data.liveChannels.length} TV, ${data.vodStreams.length} films, ${data.series.length} séries)`);
+        const total = data.liveChannels.length + data.vodStreams.length + data.series.length;
+        toast.success(`${total} éléments chargés`);
         onPlaylistLoaded(creds.server.replace(/https?:\/\//, ""), data.liveChannels, data);
         onClose();
         return;
       } catch {
-        toast.error("Erreur de connexion Xtream");
-      } finally {
-        setLoading(false);
-        setProgress("");
-      }
+        toast.error("Erreur Xtream");
+      } finally { setLoading(false); setProgress(""); }
       return;
     }
 
-    // Regular M3U
     for (const proxy of CORS_PROXIES) {
       try {
         const res = await fetch(proxy(url));
@@ -111,9 +108,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
         onPlaylistLoaded(file.name, channels);
         toast.success(`${channels.length} chaînes chargées`);
         onClose();
-      } else {
-        toast.error("Aucune chaîne trouvée");
-      }
+      } else toast.error("Aucune chaîne trouvée");
     };
     reader.readAsText(file);
   };
@@ -121,29 +116,25 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
   const loadXtream = async () => {
     if (!xtream.server || !xtream.user || !xtream.pass) return;
     setLoading(true);
-    const server = xtream.server.replace(/\/$/, "");
-    const creds = { server, username: xtream.user, password: xtream.pass };
-
+    const creds = { server: xtream.server.replace(/\/$/, ""), username: xtream.user, password: xtream.pass };
     try {
       const playlistId = `xt_${Date.now()}`;
       const data = await loadXtreamPlaylist(creds, playlistId, setProgress);
-      const totalCount = data.liveChannels.length + data.vodStreams.length + data.series.length;
-      toast.success(`${totalCount} éléments chargés`);
-      onPlaylistLoaded(server.replace(/https?:\/\//, ""), data.liveChannels, data);
+      const total = data.liveChannels.length + data.vodStreams.length + data.series.length;
+      toast.success(`${total} éléments chargés`);
+      onPlaylistLoaded(creds.server.replace(/https?:\/\//, ""), data.liveChannels, data);
       onClose();
-    } catch {
-      toast.error("Connexion échouée");
-    } finally {
-      setLoading(false);
-      setProgress("");
-    }
+    } catch { toast.error("Connexion échouée"); }
+    finally { setLoading(false); setProgress(""); }
   };
 
   const TABS = [
-    { id: "url" as const, label: "URL M3U", icon: Link },
-    { id: "file" as const, label: "Fichier", icon: Upload },
-    { id: "xtream" as const, label: "Xtream", icon: Server },
+    { id: "url" as const, label: "🔗 URL", icon: Link },
+    { id: "file" as const, label: "📂 Fichier", icon: Upload },
+    { id: "xtream" as const, label: "📡 Xtream", icon: Server },
   ];
+
+  const inputStyle = { background: "#1C1C24", border: "1px solid #242430", color: "#F5F5F7" };
 
   return (
     <AnimatePresence>
@@ -152,7 +143,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0, 0, 0, 0.7)" }}
           onClick={onClose}
         >
           <motion.div
@@ -160,95 +152,85 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded }: PlaylistModal
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl border border-border bg-card p-6"
+            className="w-full max-w-[440px] rounded-[20px] p-6"
+            style={{ background: "#131318", border: "1px solid #1C1C24" }}
           >
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Ajouter une playlist</h2>
-              <button onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:text-foreground transition-colors">
-                <X size={20} />
+              <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Ajouter une playlist</h2>
+              <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+                <X size={18} />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="mb-5 flex rounded-lg bg-secondary p-1">
+            <div className="mb-5 flex rounded-xl p-1" style={{ background: "#1C1C24" }}>
               {TABS.map(t => (
                 <button
                   key={t.id}
                   onClick={() => setTab(t.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${tab === t.id ? "bg-muted text-foreground" : "text-muted-foreground"}`}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors"
+                  style={tab === t.id ? { background: "#242430", color: "#F5F5F7" } : { color: "#86868B" }}
                 >
-                  <t.icon size={14} />
                   {t.label}
                 </button>
               ))}
             </div>
 
-            {/* URL tab */}
             {tab === "url" && (
               <div className="space-y-3">
                 <input
                   value={url}
                   onChange={e => setUrl(e.target.value)}
                   placeholder="URL M3U ou Xtream (auto-détection)"
-                  className="w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent focus:ring-primary placeholder:text-muted-foreground"
+                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                  style={inputStyle}
                 />
                 {url && detectXtreamUrl(url) && (
-                  <p className="text-[11px] text-primary flex items-center gap-1">
-                    <Server size={12} /> Xtream Codes détecté automatiquement
+                  <p className="text-[11px] flex items-center gap-1" style={{ color: "#FF6D00" }}>
+                    <Server size={11} /> Xtream Codes détecté
                   </p>
                 )}
                 <button
                   onClick={loadFromUrl}
                   disabled={loading || !url}
-                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full rounded-xl py-3 text-[13px] font-semibold text-white bg-gradient-orange transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  {loading && <Loader2 size={15} className="animate-spin" />}
                   {loading ? (progress || "Chargement...") : "Charger"}
                 </button>
               </div>
             )}
 
-            {/* File tab */}
             {tab === "file" && (
-              <label className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-8 cursor-pointer hover:border-primary/30 transition-colors">
-                <Upload size={32} className="text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Cliquez pour sélectionner un fichier .m3u</span>
+              <label className="flex flex-col items-center gap-3 rounded-2xl p-8 cursor-pointer transition-colors hover:bg-[#1C1C24]" style={{ border: "2px dashed #242430" }}>
+                <Upload size={28} style={{ color: "#48484A" }} />
+                <span className="text-[13px]" style={{ color: "#86868B" }}>Cliquez pour sélectionner un fichier .m3u</span>
                 <input type="file" accept=".m3u,.m3u8" onChange={loadFromFile} className="hidden" />
               </label>
             )}
 
-            {/* Xtream tab */}
             {tab === "xtream" && (
               <div className="space-y-3">
-                <input
-                  value={xtream.server}
-                  onChange={e => setXtream({ ...xtream, server: e.target.value })}
-                  placeholder="http://serveur.com:port"
-                  className="w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent focus:ring-primary placeholder:text-muted-foreground"
-                />
-                <input
-                  value={xtream.user}
-                  onChange={e => setXtream({ ...xtream, user: e.target.value })}
-                  placeholder="Nom d'utilisateur"
-                  className="w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent focus:ring-primary placeholder:text-muted-foreground"
-                />
-                <input
-                  value={xtream.pass}
-                  onChange={e => setXtream({ ...xtream, pass: e.target.value })}
-                  placeholder="Mot de passe"
-                  type="password"
-                  className="w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground outline-none ring-1 ring-transparent focus:ring-primary placeholder:text-muted-foreground"
-                />
-                <button
-                  onClick={loadXtream}
-                  disabled={loading || !xtream.server || !xtream.user || !xtream.pass}
-                  className="w-full rounded-lg bg-gradient-orange py-3 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {loading && <Loader2 size={16} className="animate-spin" />}
+                <input value={xtream.server} onChange={e => setXtream({ ...xtream, server: e.target.value })} placeholder="http://serveur.com:port" className="w-full rounded-xl px-4 py-3 text-[13px] outline-none" style={inputStyle} />
+                <input value={xtream.user} onChange={e => setXtream({ ...xtream, user: e.target.value })} placeholder="Nom d'utilisateur" className="w-full rounded-xl px-4 py-3 text-[13px] outline-none" style={inputStyle} />
+                <input value={xtream.pass} onChange={e => setXtream({ ...xtream, pass: e.target.value })} placeholder="Mot de passe" type="password" className="w-full rounded-xl px-4 py-3 text-[13px] outline-none" style={inputStyle} />
+                <button onClick={loadXtream} disabled={loading || !xtream.server || !xtream.user || !xtream.pass} className="w-full rounded-xl py-3 text-[13px] font-semibold text-white bg-gradient-orange transition-opacity disabled:opacity-50 flex items-center justify-center gap-2">
+                  {loading && <Loader2 size={15} className="animate-spin" />}
                   {loading ? (progress || "Connexion...") : "Connexion"}
                 </button>
               </div>
             )}
+
+            {/* Separator + quick buttons */}
+            <div className="my-4 h-px" style={{ background: "#1C1C24" }} />
+            <div className="flex gap-2">
+              <button onClick={() => { onLoadDemo(); onClose(); }} className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]" style={{ background: "#1C1C24", color: "#F5F5F7" }}>
+                <Tv size={14} /> Chaînes démo (24)
+              </button>
+              <button className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]" style={{ background: "#1C1C24", color: "#F5F5F7" }}>
+                <Globe size={14} /> Free-TV (500+)
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}
