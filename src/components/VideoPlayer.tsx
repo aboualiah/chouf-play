@@ -249,12 +249,6 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           if (cancelled) return;
           tryMpegtsPlayer(rawUrl);
         });
-              onStreamError();
-            }
-          } else {
-            onStreamError();
-          }
-        });
       } else {
         // Direct playback
         video.src = rawUrl;
