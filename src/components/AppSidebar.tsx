@@ -46,6 +46,7 @@ export function AppSidebar({
   const [catOpen, setCatOpen] = useState(true);
   const [listsOpen, setListsOpen] = useState(true);
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
+  const [qrOpen, setQrOpen] = useState(false);
   const categories = getCategories(channels);
   const navigate = useNavigate();
 
