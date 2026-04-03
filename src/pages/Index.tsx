@@ -180,10 +180,8 @@ export default function Index() {
       favorites={favorites}
       activeCategory={activeCategory}
       activeTab={activeTab}
-      activeSubTab={activeSubTab}
       onCategorySelect={handleCategorySelect}
       onTabSelect={handleTabSelect}
-      onSubTabSelect={setActiveSubTab}
       onAddPlaylist={() => setPlaylistModalOpen(true)}
       onDeletePlaylist={handleDeletePlaylist}
       onRefreshPlaylist={() => {}}
