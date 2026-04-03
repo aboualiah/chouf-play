@@ -52,19 +52,49 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
 
     const tryMpegts = () => {
       const w = window as any;
-      if (w.mpegts && w.mpegts.isSupported()) {
-        const player = w.mpegts.createPlayer({
-          type: "mpegts",
-          url: channel.url,
-          isLive: true,
-        });
-        mpegtsRef.current = player;
-        player.attachMediaElement(video);
-        player.load();
-        video.play().catch(() => {});
+      const initMpegts = () => {
+        if (w.mpegts && w.mpegts.isSupported()) {
+          const player = w.mpegts.createPlayer({
+            type: "mpegts",
+            url: channel.url,
+            isLive: true,
+          });
+          mpegtsRef.current = player;
+          player.attachMediaElement(video);
+          player.load();
+          video.play().catch(() => {});
+        } else {
+          // Try HLS.js as fallback for .ts URLs
+          const hlsUrl = channel.url.replace(/\.ts$/, ".m3u8");
+          if (Hls.isSupported()) {
+            const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+            hlsRef.current = hls;
+            hls.loadSource(channel.url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+            hls.on(Hls.Events.ERROR, () => {
+              video.src = channel.url;
+              video.play().catch(() => setError("Impossible de lire ce flux"));
+            });
+          } else {
+            video.src = channel.url;
+            video.play().catch(() => setError("Impossible de lire ce flux"));
+          }
+        }
+      };
+
+      if (w.mpegts) {
+        initMpegts();
       } else {
-        video.src = channel.url;
-        video.play().catch(() => setError("Impossible de lire ce flux"));
+        // Wait for mpegts.js to load (max 5s)
+        let attempts = 0;
+        const waitForMpegts = setInterval(() => {
+          attempts++;
+          if (w.mpegts || attempts > 25) {
+            clearInterval(waitForMpegts);
+            initMpegts();
+          }
+        }, 200);
       }
     };
 
