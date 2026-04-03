@@ -2,6 +2,7 @@ import { useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Bell, BellOff, Play } from "lucide-react";
 import React from "react";
 import { getReminders, toggleReminder as toggleReminderStorage } from "@/lib/storage";
+import { getMatchSettings } from "@/pages/Settings";
 
 interface Match {
   id: string;
@@ -88,6 +89,15 @@ export function MatchCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [reminders, setReminders] = useState<string[]>(getReminders());
 
+  const settings = getMatchSettings();
+
+  const visibleMatches = useMemo(() => {
+    if (!settings.showBanner) return [];
+    return DEMO_MATCHES.filter(m => settings.competitions[m.league] !== false);
+  }, [settings.showBanner, settings.competitions]);
+
+  if (visibleMatches.length === 0) return null;
+
   const scroll = (dir: number) => {
     scrollRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
@@ -108,7 +118,7 @@ export function MatchCarousel() {
         </div>
       </div>
       <div ref={scrollRef} className="flex gap-2.5 overflow-x-auto scrollbar-none pb-2" style={{ scrollSnapType: "x mandatory" }}>
-        {DEMO_MATCHES.map(match => (
+        {visibleMatches.map(match => (
           <MatchCard
             key={match.id}
             match={match}
