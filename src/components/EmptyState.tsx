@@ -1,5 +1,8 @@
-import { Zap, Shield, Crown, Plus, Play, Trophy } from "lucide-react";
+import { Zap, Shield, Crown, Plus, Play, Trophy, QrCode, Eye, EyeOff } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { QRCodePortal } from "@/components/QRCodePortal";
+import { getMatchSettings } from "@/pages/Settings";
 import heroBg from "@/assets/hero-bg.jpg";
 
 interface EmptyStateProps {
