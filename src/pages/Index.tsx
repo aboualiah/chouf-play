@@ -347,14 +347,15 @@ export default function Index() {
             </div>
           </div>
 
-          <PlaylistModal
-            open={playlistModalOpen}
-            onClose={() => setPlaylistModalOpen(false)}
-            onPlaylistLoaded={handlePlaylistLoaded}
-            onLoadDemo={handleLoadDemo}
-          />
         </div>
       )}
+
+      <PlaylistModal
+        open={playlistModalOpen}
+        onClose={() => setPlaylistModalOpen(false)}
+        onPlaylistLoaded={handlePlaylistLoaded}
+        onLoadDemo={handleLoadDemo}
+      />
     </>
   );
 }
