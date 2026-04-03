@@ -2,6 +2,7 @@ import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, Chevron
 import { motion } from "framer-motion";
 import { Channel, getCategories } from "@/lib/channels";
 import { useState } from "react";
+import { TvIcon } from "./TvIcon";
 
 interface AppSidebarProps {
   channels: Channel[];
