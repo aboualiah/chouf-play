@@ -24,34 +24,29 @@ export function SplashScreen({ show }: SplashScreenProps) {
             style={{
               width: 500,
               height: 500,
-              background: "radial-gradient(circle, hsl(24 100% 50% / 0.08), transparent 70%)",
+              background: "radial-gradient(circle, hsl(24 100% 50% / 0.12), transparent 70%)",
             }}
           />
 
-          {/* Logo square with 3D rotation */}
+          {/* TV Icon with 3D rotation */}
           <motion.div
             initial={{ scale: 0, rotateY: -90, opacity: 0 }}
             animate={{ scale: 1, rotateY: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="relative mb-6"
+            transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mb-4"
             style={{ perspective: 600 }}
           >
-            <div
-              className="flex h-20 w-20 items-center justify-center rounded-2xl glow-orange"
-              style={{ background: "linear-gradient(135deg, #FF6D00, #C9A84C)" }}
-            >
-              <span className="text-2xl font-black tracking-tight text-white">CP</span>
-            </div>
+            <TvIcon size={120} />
           </motion.div>
 
           {/* App name */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-[40px] leading-none tracking-tight">
+            <h1 className="text-[44px] leading-none tracking-tight">
               <span className="font-black" style={{ color: "#F5F5F7" }}>CHOUF</span>
               <span className="font-light" style={{ color: "#FF6D00" }}>Play</span>
             </h1>
@@ -61,7 +56,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.8, duration: 0.5 }}
+            transition={{ delay: 1.6, duration: 0.5 }}
             className="mt-2 text-[11px] font-medium uppercase"
             style={{ color: "#C9A84C", letterSpacing: "4px" }}
           >
@@ -71,11 +66,29 @@ export function SplashScreen({ show }: SplashScreenProps) {
           {/* Gold line */}
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 100, opacity: 1 }}
-            transition={{ delay: 2.2, duration: 1.5, ease: "easeInOut" }}
-            className="mt-8 h-[1.5px] rounded-full"
+            animate={{ width: 120, opacity: 1 }}
+            transition={{ delay: 2.0, duration: 1.5, ease: "easeInOut" }}
+            className="mt-6 h-[1.5px] rounded-full"
             style={{ background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }}
           />
+
+          {/* Loading dots */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.5, duration: 0.5 }}
+            className="mt-8 flex gap-1.5"
+          >
+            {[0, 1, 2].map(i => (
+              <motion.div
+                key={i}
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: "#FF6D00" }}
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+              />
+            ))}
+          </motion.div>
 
           {/* Dev credit */}
           <motion.p
