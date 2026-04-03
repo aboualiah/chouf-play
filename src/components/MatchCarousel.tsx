@@ -55,17 +55,17 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
       )}
     </div>
     <div className="flex items-center justify-between mb-3">
-      <p className="flex-1 text-[13px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+      <p className="flex-1 text-[14px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
       {match.score ? (
-        <span className="mx-3 rounded-lg px-3 py-1 text-sm font-bold tabular-nums" style={{ background: "rgba(255, 109, 0, 0.12)", color: "#FF6D00" }}>{match.score}</span>
+        <span className="mx-3 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums" style={{ background: "rgba(255, 109, 0, 0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
       ) : (
-        <span className="mx-3 text-xs" style={{ color: "#48484A" }}>vs</span>
+        <span className="mx-3 text-xs font-medium" style={{ color: "#86868B" }}>vs</span>
       )}
-      <p className="flex-1 text-[13px] font-semibold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+      <p className="flex-1 text-[14px] font-bold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
     </div>
     <div className="flex items-center justify-between text-[11px] mb-3">
-      <span className="font-medium" style={{ color: match.status === "live" ? "#FF6D00" : "#86868B" }}>{match.timeLabel}</span>
-      {match.channel && <span style={{ color: "#48484A" }}>📺 {match.channel}</span>}
+      <span className="font-semibold" style={{ color: match.status === "live" ? "#FF6D00" : "#B0B0B5" }}>{match.timeLabel}</span>
+      {match.channel && <span className="font-medium" style={{ color: "#86868B" }}>📺 {match.channel}</span>}
     </div>
     {match.status === "live" ? (
       <button className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-semibold text-white bg-gradient-orange active:scale-[0.97] transition-transform">

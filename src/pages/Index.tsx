@@ -43,6 +43,14 @@ export default function Index() {
     return () => clearTimeout(t);
   }, []);
 
+  // Handle addPlaylist query param from Dashboard
+  useEffect(() => {
+    if (searchParams.get("addPlaylist") && !splash) {
+      setPlaylistModalOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, splash, setSearchParams]);
+
   const handleTabSelect = useCallback((tab: string) => {
     setActiveTab(tab);
     setActiveCategory(null);
