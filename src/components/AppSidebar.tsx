@@ -1,9 +1,10 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2 } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Radio, Star, Clock, Layers, RefreshCw, Trash2, AlertTriangle } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ChoufPlayLogo from "./ChoufPlayLogo";
+import { Badge } from "@/components/ui/badge";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -45,6 +46,28 @@ export function AppSidebar({
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
   const categories = getCategories(channels);
   const navigate = useNavigate();
+
+  const getXtreamMeta = (playlist: Playlist) => {
+    if (!playlist.isXtream) return null;
+    const info = playlist.xtreamAccountInfo;
+    const expiresAt = info?.exp_date ? new Date(Number(info.exp_date) * 1000) : null;
+    const isValidExpiry = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime());
+    const daysRemaining = isValidExpiry ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : null;
+    const isExpired = daysRemaining !== null ? daysRemaining < 0 : info?.status?.toLowerCase() === "expired";
+    const isWarning = daysRemaining !== null && daysRemaining >= 0 && daysRemaining < 7;
+    const statusLabel = isExpired ? "Expiré" : "Actif";
+    const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759";
+
+    return {
+      mac: playlist.xtreamMac,
+      maxConnections: info?.max_connections || "—",
+      expiresLabel: isValidExpiry ? expiresAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—",
+      daysRemaining,
+      statusLabel,
+      statusColor,
+      isWarning,
+    };
+  };
 
   if (collapsed) {
     return (
@@ -211,27 +234,58 @@ export function AppSidebar({
               {playlists.map(p => (
                 <div
                   key={p.id}
-                  className="group flex items-center gap-2 rounded-lg px-3 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] cursor-pointer"
+                  className="group rounded-lg px-3 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] cursor-pointer"
                   style={{ color: "#86868B" }}
                   onMouseEnter={() => setHoverPlaylist(p.id)}
                   onMouseLeave={() => setHoverPlaylist(null)}
                 >
-                  <Layers size={14} className="shrink-0" style={{ color: "#48484A" }} />
-                  <span className="truncate flex-1">{p.name}</span>
-                  {hoverPlaylist === p.id ? (
-                    <div className="flex gap-0.5">
-                      <button onClick={(e) => { e.stopPropagation(); onRefreshPlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430]">
-                        <RefreshCw size={11} />
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); onDeletePlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430] text-destructive">
-                        <Trash2 size={11} />
-                      </button>
+                  <div className="flex items-start gap-2">
+                    <Layers size={14} className="mt-0.5 shrink-0" style={{ color: "#48484A" }} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate flex-1">{p.name}</span>
+                        {p.isXtream && <Badge variant="outline" className="border-[#FF6D0030] bg-[#FF6D0012] text-[9px] uppercase tracking-wide" style={{ color: "#FF6D00" }}>Xtream</Badge>}
+                        {hoverPlaylist === p.id ? (
+                          <div className="flex gap-0.5">
+                            <button onClick={(e) => { e.stopPropagation(); onRefreshPlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430]">
+                              <RefreshCw size={11} />
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); onDeletePlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430] text-destructive">
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px]" style={{ color: "#48484A" }}>
+                            {p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}
+                          </span>
+                        )}
+                      </div>
+                      {(() => {
+                        const xtreamMeta = getXtreamMeta(p);
+                        if (!xtreamMeta) return null;
+
+                        return (
+                          <div className="mt-1.5 rounded-xl px-2.5 py-2" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
+                            <div className="flex items-center justify-between gap-2 text-[10px]">
+                              <span style={{ color: xtreamMeta.statusColor }}>{isNaN(0) ? '' : xtreamMeta.statusColor === '#34C759' ? '🟢' : xtreamMeta.statusColor === '#FF3B30' ? '🔴' : '🟠'} {xtreamMeta.statusLabel}</span>
+                              <span style={{ color: "#48484A" }}>Max {xtreamMeta.maxConnections}</span>
+                            </div>
+                            <div className="mt-1 text-[10px]" style={{ color: "#86868B" }}>MAC {xtreamMeta.mac || "—"}</div>
+                            <div className="mt-1 flex items-center justify-between gap-2 text-[10px]" style={{ color: xtreamMeta.isWarning ? "#FF9F0A" : "#86868B" }}>
+                              <span>Expire le {xtreamMeta.expiresLabel}</span>
+                              <span>{xtreamMeta.daysRemaining !== null ? `${Math.max(xtreamMeta.daysRemaining, 0)} j` : "—"}</span>
+                            </div>
+                            {xtreamMeta.isWarning && (
+                              <div className="mt-1 flex items-center gap-1 text-[10px]" style={{ color: "#FF9F0A" }}>
+                                <AlertTriangle size={10} />
+                                <span>Expiration proche</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
-                  ) : (
-                    <span className="text-[10px]" style={{ color: "#48484A" }}>
-                      {p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}
-                    </span>
-                  )}
+                  </div>
                 </div>
               ))}
               <button
