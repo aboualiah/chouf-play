@@ -108,22 +108,26 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     const initTimer = setTimeout(() => {
       if (isHLS) {
         if (Hls.isSupported()) {
+          setDebugInfo(p => ({ ...p, method: 'HLS.js' }));
           const hls = new Hls({ enableWorker: true, lowLatencyMode: true, maxBufferLength: 30 });
           hlsRef.current = hls;
           hls.loadSource(url);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); startPlay(); });
           hls.on(Hls.Events.ERROR, (_, d) => {
-            if (d.fatal) { hls.destroy(); hlsRef.current = null; tryDirect(video, url, startPlay, onStreamError); }
+            if (d.fatal) { hls.destroy(); hlsRef.current = null; setDebugInfo(p => ({ ...p, method: 'DIRECT (fallback HLS)' })); tryDirect(video, url, startPlay, onStreamError); }
           });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          setDebugInfo(p => ({ ...p, method: 'Native HLS' }));
           video.src = url;
           video.addEventListener("playing", startPlay, { once: true });
           video.play().catch(() => {});
         } else {
+          setDebugInfo(p => ({ ...p, method: 'DIRECT (no HLS support)' }));
           tryDirect(video, url, startPlay, onStreamError);
         }
       } else if (isMpegTS && window.mpegts && window.mpegts.isSupported()) {
+        setDebugInfo(p => ({ ...p, method: 'mpegts.js' }));
         try {
           console.log("[VideoPlayer] Using mpegts.js for:", url);
           const player = window.mpegts.createPlayer({ type: 'mpegts', url, isLive: true });
@@ -134,9 +138,12 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           video.addEventListener('playing', startPlay, { once: true });
         } catch (e) {
           console.warn("[VideoPlayer] mpegts failed, trying direct:", e);
+          setDebugInfo(p => ({ ...p, method: 'DIRECT (mpegts failed)' }));
           tryDirect(video, url, startPlay, onStreamError);
         }
       } else {
+        const reason = isMpegTS ? 'mpegts.js NOT available' : 'direct stream';
+        setDebugInfo(p => ({ ...p, method: 'DIRECT (' + reason + ')' }));
         if (isMpegTS) console.warn("[VideoPlayer] mpegts.js not available, trying direct for:", url);
         tryDirect(video, url, startPlay, onStreamError);
       }
