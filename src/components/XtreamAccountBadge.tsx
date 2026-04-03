@@ -12,7 +12,19 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
 
   const info = playlist.xtreamAccountInfo;
   const mac = playlist.xtreamMac || "—";
-  const expiresAt = info?.exp_date ? new Date(Number(info.exp_date) * 1000) : null;
+  
+  // Handle exp_date: could be string timestamp, number, or date string
+  let expiresAt: Date | null = null;
+  if (info?.exp_date) {
+    const raw = info.exp_date;
+    const num = Number(raw);
+    if (!Number.isNaN(num) && num > 0) {
+      // Unix timestamp (seconds or milliseconds)
+      expiresAt = new Date(num > 1e12 ? num : num * 1000);
+    } else if (typeof raw === "string") {
+      expiresAt = new Date(raw);
+    }
+  }
   const isValidExpiry = expiresAt instanceof Date && !Number.isNaN(expiresAt.getTime());
   const daysRemaining = isValidExpiry ? Math.ceil((expiresAt.getTime() - Date.now()) / 86400000) : null;
   const isExpired = daysRemaining !== null ? daysRemaining < 0 : info?.status?.toLowerCase() === "expired";
