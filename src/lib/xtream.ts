@@ -27,11 +27,104 @@ export interface XtreamPlaylistData {
   mac: string;
 }
 
-const CORS_PROXIES = [
-  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  (url: string) => url,
+interface CorsProxy {
+  name: string;
+  buildUrl: (url: string) => string;
+}
+
+const CORS_PROXIES: CorsProxy[] = [
+  { name: "direct", buildUrl: (url: string) => url },
+  { name: "codetabs", buildUrl: (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}` },
+  { name: "allorigins", buildUrl: (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}` },
+  { name: "corsproxy", buildUrl: (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}` },
+  { name: "jina", buildUrl: (url: string) => `https://r.jina.ai/http://${url.replace(/^https?:\/\//, "")}` },
 ];
+
+function getProxyOrder(url: string): CorsProxy[] {
+  if (url.startsWith("http://")) {
+    return [
+      CORS_PROXIES[1],
+      CORS_PROXIES[2],
+      CORS_PROXIES[3],
+      CORS_PROXIES[4],
+      CORS_PROXIES[0],
+    ];
+  }
+
+  return CORS_PROXIES;
+}
+
+function extractFirstJsonValue(text: string): string | null {
+  const startCandidates = [text.indexOf("{"), text.indexOf("[")].filter((index) => index >= 0);
+  if (startCandidates.length === 0) return null;
+
+  const start = Math.min(...startCandidates);
+  const openChar = text[start];
+  const closeChar = openChar === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === openChar) depth++;
+    if (char === closeChar) {
+      depth--;
+      if (depth === 0) {
+        return text.slice(start, i + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+function parseJsonPayload(text: string): any | null {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) {
+    return null;
+  }
+
+  const segments = [trimmed];
+  const markdownIndex = trimmed.indexOf("Markdown Content:");
+  if (markdownIndex >= 0) {
+    segments.unshift(trimmed.slice(markdownIndex + "Markdown Content:".length).trim());
+  }
+
+  for (const segment of segments) {
+    const jsonCandidate = extractFirstJsonValue(segment);
+    if (!jsonCandidate) continue;
+
+    try {
+      return JSON.parse(jsonCandidate);
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
 
 /**
  * Detect if a URL contains Xtream credentials
@@ -61,16 +154,20 @@ export function detectXtreamUrl(url: string): XtreamCredentials | null {
 
 async function fetchJson(url: string): Promise<any> {
   let lastError: Error | null = null;
-  for (const proxy of CORS_PROXIES) {
+  for (const proxy of getProxyOrder(url)) {
     try {
-      const res = await fetch(proxy(url));
+      const res = await fetch(proxy.buildUrl(url), {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+        },
+      });
       if (!res.ok) continue;
       const text = await res.text();
-      if (!text || text.trim() === '') continue;
-      try {
-        return JSON.parse(text);
-      } catch {
-        continue;
+      if (!text || text.trim() === "") continue;
+
+      const parsed = parseJsonPayload(text);
+      if (parsed !== null) {
+        return parsed;
       }
     } catch (e) {
       lastError = e as Error;
