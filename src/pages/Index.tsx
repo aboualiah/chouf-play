@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [splash, setSplash] = useState(true);
+  const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
