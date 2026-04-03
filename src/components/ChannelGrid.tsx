@@ -1,11 +1,11 @@
-import { Channel } from "@/lib/channels";
+import { Channel, CATEGORY_GRADIENTS } from "@/lib/channels";
 import { Heart, Play } from "lucide-react";
-import { motion } from "framer-motion";
 import React from "react";
 
 interface ChannelGridProps {
   channels: Channel[];
   favorites: string[];
+  activeChannelId?: string | null;
   onPlay: (channel: Channel) => void;
   onToggleFavorite: (channelId: string) => void;
   viewMode: "grid" | "list";
@@ -15,120 +15,109 @@ function getInitials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  "Religion": "from-amber-900/40 to-amber-800/20",
-  "Info FR": "from-blue-900/40 to-blue-800/20",
-  "Info EN": "from-indigo-900/40 to-indigo-800/20",
-  "Info AR": "from-emerald-900/40 to-emerald-800/20",
-  "Info DE": "from-red-900/40 to-red-800/20",
-  "Sport": "from-orange-900/40 to-orange-800/20",
-  "Culture": "from-purple-900/40 to-purple-800/20",
-};
-
-const ChannelCard = React.memo(({ ch, isFav, onPlay, onToggleFavorite }: {
-  ch: Channel;
-  isFav: boolean;
-  onPlay: () => void;
-  onToggleFavorite: () => void;
+const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite }: {
+  ch: Channel; isFav: boolean; isActive: boolean;
+  onPlay: () => void; onToggleFavorite: () => void;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
+  <div
     onClick={onPlay}
-    className="group relative cursor-pointer overflow-hidden rounded-xl bg-card border border-border hover:border-primary/30 transition-all hover:scale-[1.02]"
+    className="group relative cursor-pointer overflow-hidden rounded-[14px] transition-all duration-200 hover:scale-[1.02]"
+    style={{
+      background: "#131318",
+      border: `1px solid ${isActive ? "rgba(255, 109, 0, 0.5)" : "rgba(28, 28, 36, 0.5)"}`,
+      boxShadow: isActive ? "0 0 20px rgba(255, 109, 0, 0.1)" : "none",
+    }}
   >
-    <div className={`flex h-20 sm:h-24 items-center justify-center bg-gradient-to-br ${CATEGORY_COLORS[ch.category] || "from-muted to-secondary"}`}>
+    <div className={`flex h-20 items-center justify-center bg-gradient-to-br ${CATEGORY_GRADIENTS[ch.category] || "from-gray-700/30 to-gray-900/20"}`}>
       {ch.logo ? (
-        <img src={ch.logo} alt={ch.name} loading="lazy" className="h-12 w-12 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        <img src={ch.logo} alt={ch.name} loading="lazy" className="h-[52px] w-[52px] rounded-xl object-contain"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
       ) : (
-        <span className="text-xl sm:text-2xl font-bold text-foreground/80">{getInitials(ch.name)}</span>
+        <div className={`flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-gradient-to-br ${CATEGORY_GRADIENTS[ch.category] || "from-gray-600/40 to-gray-800/30"}`}>
+          <span className="text-sm font-bold" style={{ color: "#F5F5F7" }}>{getInitials(ch.name)}</span>
+        </div>
       )}
     </div>
-    <div className="p-2 sm:p-3">
-      <p className="text-xs sm:text-sm font-medium text-foreground truncate">{ch.name}</p>
-      <p className="text-[10px] text-muted-foreground truncate">{ch.category}</p>
+    <div className="px-3 py-2.5">
+      <p className="text-[11px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
+      <p className="text-[9px] truncate" style={{ color: "#48484A" }}>{ch.category}</p>
     </div>
+
+    {/* Active badge */}
+    {isActive && (
+      <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(52, 199, 89, 0.15)" }}>
+        <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+        <span className="text-[8px] font-bold" style={{ color: "#34C759" }}>EN DIRECT</span>
+      </div>
+    )}
+
+    {/* Fav button */}
     <button
       onClick={e => { e.stopPropagation(); onToggleFavorite(); }}
-      className="absolute right-2 top-2 rounded-full bg-background/60 p-1.5 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+      className="absolute right-2 top-2 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
+      style={{ background: "rgba(10, 10, 15, 0.6)", backdropFilter: "blur(4px)" }}
     >
-      <Heart size={12} className={isFav ? "fill-destructive text-destructive" : "text-foreground"} />
+      <Heart size={11} className={isFav ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={isFav ? {} : { color: "#F5F5F7" }} />
     </button>
-    <div className="absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 transition-opacity group-hover:opacity-100">
-      <div className="rounded-full bg-primary p-2.5 sm:p-3">
-        <Play size={18} className="text-primary-foreground" fill="currentColor" />
+
+    {/* Play overlay */}
+    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "rgba(10, 10, 15, 0.45)" }}>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-orange">
+        <Play size={16} className="text-white" fill="currentColor" />
       </div>
     </div>
-  </motion.div>
+  </div>
 ));
 ChannelCard.displayName = "ChannelCard";
 
-const ChannelListItem = React.memo(({ ch, isFav, index, onPlay, onToggleFavorite }: {
-  ch: Channel;
-  isFav: boolean;
-  index: number;
-  onPlay: () => void;
-  onToggleFavorite: () => void;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, x: -10 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: Math.min(index * 0.02, 0.5) }}
-    className="group flex items-center gap-3 rounded-lg bg-card px-3 sm:px-4 py-3 cursor-pointer hover:bg-secondary transition-colors"
-    onClick={onPlay}
-  >
-    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${CATEGORY_COLORS[ch.category] || "from-muted to-secondary"}`}>
-      {ch.logo ? (
-        <img src={ch.logo} alt={ch.name} loading="lazy" className="h-6 w-6 object-contain" />
-      ) : (
-        <span className="text-xs font-bold text-foreground">{getInitials(ch.name)}</span>
-      )}
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-foreground truncate">{ch.name}</p>
-      <p className="text-[11px] text-muted-foreground">{ch.category}</p>
-    </div>
-    <button onClick={e => { e.stopPropagation(); onToggleFavorite(); }} className="opacity-0 group-hover:opacity-100 transition-opacity">
-      <Heart size={16} className={isFav ? "fill-destructive text-destructive" : "text-muted-foreground"} />
-    </button>
-    <Play size={16} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-  </motion.div>
-));
-ChannelListItem.displayName = "ChannelListItem";
-
-export function ChannelGrid({ channels, favorites, onPlay, onToggleFavorite, viewMode }: ChannelGridProps) {
+export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onToggleFavorite, viewMode }: ChannelGridProps) {
   if (channels.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-muted-foreground p-8">
-        <p>Aucune chaîne trouvée</p>
+      <div className="flex flex-1 items-center justify-center p-8">
+        <p className="text-sm" style={{ color: "#48484A" }}>Aucune chaîne trouvée</p>
       </div>
     );
   }
 
   if (viewMode === "list") {
     return (
-      <div className="space-y-1 p-3 sm:p-4">
-        {channels.map((ch, i) => (
-          <ChannelListItem
+      <div className="space-y-0.5 p-3">
+        {channels.map(ch => (
+          <div
             key={ch.id}
-            ch={ch}
-            isFav={favorites.includes(ch.id)}
-            index={i}
-            onPlay={() => onPlay(ch)}
-            onToggleFavorite={() => onToggleFavorite(ch.id)}
-          />
+            onClick={() => onPlay(ch)}
+            className="group flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-colors hover:bg-[#131318]"
+            style={activeChannelId === ch.id ? { background: "rgba(255, 109, 0, 0.06)", borderLeft: "2px solid #FF6D00" } : {}}
+          >
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${CATEGORY_GRADIENTS[ch.category] || "from-gray-700/30 to-gray-900/20"}`}>
+              {ch.logo ? (
+                <img src={ch.logo} alt={ch.name} loading="lazy" className="h-6 w-6 rounded object-contain" />
+              ) : (
+                <span className="text-[10px] font-bold" style={{ color: "#F5F5F7" }}>{getInitials(ch.name)}</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
+              <p className="text-[10px]" style={{ color: "#48484A" }}>{ch.category}</p>
+            </div>
+            <button onClick={e => { e.stopPropagation(); onToggleFavorite(ch.id); }} className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Heart size={14} className={favorites.includes(ch.id) ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={favorites.includes(ch.id) ? {} : { color: "#48484A" }} />
+            </button>
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-3 sm:p-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {channels.map((ch) => (
+    <div className="grid grid-cols-2 gap-2.5 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5">
+      {channels.map(ch => (
         <ChannelCard
           key={ch.id}
           ch={ch}
           isFav={favorites.includes(ch.id)}
+          isActive={activeChannelId === ch.id}
           onPlay={() => onPlay(ch)}
           onToggleFavorite={() => onToggleFavorite(ch.id)}
         />

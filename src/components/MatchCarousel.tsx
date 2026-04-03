@@ -1,11 +1,10 @@
 import { useRef, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Bell, BellOff, Play } from "lucide-react";
 import React from "react";
-import { getMatchSettings } from "@/pages/Settings";
+import { getReminders, toggleReminder as toggleReminderStorage } from "@/lib/storage";
 
 interface Match {
   id: string;
-  sport: string;
   sportIcon: string;
   league: string;
   team1: string;
@@ -17,94 +16,70 @@ interface Match {
 }
 
 const DEMO_MATCHES: Match[] = [
-  { id: "m1", sport: "Football", sportIcon: "⚽", league: "Ligue 1", team1: "OL Lyon", team2: "AS Monaco", status: "live", timeLabel: "EN COURS", score: "1-2", channel: "beIN Sports 1" },
-  { id: "m2", sport: "Football", sportIcon: "⚽", league: "Ligue 1", team1: "PSG", team2: "OM", status: "upcoming", timeLabel: "dans 3h", channel: "beIN Sports 1" },
-  { id: "m3", sport: "Football", sportIcon: "⚽", league: "Champions League", team1: "Real Madrid", team2: "Man City", status: "upcoming", timeLabel: "demain", channel: "RMC Sport 1" },
-  { id: "m4", sport: "Football", sportIcon: "⚽", league: "Premier League", team1: "Arsenal", team2: "Liverpool", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 2" },
-  { id: "m5", sport: "Football", sportIcon: "⚽", league: "La Liga", team1: "Barcelona", team2: "Atletico", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 3" },
-  { id: "m6", sport: "Football", sportIcon: "⚽", league: "Serie A", team1: "Inter", team2: "AC Milan", status: "upcoming", timeLabel: "3 jours" },
-  { id: "m7", sport: "Football", sportIcon: "⚽", league: "Bundesliga", team1: "Bayern", team2: "Dortmund", status: "upcoming", timeLabel: "4 jours" },
-  { id: "m8", sport: "Football", sportIcon: "⚽", league: "Botola Pro", team1: "Wydad", team2: "Raja", status: "upcoming", timeLabel: "demain" },
-  { id: "m9", sport: "Basketball", sportIcon: "🏀", league: "NBA", team1: "Lakers", team2: "Celtics", status: "upcoming", timeLabel: "8h", channel: "beIN Sports 4" },
-  { id: "m10", sport: "Tennis", sportIcon: "🎾", league: "Roland Garros", team1: "Djokovic", team2: "Alcaraz", status: "upcoming", timeLabel: "5 jours" },
-  { id: "m11", sport: "MMA", sportIcon: "🥊", league: "UFC", team1: "Makhachev", team2: "Oliveira", status: "upcoming", timeLabel: "7 jours" },
-  { id: "m12", sport: "Rugby", sportIcon: "🏉", league: "Six Nations", team1: "France", team2: "England", status: "upcoming", timeLabel: "6 jours" },
+  { id: "m1", sportIcon: "⚽", league: "Ligue 1", team1: "OL Lyon", team2: "AS Monaco", status: "live", timeLabel: "EN COURS", score: "1-2", channel: "beIN Sports 1" },
+  { id: "m2", sportIcon: "⚽", league: "Ligue 1", team1: "PSG", team2: "OM", status: "upcoming", timeLabel: "dans 3h", channel: "beIN Sports 1" },
+  { id: "m3", sportIcon: "⚽", league: "Champions League", team1: "Real Madrid", team2: "Man City", status: "upcoming", timeLabel: "demain", channel: "RMC Sport 1" },
+  { id: "m4", sportIcon: "⚽", league: "Premier League", team1: "Arsenal", team2: "Liverpool", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 2" },
+  { id: "m5", sportIcon: "⚽", league: "La Liga", team1: "Barcelona", team2: "Atletico", status: "upcoming", timeLabel: "2 jours", channel: "beIN Sports 3" },
+  { id: "m6", sportIcon: "⚽", league: "Serie A", team1: "Inter", team2: "AC Milan", status: "upcoming", timeLabel: "3 jours" },
+  { id: "m7", sportIcon: "⚽", league: "Bundesliga", team1: "Bayern", team2: "Dortmund", status: "upcoming", timeLabel: "4 jours" },
+  { id: "m8", sportIcon: "⚽", league: "Botola Pro", team1: "Wydad", team2: "Raja", status: "upcoming", timeLabel: "demain" },
+  { id: "m9", sportIcon: "🏀", league: "NBA", team1: "Lakers", team2: "Celtics", status: "upcoming", timeLabel: "8h", channel: "beIN Sports 4" },
+  { id: "m10", sportIcon: "🎾", league: "Roland Garros", team1: "Djokovic", team2: "Alcaraz", status: "upcoming", timeLabel: "5 jours" },
+  { id: "m11", sportIcon: "🥊", league: "UFC", team1: "Makhachev", team2: "Oliveira", status: "upcoming", timeLabel: "7 jours" },
+  { id: "m12", sportIcon: "🏉", league: "Six Nations", team1: "France", team2: "England", status: "upcoming", timeLabel: "6 jours" },
 ];
 
-const REMINDERS_KEY = "chouf_match_reminders";
-
-function getReminders(): string[] {
-  return JSON.parse(localStorage.getItem(REMINDERS_KEY) || "[]");
-}
-
-function toggleReminder(matchId: string): string[] {
-  const r = getReminders();
-  const idx = r.indexOf(matchId);
-  if (idx >= 0) r.splice(idx, 1);
-  else r.push(matchId);
-  localStorage.setItem(REMINDERS_KEY, JSON.stringify(r));
-  return r;
-}
-
 const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
-  match: Match;
-  hasReminder: boolean;
-  onToggleReminder: () => void;
+  match: Match; hasReminder: boolean; onToggleReminder: () => void;
 }) => (
   <div
-    className={`flex-shrink-0 w-[240px] sm:w-[260px] rounded-xl border bg-card p-3 sm:p-4 transition-all ${
-      match.status === "live"
-        ? "border-primary/60 shadow-[0_0_20px_hsl(24_100%_50%/0.15)]"
-        : "border-border hover:border-border/80"
-    }`}
-    style={{ scrollSnapAlign: "start" }}
+    className="flex-shrink-0 w-[260px] rounded-2xl p-4 transition-all"
+    style={{
+      background: "#131318",
+      border: match.status === "live" ? "1px solid rgba(255, 109, 0, 0.5)" : "1px solid rgba(28, 28, 36, 0.5)",
+      boxShadow: match.status === "live" ? "0 0 25px rgba(255, 109, 0, 0.12)" : "none",
+      scrollSnapAlign: "start",
+    }}
   >
-    <div className="flex items-center justify-between mb-2 sm:mb-3">
-      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+    <div className="flex items-center justify-between mb-3">
+      <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "#48484A" }}>
         {match.sportIcon} {match.league}
       </span>
       {match.status === "live" && (
-        <span className="flex items-center gap-1 rounded-full bg-destructive/20 px-2 py-0.5 text-[10px] font-bold text-destructive">
-          <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
+        <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255, 59, 48, 0.15)", color: "#FF3B30" }}>
+          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
           LIVE
         </span>
       )}
     </div>
-    <div className="flex items-center justify-between mb-2 sm:mb-3">
-      <div className="flex-1 min-w-0">
-        <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{match.team1}</p>
-      </div>
+    <div className="flex items-center justify-between mb-3">
+      <p className="flex-1 text-[13px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
       {match.score ? (
-        <span className="mx-2 sm:mx-3 rounded-lg bg-primary/15 px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold text-primary tabular-nums">{match.score}</span>
+        <span className="mx-3 rounded-lg px-3 py-1 text-sm font-bold tabular-nums" style={{ background: "rgba(255, 109, 0, 0.12)", color: "#FF6D00" }}>{match.score}</span>
       ) : (
-        <span className="mx-2 text-xs text-muted-foreground">vs</span>
+        <span className="mx-3 text-xs" style={{ color: "#48484A" }}>vs</span>
       )}
-      <div className="flex-1 min-w-0 text-right">
-        <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{match.team2}</p>
-      </div>
+      <p className="flex-1 text-[13px] font-semibold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
     </div>
-    <div className="flex items-center justify-between text-[11px]">
-      <span className={`font-medium ${match.status === "live" ? "text-primary" : "text-muted-foreground"}`}>{match.timeLabel}</span>
-      {match.channel && <span className="flex items-center gap-1 text-muted-foreground truncate ml-2">📺 {match.channel}</span>}
+    <div className="flex items-center justify-between text-[11px] mb-3">
+      <span className="font-medium" style={{ color: match.status === "live" ? "#FF6D00" : "#86868B" }}>{match.timeLabel}</span>
+      {match.channel && <span style={{ color: "#48484A" }}>📺 {match.channel}</span>}
     </div>
-    <div className="mt-2 sm:mt-3">
-      {match.status === "live" ? (
-        <button className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-95">
-          <Play size={12} fill="currentColor" />
-          Regarder
-        </button>
-      ) : (
-        <button
-          onClick={onToggleReminder}
-          className={`flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors active:scale-95 ${
-            hasReminder ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {hasReminder ? <BellOff size={12} /> : <Bell size={12} />}
-          {hasReminder ? "Rappel activé" : "Rappel"}
-        </button>
-      )}
-    </div>
+    {match.status === "live" ? (
+      <button className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-semibold text-white bg-gradient-orange active:scale-[0.97] transition-transform">
+        <Play size={12} fill="currentColor" /> Regarder
+      </button>
+    ) : (
+      <button
+        onClick={onToggleReminder}
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-medium transition-colors active:scale-[0.97]"
+        style={hasReminder ? { background: "rgba(255, 109, 0, 0.1)", color: "#FF6D00" } : { background: "#1C1C24", color: "#86868B" }}
+      >
+        {hasReminder ? <BellOff size={12} /> : <Bell size={12} />}
+        {hasReminder ? "Rappel activé" : "Rappel"}
+      </button>
+    )}
   </div>
 ));
 MatchCard.displayName = "MatchCard";
@@ -113,42 +88,32 @@ export function MatchCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [reminders, setReminders] = useState<string[]>(getReminders());
 
-  const settings = useMemo(() => getMatchSettings(), []);
-
-  const filteredMatches = useMemo(() => {
-    if (!settings.showBanner) return [];
-    return DEMO_MATCHES.filter(m => settings.competitions[m.league] !== false);
-  }, [settings]);
-
-  if (filteredMatches.length === 0) return null;
-
   const scroll = (dir: number) => {
     scrollRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
 
   return (
-    <div className="relative px-3 sm:px-4 pt-3 sm:pt-4">
-      <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <h3 className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-2">
-          <span className="text-base">⚽</span> Matchs à venir
+    <div className="px-3 pt-3">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-[13px] font-semibold flex items-center gap-2" style={{ color: "#F5F5F7" }}>
+          ⚽ Matchs à venir
         </h3>
         <div className="flex gap-1">
-          <button onClick={() => scroll(-1)} className="rounded-lg bg-secondary p-1.5 text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft size={14} />
+          <button onClick={() => scroll(-1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: "#131318" }}>
+            <ChevronLeft size={14} style={{ color: "#86868B" }} />
           </button>
-          <button onClick={() => scroll(1)} className="rounded-lg bg-secondary p-1.5 text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronRight size={14} />
+          <button onClick={() => scroll(1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: "#131318" }}>
+            <ChevronRight size={14} style={{ color: "#86868B" }} />
           </button>
         </div>
       </div>
-
-      <div ref={scrollRef} className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-thin pb-2" style={{ scrollSnapType: "x mandatory" }}>
-        {filteredMatches.map(match => (
+      <div ref={scrollRef} className="flex gap-2.5 overflow-x-auto scrollbar-none pb-2" style={{ scrollSnapType: "x mandatory" }}>
+        {DEMO_MATCHES.map(match => (
           <MatchCard
             key={match.id}
             match={match}
             hasReminder={reminders.includes(match.id)}
-            onToggleReminder={() => setReminders(toggleReminder(match.id))}
+            onToggleReminder={() => setReminders(toggleReminderStorage(match.id))}
           />
         ))}
       </div>
