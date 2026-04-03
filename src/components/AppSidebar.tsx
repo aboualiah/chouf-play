@@ -1,0 +1,193 @@
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, Radio, Star, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Channel, getCategories } from "@/lib/channels";
+import { useState } from "react";
+
+interface AppSidebarProps {
+  channels: Channel[];
+  favorites: string[];
+  activeCategory: string | null;
+  activeTab: string;
+  onCategorySelect: (cat: string | null) => void;
+  onTabSelect: (tab: string) => void;
+  onAddPlaylist: () => void;
+  playlists: { id: string; name: string; channels: Channel[] }[];
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+const NAV_ITEMS = [
+  { id: "live", label: "TV en direct", icon: Tv, count: null },
+  { id: "films", label: "Films", icon: Film, count: 0 },
+  { id: "series", label: "Séries", icon: Clapperboard, count: 0 },
+];
+
+const SUB_TABS = [
+  { id: "all", label: "Toutes", icon: Radio },
+  { id: "favorites", label: "Favoris", icon: Star },
+  { id: "recent", label: "Récentes", icon: Clock },
+];
+
+export function AppSidebar({
+  channels, favorites, activeCategory, activeTab, onCategorySelect,
+  onTabSelect, onAddPlaylist, playlists, collapsed, onToggleCollapse
+}: AppSidebarProps) {
+  const [catOpen, setCatOpen] = useState(true);
+  const categories = getCategories(channels);
+
+  if (collapsed) {
+    return (
+      <motion.aside
+        initial={{ width: 260 }}
+        animate={{ width: 64 }}
+        className="flex h-screen flex-col border-r border-border bg-card py-4"
+      >
+        <button onClick={onToggleCollapse} className="mx-auto mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-orange">
+          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        </button>
+        <nav className="flex flex-col items-center gap-2">
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => onTabSelect(item.id)}
+              className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${activeTab === item.id ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <item.icon size={20} />
+            </button>
+          ))}
+          <button
+            onClick={() => onTabSelect("favorites")}
+            className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${activeTab === "favorites" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <Heart size={20} />
+          </button>
+        </nav>
+      </motion.aside>
+    );
+  }
+
+  return (
+    <motion.aside
+      initial={{ width: 64 }}
+      animate={{ width: 260 }}
+      className="flex h-screen w-[260px] flex-col border-r border-border bg-card overflow-hidden"
+    >
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-5 py-5">
+        <button onClick={onToggleCollapse} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-orange glow-orange">
+          <span className="text-sm font-bold text-primary-foreground">CP</span>
+        </button>
+        <div className="min-w-0">
+          <h1 className="text-lg font-bold leading-tight text-foreground">CHOUF<span className="font-light text-primary">Play</span></h1>
+          <p className="text-[10px] tracking-[0.15em] text-muted-foreground">IPTV PLAYER</p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4">
+        {/* Main Nav */}
+        <div className="mb-1">
+          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Navigation</p>
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => onTabSelect(item.id)}
+              className={`mb-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === item.id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+            >
+              <item.icon size={18} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => onTabSelect("favorites")}
+            className={`mb-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${activeTab === "favorites" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+          >
+            <Heart size={18} />
+            <span>Favoris</span>
+            {favorites.length > 0 && (
+              <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">{favorites.length}</span>
+            )}
+          </button>
+        </div>
+
+        {/* Sub tabs for Live */}
+        {activeTab === "live" && (
+          <div className="mb-3">
+            <div className="flex gap-1 rounded-lg bg-secondary p-1">
+              {SUB_TABS.map(t => (
+                <button key={t.id} className="flex-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground"
+                  data-active={(activeCategory === null && t.id === "all") ? true : undefined}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Categories */}
+        {activeTab === "live" && (
+          <div className="mb-3">
+            <button onClick={() => setCatOpen(!catOpen)} className="mb-1 flex w-full items-center justify-between px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span>Catégories</span>
+              <ChevronDown size={12} className={`transition-transform ${catOpen ? "" : "-rotate-90"}`} />
+            </button>
+            {catOpen && (
+              <div className="space-y-0.5">
+                <button
+                  onClick={() => onCategorySelect(null)}
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeCategory === null ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+                >
+                  Toutes ({channels.length})
+                </button>
+                {categories.map(cat => {
+                  const count = channels.filter(c => c.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => onCategorySelect(cat)}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors ${activeCategory === cat ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+                    >
+                      <span>{cat}</span>
+                      <span className="text-[10px]">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Playlists */}
+        <div>
+          <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Mes Listes</p>
+          {playlists.map(p => (
+            <div key={p.id} className="mb-0.5 flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer">
+              <Radio size={14} />
+              <span className="truncate">{p.name}</span>
+              <span className="ml-auto text-[10px]">{p.channels.length}</span>
+            </div>
+          ))}
+          <button
+            onClick={onAddPlaylist}
+            className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Plus size={16} />
+            <span>Ajouter une liste</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom */}
+      <div className="border-t border-border px-3 py-3 space-y-0.5">
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+          <LayoutDashboard size={18} />
+          <span>Dashboard</span>
+        </button>
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+          <Settings size={18} />
+          <span>Paramètres</span>
+        </button>
+      </div>
+    </motion.aside>
+  );
+}
