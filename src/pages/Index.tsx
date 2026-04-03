@@ -1,12 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
 import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
+import { MatchCarousel } from "@/components/MatchCarousel";
 import { DEMO_CHANNELS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, addRecent, getRecent, Playlist } from "@/lib/storage";
+import { XtreamPlaylistData } from "@/lib/xtream";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Index() {
@@ -27,17 +30,34 @@ export default function Index() {
     return () => clearTimeout(t);
   }, []);
 
+  // All channels including Xtream
   const allChannels = useMemo(() => {
     const extra = playlists.flatMap(p => p.channels);
     return [...DEMO_CHANNELS, ...extra];
   }, [playlists]);
 
-  const filteredChannels = useMemo(() => {
-    let chs = allChannels;
+  // All VOD
+  const allVod = useMemo(() => {
+    return playlists.flatMap(p => p.vodStreams || []);
+  }, [playlists]);
 
-    if (activeTab === "favorites") {
-      chs = chs.filter(c => favorites.includes(c.id));
+  // All Series
+  const allSeries = useMemo(() => {
+    return playlists.flatMap(p => p.series || []);
+  }, [playlists]);
+
+  // Content based on active tab
+  const contentForTab = useMemo(() => {
+    switch (activeTab) {
+      case "films": return allVod;
+      case "series": return allSeries;
+      case "favorites": return [...allChannels, ...allVod, ...allSeries].filter(c => favorites.includes(c.id));
+      default: return allChannels;
     }
+  }, [activeTab, allChannels, allVod, allSeries, favorites]);
+
+  const filteredChannels = useMemo(() => {
+    let chs = contentForTab;
 
     if (activeCategory) {
       chs = chs.filter(c => c.category === activeCategory);
@@ -49,24 +69,67 @@ export default function Index() {
     }
 
     return chs;
-  }, [allChannels, activeTab, activeCategory, searchQuery, favorites]);
+  }, [contentForTab, activeCategory, searchQuery]);
 
-  const handleToggleFavorite = (id: string) => {
-    const newFavs = toggleFavorite(id);
+  const handleToggleFavorite = useCallback((id: string) => {
+    const ch = [...allChannels, ...allVod, ...allSeries].find(c => c.id === id);
+    const newFavs = toggleFavorite(id, ch?.playlistId, ch?.type);
     setFavorites(newFavs);
-  };
+  }, [allChannels, allVod, allSeries]);
 
-  const handlePlay = (channel: Channel) => {
+  const handlePlay = useCallback((channel: Channel) => {
     setActiveChannel(channel);
     addRecent(channel.id);
-  };
+  }, []);
 
-  const handlePlaylistLoaded = (name: string, channels: Channel[]) => {
-    const newPlaylist: Playlist = { id: `pl_${Date.now()}`, name, channels, addedAt: Date.now() };
+  const handlePlaylistLoaded = useCallback((name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => {
+    const newPlaylist: Playlist = {
+      id: xtreamData ? `xt_${Date.now()}` : `pl_${Date.now()}`,
+      name,
+      channels,
+      addedAt: Date.now(),
+      isXtream: !!xtreamData,
+      xtreamCredentials: xtreamData?.credentials,
+      xtreamAccountInfo: xtreamData?.accountInfo,
+      xtreamMac: xtreamData?.mac,
+      vodStreams: xtreamData?.vodStreams || [],
+      series: xtreamData?.series || [],
+    };
     const updated = [...playlists, newPlaylist];
     setPlaylists(updated);
     savePlaylists(updated);
-  };
+  }, [playlists]);
+
+  // Keyboard shortcuts
+  const handlePrevChannel = useCallback(() => {
+    if (!activeChannel) return;
+    const idx = filteredChannels.findIndex(c => c.id === activeChannel.id);
+    if (idx > 0) handlePlay(filteredChannels[idx - 1]);
+  }, [activeChannel, filteredChannels, handlePlay]);
+
+  const handleNextChannel = useCallback(() => {
+    if (!activeChannel) return;
+    const idx = filteredChannels.findIndex(c => c.id === activeChannel.id);
+    if (idx < filteredChannels.length - 1) handlePlay(filteredChannels[idx + 1]);
+  }, [activeChannel, filteredChannels, handlePlay]);
+
+  useKeyboardShortcuts({
+    onToggleFavorite: activeChannel ? () => handleToggleFavorite(activeChannel.id) : undefined,
+    onBack: activeChannel ? () => setActiveChannel(null) : undefined,
+    onTogglePlay: activeChannel ? () => {
+      const v = document.querySelector("video");
+      if (v) v.paused ? v.play() : v.pause();
+    } : undefined,
+    onPrevChannel: handlePrevChannel,
+    onNextChannel: handleNextChannel,
+    onToggleFullscreen: activeChannel ? () => {
+      const c = document.querySelector("[data-player-container]");
+      if (c) {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else (c as HTMLElement).requestFullscreen();
+      }
+    } : undefined,
+  });
 
   return (
     <>
@@ -75,12 +138,12 @@ export default function Index() {
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden bg-background">
           <AppSidebar
-            channels={allChannels}
+            channels={activeTab === "films" ? allVod : activeTab === "series" ? allSeries : allChannels}
             favorites={favorites}
             activeCategory={activeCategory}
             activeTab={activeTab}
             onCategorySelect={setActiveCategory}
-            onTabSelect={setActiveTab}
+            onTabSelect={(tab) => { setActiveTab(tab); setActiveCategory(null); }}
             onAddPlaylist={() => setPlaylistModalOpen(true)}
             playlists={playlists}
             collapsed={sidebarCollapsed}
@@ -126,7 +189,7 @@ export default function Index() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1" data-player-container>
                       <VideoPlayer
                         channel={activeChannel}
                         isFavorite={favorites.includes(activeChannel.id)}
@@ -143,6 +206,7 @@ export default function Index() {
                     exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin"
                   >
+                    {activeTab === "live" && <MatchCarousel />}
                     <ChannelGrid
                       channels={filteredChannels}
                       favorites={favorites}
