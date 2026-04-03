@@ -8,18 +8,6 @@ interface Match {
   id: string;
   sportIcon: string;
   league: string;
-  team1: string;
-  team2: string;
-  status: "live" | "upcoming";
-  timeLabel: string;
-  score?: string;
-  channel?: string;
-}
-
-interface Match {
-  id: string;
-  sportIcon: string;
-  league: string;
   leagueLogo?: string;
   team1: string;
   team1Logo?: string;
