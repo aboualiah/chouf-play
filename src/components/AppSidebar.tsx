@@ -49,8 +49,8 @@ export function AppSidebar({
   if (collapsed) {
     return (
       <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "#131318", borderColor: "#1C1C24" }}>
-        <button onClick={onToggleCollapse} className="mb-6 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-orange">
-          <span className="text-xs font-black text-white">CP</span>
+        <button onClick={onToggleCollapse} className="mb-6">
+          <ChoufPlayLogo size={36} showCP={false} />
         </button>
         <nav className="flex flex-col items-center gap-1.5">
           {NAV_ITEMS.map(item => (
