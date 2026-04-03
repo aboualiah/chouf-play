@@ -28,6 +28,17 @@ function withCorsProxy(url: string) {
   return `${CORS_PROXY}${encodeURIComponent(url)}`;
 }
 
+function getStreamUrl(originalUrl: string): string {
+  if (originalUrl.startsWith('http://') && window.location.protocol === 'https:') {
+    return withCorsProxy(originalUrl);
+  }
+  return originalUrl;
+}
+
+function needsMixedContentProxy(url: string): boolean {
+  return url.startsWith('http://') && window.location.protocol === 'https:';
+}
+
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
