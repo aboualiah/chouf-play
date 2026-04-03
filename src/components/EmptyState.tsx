@@ -177,7 +177,12 @@ export function EmptyState({ onAddPlaylist, onLoadDemo }: EmptyStateProps) {
                 )}
               </motion.div>
             ))}
-          </div>
+          </div>}
+          {!showMatches && (
+            <p className="text-center text-[11px] py-4" style={{ color: "#48484A" }}>
+              Bannière matchs masquée. Activez dans les Paramètres.
+            </p>
+          )}
         </motion.div>
       </div>
     </div>
