@@ -132,7 +132,8 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
               <p className="text-[12px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
               <p className="text-[10px]" style={{ color: "#48484A" }}>{ch.category}</p>
             </div>
-            <button onClick={e => { e.stopPropagation(); onToggleFavorite(ch.id); }} className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onClick={e => { e.stopPropagation(); onToggleFavorite(ch.id); }}
+              className={`transition-opacity ${favorites.includes(ch.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               <Heart size={14} className={favorites.includes(ch.id) ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={favorites.includes(ch.id) ? {} : { color: "#48484A" }} />
             </button>
           </div>

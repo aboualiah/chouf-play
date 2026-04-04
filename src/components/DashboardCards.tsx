@@ -141,18 +141,29 @@ export function DashboardCards({
         ))}
       </div>
 
-      {/* Premium Banner — bottom, matching reference design */}
+      {/* Premium Banner — click opens QR for payment */}
+      <PremiumBanner />
+    </div>
+  );
+}
+
+function PremiumBanner() {
+  const [qrOpen, setQrOpen] = useState(false);
+  const paymentUrl = "https://choufplay.app/premium";
+
+  return (
+    <>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
+        onClick={() => setQrOpen(true)}
         className="relative overflow-hidden rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
         style={{
           background: "linear-gradient(135deg, rgba(30,25,18,0.95), rgba(20,18,14,0.90))",
           border: "1px solid rgba(201,168,76,0.15)",
         }}
       >
-        {/* Decorative tilted card element */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-[0.07]" style={{
           width: 100, height: 65, borderRadius: 10,
           background: "linear-gradient(135deg, #C9A84C, #FF6D00)",
@@ -181,6 +192,35 @@ export function DashboardCards({
           <ArrowRight size={18} style={{ color: "#C9A84C40" }} />
         </div>
       </motion.div>
-    </div>
+
+      {/* QR Code modal for payment */}
+      {qrOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+          onClick={() => setQrOpen(false)}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+            className="rounded-2xl p-6 text-center max-w-sm mx-4"
+            style={{ background: "#131318", border: "1px solid #1C1C24" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <Crown size={32} style={{ color: "#C9A84C", margin: "0 auto 12px", filter: "drop-shadow(0 0 10px rgba(201,168,76,0.5))" }} />
+            <h3 className="text-lg font-bold mb-2" style={{ color: "#F5F5F7" }}>Activer Premium</h3>
+            <p className="text-[12px] mb-4" style={{ color: "#86868B" }}>Scannez le QR code pour accéder au paiement</p>
+            <div className="mx-auto mb-4 rounded-xl p-3 inline-block" style={{ background: "#fff" }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentUrl)}`}
+                alt="QR Code Premium" width={200} height={200}
+              />
+            </div>
+            <p className="text-[11px] mb-3" style={{ color: "#48484A" }}>{paymentUrl}</p>
+            <button onClick={() => setQrOpen(false)}
+              className="rounded-xl px-6 py-2 text-[13px] font-semibold transition-colors hover:opacity-80"
+              style={{ background: "rgba(201,168,76,0.15)", color: "#C9A84C" }}>
+              Fermer
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </>
   );
 }
