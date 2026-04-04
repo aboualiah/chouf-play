@@ -452,6 +452,16 @@ export default function Index() {
         onPlaylistLoaded={handlePlaylistLoaded}
         onLoadDemo={handleLoadDemo}
       />
+
+      {/* Catchup panel */}
+      {activeChannel && (
+        <CatchupPanel
+          channel={activeChannel}
+          open={showCatchup}
+          onClose={() => setShowCatchup(false)}
+          onPlay={(url) => { setShowCatchup(false); toast.info("Catch-up sera disponible dans une future version"); }}
+        />
+      )}
     </>
   );
 }
