@@ -189,7 +189,7 @@ export default function Settings() {
   const [userAgent, setUserAgent] = useState("default");
 
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(24);
+  const [refreshInterval, setRefreshInterval] = useState("3");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
