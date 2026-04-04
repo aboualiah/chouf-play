@@ -64,7 +64,7 @@ export default function Index() {
     const t = setTimeout(() => {
       setSplash(false);
       sessionStorage.setItem("chouf_splash_done", "1");
-    }, 5000);
+    }, SPLASH_DURATION);
     return () => clearTimeout(t);
   }, [splash]);
 

@@ -92,7 +92,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
-            transition={{ delay: 3.5, duration: 0.5 }}
+            transition={{ delay: 2.0, duration: 0.4 }}
             className="absolute bottom-8 text-[10px] text-muted-foreground"
           >
             par I-Success
