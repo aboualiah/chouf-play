@@ -80,18 +80,26 @@ export default function Index() {
   }, [searchParams, splash, setSearchParams]);
 
   const handleTabSelect = useCallback((tab: string) => {
+    // Stop radio when leaving radio tab
+    if (activeTab === "radio" && tab !== "radio" && radioPlaying) {
+      stopRadio();
+    }
     setActiveTab(tab);
     setActiveCategory(null);
     setView("content");
     if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile]);
+  }, [isMobile, activeTab, radioPlaying, stopRadio]);
 
   const handleBackToDashboard = useCallback(() => {
+    // Stop radio when going back to dashboard
+    if (activeTab === "radio" && radioPlaying) {
+      stopRadio();
+    }
     setActiveChannel(null);
     setView("dashboard");
     setShowEpgGrid(false);
     setShowRecordings(false);
-  }, []);
+  }, [activeTab, radioPlaying, stopRadio]);
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
