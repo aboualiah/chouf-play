@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Play, Filter, ArrowLeft } from "lucide-react";
+import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { HeaderBar } from "@/components/HeaderBar";
@@ -51,6 +51,7 @@ export default function Index() {
   const [showCatchup, setShowCatchup] = useState(false);
   const [showEpgGrid, setShowEpgGrid] = useState(false);
   const [showRecordings, setShowRecordings] = useState(false);
+  const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
@@ -251,20 +252,20 @@ export default function Index() {
     if (activeTab === "radio") {
       return <RadioList channels={allChannels} activeStation={radioStation} onSelect={handleRadioSelect} />;
     }
-    // Live TV with category panel on the left
+    // Live TV with 3-panel layout: Categories | Channels | Preview
     return (
       <>
         {activeTab === "live" && (() => {
           const categories = getCategories(allChannels);
+          // Selected channel for preview (not playing yet)
           return (
             <div className="flex flex-1 overflow-hidden">
-              {/* Categories panel - left side */}
+              {/* Panel 1: Categories */}
               {categories.length > 0 && (
-                <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0D0D12", borderColor: "#1C1C24" }}>
+                <div className="w-[180px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0D0D12", borderColor: "#1C1C24" }}>
                   <div className="px-3 py-2.5" style={{ borderBottom: "1px solid #1C1C24" }}>
                     <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Catégories</p>
                   </div>
-                  {/* Quick filters */}
                   {[
                     { id: null, label: t("cat.all"), icon: Radio, count: allChannels.length },
                     { id: "__fav", label: t("nav.favorites"), icon: Star, count: allChannels.filter(c => favorites.includes(c.id)).length },
@@ -286,7 +287,6 @@ export default function Index() {
                     </button>
                   ))}
                   <div className="h-px mx-3 my-1" style={{ background: "#1C1C24" }} />
-                  {/* Category list */}
                   {categories.map(cat => {
                     const count = allChannels.filter(c => c.category === cat).length;
                     const isActive = activeCategory === cat;
@@ -307,16 +307,115 @@ export default function Index() {
                   })}
                 </div>
               )}
-              {/* Channels list - right side */}
-              <div className="flex-1 overflow-y-auto scrollbar-thin">
-                <ChannelGrid
-                  channels={filteredChannels}
-                  favorites={favorites}
-                  activeChannelId={activeChannel?.id}
-                  onPlay={handlePlay}
-                  onToggleFavorite={handleToggleFavorite}
-                  viewMode={viewMode}
-                />
+
+              {/* Panel 2: Channels list */}
+              <div className="w-[300px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0F0F14", borderColor: "#1C1C24" }}>
+                <div className="px-3 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>
+                    Chaînes ({filteredChannels.length})
+                  </p>
+                </div>
+                <div className="flex-1 overflow-y-auto scrollbar-thin">
+                  {filteredChannels.map((ch, i) => {
+                    const isFav = favorites.includes(ch.id);
+                    const isSelected = previewChannel?.id === ch.id;
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => setPreviewChannel(ch)}
+                        onDoubleClick={() => handlePlay(ch)}
+                        className="flex items-center gap-3 w-full px-3 py-2 text-left transition-all hover:bg-[#131318] group"
+                        style={isSelected
+                          ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" }
+                          : { borderLeft: "3px solid transparent" }
+                        }
+                      >
+                        <span className="text-[9px] font-mono w-4 text-right tabular-nums" style={{ color: "#48484A" }}>{i + 1}</span>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
+                          {ch.logo ? (
+                            <img src={ch.logo} loading="lazy" className="h-5 w-5 rounded object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          ) : (
+                            <span className="text-[9px] font-bold" style={{ color: "#86868B" }}>{ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] font-medium truncate" style={{ color: isSelected ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
+                          <p className="text-[9px]" style={{ color: "#48484A" }}>{ch.category}</p>
+                        </div>
+                        {isFav && <Heart size={10} className="fill-[#FF3B30] text-[#FF3B30] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Panel 3: Channel Preview */}
+              <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#0A0A0F" }}>
+                {previewChannel ? (
+                  <div className="flex flex-col h-full">
+                    {/* Preview area */}
+                    <div className="flex-1 flex items-center justify-center relative" style={{ background: "#000" }}>
+                      {previewChannel.logo ? (
+                        <div className="text-center">
+                          <img src={previewChannel.logo} className="h-24 w-24 mx-auto rounded-2xl object-contain mb-4" alt="" />
+                          <p className="text-[18px] font-bold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
+                          <p className="text-[12px] mt-1" style={{ color: "#48484A" }}>{previewChannel.category}</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="h-24 w-24 mx-auto rounded-2xl flex items-center justify-center mb-4" style={{ background: "#1C1C24" }}>
+                            <span className="text-2xl font-bold" style={{ color: "#86868B" }}>{previewChannel.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                          </div>
+                          <p className="text-[18px] font-bold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
+                          <p className="text-[12px] mt-1" style={{ color: "#48484A" }}>{previewChannel.category}</p>
+                        </div>
+                      )}
+                      {/* Play button overlay */}
+                      <button
+                        onClick={() => handlePlay(previewChannel)}
+                        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-xl px-6 py-3 transition-all hover:scale-105"
+                        style={{ background: "rgba(255,109,0,0.9)", color: "#fff" }}
+                      >
+                        <Play size={18} fill="currentColor" />
+                        <span className="text-[13px] font-bold">Regarder</span>
+                      </button>
+                    </div>
+
+                    {/* Program info bar */}
+                    <div className="px-5 py-3" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
+                      <p className="text-[13px] font-semibold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "#86868B" }}>Programme en cours</p>
+                    </div>
+
+                    {/* 4 Colored buttons: Red, Blue, Green, Yellow */}
+                    <div className="flex items-center justify-center gap-4 px-5 py-3" style={{ background: "#0D0D12", borderTop: "1px solid #1C1C24" }}>
+                      {[
+                        { color: "#FF3B30", glow: "rgba(255,59,48,0.3)", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
+                        { color: "#007AFF", glow: "rgba(0,122,255,0.3)", label: "Options", action: () => {} },
+                        { color: "#34C759", glow: "rgba(52,199,89,0.3)", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
+                        { color: "#FFD60A", glow: "rgba(255,214,10,0.3)", label: "Listes", action: () => {} },
+                      ].map((btn, i) => (
+                        <button
+                          key={i}
+                          onClick={btn.action}
+                          className="flex items-center gap-2 rounded-xl px-4 py-2 transition-all hover:scale-105"
+                          style={{ background: `${btn.color}15`, border: `1px solid ${btn.color}30` }}
+                        >
+                          <div className="h-3 w-3 rounded-full" style={{ background: btn.color, boxShadow: `0 0 8px ${btn.glow}` }} />
+                          <span className="text-[11px] font-medium" style={{ color: btn.color }}>{btn.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <Filter size={32} className="mx-auto mb-3" style={{ color: "#1C1C24" }} />
+                      <p className="text-[13px] font-medium" style={{ color: "#48484A" }}>Sélectionnez une chaîne</p>
+                      <p className="text-[10px] mt-1" style={{ color: "#2C2C34" }}>Double-cliquez pour lancer la lecture</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -473,7 +572,7 @@ export default function Index() {
                       onPlaylistSelect={setActivePlaylistId}
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
-                      onAddPlaylist={() => setPlaylistModalOpen(true)}
+                      onAddPlaylist={() => { window.location.href = "/playlists"; }}
                       onOpenSettings={() => { window.location.href = "/settings"; }}
                     />
                   </motion.div>

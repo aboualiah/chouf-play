@@ -713,7 +713,7 @@ export default function Settings() {
     <div className="min-h-screen" style={{ background: "#0A0A0F" }}>
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
         style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid #1C1C24" }}>
-        <button onClick={() => navigate("/")} className="rounded-xl p-2 transition-colors" style={{ background: "#131318", color: "#86868B" }}>
+        <button onClick={() => navigate("/")} className="rounded-xl p-2 transition-colors hover:bg-white/5" style={{ background: "#131318", color: "#C9A84C" }}>
           <ArrowLeft size={18} />
         </button>
         <div>

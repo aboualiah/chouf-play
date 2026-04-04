@@ -10,6 +10,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const DemoChannels = lazy(() => import("./pages/DemoChannels"));
+const PlaylistManager = lazy(() => import("./pages/PlaylistManager"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/demo" element={<DemoChannels />} />
+              <Route path="/playlists" element={<PlaylistManager />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />
