@@ -69,9 +69,30 @@ export default function Index() {
     const t = setTimeout(() => {
       setSplash(false);
       sessionStorage.setItem("chouf_splash_done", "1");
+      // Determine next step after splash
+      if (!isOnboardingDone()) {
+        setOnboardingStep("terms");
+      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
+        setOnboardingStep("app");
+      } else {
+        setOnboardingStep("welcome");
+      }
     }, SPLASH_DURATION);
     return () => clearTimeout(t);
   }, [splash]);
+
+  // If splash already done on mount, set correct step
+  useEffect(() => {
+    if (!splash) {
+      if (!isOnboardingDone()) {
+        setOnboardingStep("terms");
+      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
+        setOnboardingStep("app");
+      } else {
+        setOnboardingStep("welcome");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadPlaylistsAsync().then(p => { if (p.length > 0) setPlaylists(p); });
