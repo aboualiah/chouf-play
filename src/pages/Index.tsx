@@ -32,9 +32,15 @@ import { toast } from "sonner";
 export default function Index() {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const SPLASH_DURATION = 3000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
+  const isOnboardingDone = () => localStorage.getItem("chouf_onboarding_done") === "true";
+
+  // Onboarding step: "splash" | "terms" | "permissions" | "welcome" | "app"
+  const [onboardingStep, setOnboardingStep] = useState<"splash" | "terms" | "permissions" | "welcome" | "app">("splash");
+
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [view, setView] = useState<"dashboard" | "content">("dashboard");
