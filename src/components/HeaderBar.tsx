@@ -109,7 +109,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           </button>
         </div>
 
-        <WeatherWidget />
+        
 
         <div className="text-right hidden sm:block">
           <p className="text-[14px] font-semibold tabular-nums tracking-tight" style={{ color: "#F5F5F7", fontFamily: APPLE_FONT, letterSpacing: "-0.02em" }}>{time}</p>
