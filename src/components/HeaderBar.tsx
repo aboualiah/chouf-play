@@ -31,7 +31,7 @@ const TABS = [
   { id: "demo", label: "TV Démo", icon: Monitor },
 ];
 
-const APPLE_FONT = "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
+const CLOCK_FONT = "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
 
 function useClock() {
   const [now, setNow] = useState(new Date());
