@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { XtreamAccountBadge } from "./XtreamAccountBadge";
 import { QRCodePortal } from "./QRCodePortal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useI18n } from "@/lib/i18n";
 
 interface AppSidebarProps {
   channels: Channel[];
