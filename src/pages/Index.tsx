@@ -16,7 +16,7 @@ import { RecordingsPanel } from "@/components/RecordingsPanel";
 import { FilmsGrid } from "@/components/FilmsGrid";
 import { SeriesGrid } from "@/components/SeriesGrid";
 import { RadioList, RadioMiniPlayer, useRadioPlayer } from "@/components/RadioPlayer";
-import { DEMO_CHANNELS, Channel } from "@/lib/channels";
+import { DEMO_CHANNELS, RADIO_STATIONS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, loadPlaylistsAsync, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
