@@ -80,8 +80,16 @@ export default function Index() {
   const handleTabSelect = useCallback((tab: string) => {
     setActiveTab(tab);
     setActiveCategory(null);
+    setView("content");
     if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile]);
+
+  const handleBackToDashboard = useCallback(() => {
+    setActiveChannel(null);
+    setView("dashboard");
+    setShowEpgGrid(false);
+    setShowRecordings(false);
+  }, []);
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
