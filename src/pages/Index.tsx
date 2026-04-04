@@ -144,7 +144,7 @@ export default function Index() {
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
-    toast.success("15 chaînes démo chargées");
+    toast.success(t("msg.demo_loaded"));
   }, []);
 
   const handlePlaylistLoaded = useCallback((name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => {
