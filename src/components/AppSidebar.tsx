@@ -58,7 +58,7 @@ export function AppSidebar({
                 <Menu size={20} style={{ color: "#C9A84C" }} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right"><p>Ouvrir le menu</p></TooltipContent>
+            <TooltipContent side="right"><p>{t("sidebar.open")}</p></TooltipContent>
           </Tooltip>
 
           <nav className="flex flex-col items-center gap-1">
