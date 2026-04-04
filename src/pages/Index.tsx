@@ -229,6 +229,12 @@ export default function Index() {
 
   // Determine which content view to render
   const renderContent = () => {
+    if (showEpgGrid) {
+      return <EpgGrid channels={allChannels} onPlay={handlePlay} />;
+    }
+    if (showRecordings) {
+      return <RecordingsPanel />;
+    }
     if (activeTab === "films" && allVod.length > 0) {
       return <FilmsGrid films={filteredChannels} favorites={favorites} onPlay={handlePlay} onToggleFavorite={handleToggleFavorite} />;
     }
@@ -250,6 +256,8 @@ export default function Index() {
             onPlay={handlePlay}
             activePlaylistId={activePlaylistId}
             onPlaylistSelect={setActivePlaylistId}
+            onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); }}
+            onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); }}
           />
         )}
         {activeTab === "live" && (
@@ -261,7 +269,7 @@ export default function Index() {
             ].map(t => (
               <button
                 key={t.id}
-                onClick={() => setActiveSubTab(t.id)}
+                onClick={() => { setActiveSubTab(t.id); setShowEpgGrid(false); setShowRecordings(false); }}
                 className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
                 style={activeSubTab === t.id
                   ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
