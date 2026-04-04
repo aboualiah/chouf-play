@@ -42,7 +42,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.9, duration: 0.5 }}
+            transition={{ delay: 0.8, duration: 0.4 }}
             className="text-center"
           >
             <h1 className="text-[44px] leading-none tracking-tight">
@@ -55,7 +55,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2.4, duration: 0.5 }}
+            transition={{ delay: 1.2, duration: 0.4 }}
             className="mt-3 text-[11px] font-semibold uppercase text-accent"
             style={{ letterSpacing: "4px" }}
           >
@@ -66,7 +66,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 120, opacity: 1 }}
-            transition={{ delay: 3.0, duration: 1, ease: "easeInOut" }}
+            transition={{ delay: 1.5, duration: 0.6, ease: "easeInOut" }}
             className="mt-6 h-[1.5px] rounded-full"
             style={{ background: "linear-gradient(90deg, transparent, hsl(var(--cp-gold)), transparent)" }}
           />
@@ -75,7 +75,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 3.5, duration: 0.4 }}
+            transition={{ delay: 1.8, duration: 0.3 }}
             className="mt-8 flex gap-1.5"
           >
             {[0, 1, 2].map(i => (
@@ -92,7 +92,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
-            transition={{ delay: 3.5, duration: 0.5 }}
+            transition={{ delay: 2.0, duration: 0.4 }}
             className="absolute bottom-8 text-[10px] text-muted-foreground"
           >
             par I-Success

@@ -33,6 +33,7 @@ export default function Index() {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
+  const SPLASH_DURATION = 3000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -63,7 +64,7 @@ export default function Index() {
     const t = setTimeout(() => {
       setSplash(false);
       sessionStorage.setItem("chouf_splash_done", "1");
-    }, 5000);
+    }, SPLASH_DURATION);
     return () => clearTimeout(t);
   }, [splash]);
 

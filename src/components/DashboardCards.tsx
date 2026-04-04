@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, Play, ArrowRight } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, Play, ArrowRight, Crown } from "lucide-react";
 import { Playlist, getRecent } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -147,6 +147,41 @@ export function DashboardCards({
           </button>
         ))}
       </div>
+
+      {/* Premium Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="relative overflow-hidden rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
+        style={{
+          background: "linear-gradient(135deg, rgba(201,168,76,0.12), rgba(255,109,0,0.06))",
+          border: "1px solid rgba(201,168,76,0.2)",
+        }}
+      >
+        {/* Decorative card element */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10" style={{
+          width: 80, height: 50, borderRadius: 8,
+          background: "linear-gradient(135deg, #C9A84C, #FF6D00)",
+          transform: "translateY(-50%) rotate(-12deg)",
+        }} />
+        <div className="flex items-center gap-3 px-4 py-3 relative z-10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+            style={{ background: "rgba(201,168,76,0.15)" }}>
+            <Crown size={20} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.5))" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-bold" style={{ color: "#F5F5F7" }}>
+              CHOUF Play <span style={{ color: "#C9A84C" }}>Premium</span>
+            </p>
+            <p className="text-[10px]" style={{ color: "#86868B" }}>
+              Multi-playlists, EPG, Xtream, PiP, thèmes personnalisés
+            </p>
+            <p className="text-[11px] font-bold mt-0.5" style={{ color: "#C9A84C" }}>9,99 EUR/an</p>
+          </div>
+          <ArrowRight size={16} style={{ color: "#C9A84C" }} />
+        </div>
+      </motion.div>
 
       {/* Subscription info moved to sidebar */}
     </div>
