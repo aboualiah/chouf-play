@@ -2,6 +2,10 @@ import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard,
 import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface HeaderBarProps {
   searchQuery: string;
