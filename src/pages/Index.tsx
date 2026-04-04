@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Clock, Play } from "lucide-react";
+import { Radio, Star, Clock, Play, Filter } from "lucide-react";
 import { getRecent } from "@/lib/storage";
+import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
@@ -289,28 +290,46 @@ export default function Index() {
 
     return (
       <>
-        {activeTab === "live" && (
-          <>
-            <div className="flex items-center gap-2 px-5 py-3">
-              {[
-                { id: "all", label: t("cat.all"), icon: Radio },
-                { id: "favorites", label: t("nav.favorites"), icon: Star },
-                { id: "recent", label: t("cat.recent"), icon: Clock },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveSubTab(tab.id); setShowEpgGrid(false); setShowRecordings(false); }}
-                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
-                  style={activeSubTab === tab.id
-                    ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
-                    : { color: "#86868B", border: "1px solid #1C1C24" }
-                  }
-                >
-                  <tab.icon size={13} />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
+        {activeTab === "live" && (() => {
+          const categories = getCategories(allChannels);
+          return (
+            <>
+              <div className="flex items-center gap-2 px-5 py-3 overflow-x-auto scrollbar-none">
+                {[
+                  { id: "all", label: t("cat.all"), icon: Radio },
+                  { id: "favorites", label: t("nav.favorites"), icon: Star },
+                  { id: "recent", label: t("cat.recent"), icon: Clock },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveSubTab(tab.id); setActiveCategory(null); setShowEpgGrid(false); setShowRecordings(false); }}
+                    className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all shrink-0"
+                    style={activeSubTab === tab.id && !activeCategory
+                      ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
+                      : { color: "#86868B", border: "1px solid #1C1C24" }
+                    }
+                  >
+                    <tab.icon size={13} />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+                {categories.length > 0 && (
+                  <div className="h-4 w-px mx-1 shrink-0" style={{ background: "#1C1C24" }} />
+                )}
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => { setActiveCategory(activeCategory === cat ? null : cat); setActiveSubTab("all"); }}
+                    className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-all shrink-0 whitespace-nowrap"
+                    style={activeCategory === cat
+                      ? { background: "rgba(201,168,76,0.15)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }
+                      : { color: "#48484A", border: "1px solid #1C1C24" }
+                    }
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
 
             {/* Continue Watching */}
             {recentChannels.length > 0 && (
@@ -343,7 +362,8 @@ export default function Index() {
               </div>
             )}
           </>
-        )}
+          );
+        })()}
         <ChannelGrid
           channels={filteredChannels}
           favorites={favorites}

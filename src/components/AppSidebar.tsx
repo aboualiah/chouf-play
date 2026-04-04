@@ -1,4 +1,4 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu, Clock, CalendarDays } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu, Clock, CalendarDays, LogOut, RotateCcw } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState, useEffect, useMemo } from "react";
@@ -226,22 +226,22 @@ export function AppSidebar({
                   </div>
                 );
               })}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
                 <button
                   onClick={onAddPlaylist}
-                  className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
                   style={{ color: "#FF6D00", border: "1px solid #1C1C24" }}
                 >
                   <Plus size={14} />
-                  <span>Ajouter</span>
+                  <span>Ajouter une playlist</span>
                 </button>
                 <button
                   onClick={() => setQrOpen(true)}
-                  className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
                   style={{ color: "#C9A84C", border: "1px solid #1C1C24" }}
                 >
                   <QrCode size={14} />
-                  <span>À distance</span>
+                  <span>Ajouter à distance</span>
                 </button>
               </div>
             </div>
@@ -255,13 +255,17 @@ export function AppSidebar({
           <Tv size={17} />
           <span>Chaînes Démo</span>
         </button>
-        <button onClick={() => navigate("/dashboard")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
-          <LayoutDashboard size={17} />
-          <span>Dashboard</span>
+        <button onClick={() => window.location.reload()} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+          <RotateCcw size={17} />
+          <span>Rafraîchir</span>
         </button>
         <button onClick={() => navigate("/settings")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
           <Settings size={17} />
           <span>Paramètres</span>
+        </button>
+        <button onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#FF3B30" }}>
+          <LogOut size={17} />
+          <span>Déconnexion</span>
         </button>
       </div>
       <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
