@@ -172,10 +172,13 @@ export default function Index() {
     setPlaylists(prev => {
       const updated = prev.filter(p => p.id !== id);
       savePlaylists(updated);
+      if (updated.length === 0 && !demoLoaded) {
+        localStorage.removeItem("chouf_has_setup");
+      }
       return updated;
     });
     toast.success(t("msg.playlist_deleted"));
-  }, []);
+  }, [demoLoaded]);
 
   const handlePrevChannel = useCallback(() => {
     if (!activeChannel) return;
