@@ -64,6 +64,12 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         borderBottom: "1px solid #1C1C24",
       }}
     >
+      {/* Back to dashboard */}
+      {onBackToDashboard && (
+        <button onClick={onBackToDashboard} className="rounded-lg p-2 transition-colors hover:bg-white/5" style={{ color: "#FF6D00" }}>
+          <ArrowLeft size={18} />
+        </button>
+      )}
       {/* Tabs */}
       <div className="flex items-center gap-0.5">
         {TABS.map(tab => (
