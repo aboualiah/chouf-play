@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, Play, ArrowRight, Crown } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown, Clock } from "lucide-react";
 import { Playlist, getRecent } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -20,33 +20,39 @@ interface DashboardCardsProps {
 const STAT_CARDS = [
   {
     id: "live",
-    label: "LIVE TV",
+    label: "Live TV's",
     icon: Tv,
-    gradient: "linear-gradient(135deg, rgba(255,109,0,0.20), rgba(255,214,10,0.12))",
-    border: "rgba(255,109,0,0.25)",
-    iconColor: "#FF6D00",
-    accentGlow: "0 0 40px rgba(255,109,0,0.10)",
-    shimmer: "linear-gradient(135deg, rgba(255,109,0,0.08) 0%, transparent 60%)",
+    gradient: "linear-gradient(135deg, rgba(0,206,209,0.18), rgba(0,128,128,0.10))",
+    border: "rgba(0,206,209,0.25)",
+    iconColor: "#00CED1",
+    accentGlow: "0 0 40px rgba(0,206,209,0.08)",
+    countPrefix: "+",
+    countSuffix: " Channels",
+    subLabel: "Last Update : 2 days ago",
   },
   {
     id: "films",
-    label: "FILMS",
+    label: "Movies",
     icon: Film,
-    gradient: "linear-gradient(135deg, rgba(201,168,76,0.20), rgba(255,159,10,0.12))",
-    border: "rgba(201,168,76,0.25)",
+    gradient: "linear-gradient(135deg, rgba(201,168,76,0.15), rgba(160,130,50,0.08))",
+    border: "rgba(201,168,76,0.20)",
     iconColor: "#C9A84C",
-    accentGlow: "0 0 40px rgba(201,168,76,0.10)",
-    shimmer: "linear-gradient(135deg, rgba(201,168,76,0.08) 0%, transparent 60%)",
+    accentGlow: "0 0 40px rgba(201,168,76,0.08)",
+    countPrefix: "+",
+    countSuffix: " Movies",
+    subLabel: "Last Update : 2 days ago",
   },
   {
     id: "series",
-    label: "SÉRIES",
+    label: "Series",
     icon: Clapperboard,
-    gradient: "linear-gradient(135deg, rgba(124,58,237,0.20), rgba(59,130,246,0.12))",
-    border: "rgba(124,58,237,0.25)",
+    gradient: "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.08))",
+    border: "rgba(124,58,237,0.20)",
     iconColor: "#7C3AED",
-    accentGlow: "0 0 40px rgba(124,58,237,0.10)",
-    shimmer: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, transparent 60%)",
+    accentGlow: "0 0 40px rgba(124,58,237,0.08)",
+    countPrefix: "+",
+    countSuffix: " Series",
+    subLabel: "Last Update : 2 days ago",
   },
 ];
 
@@ -62,72 +68,63 @@ export function DashboardCards({
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
   onShowEpg, onShowRecordings,
 }: DashboardCardsProps) {
-  const activePlaylist = playlists.find(p => p.id === activePlaylistId) || (playlists.length > 0 ? playlists[0] : null);
-
   const counts = useMemo(() => ({
     live: allChannels.length,
     films: allVod.length,
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
-  const recentIds = getRecent();
-  const recentChannels = useMemo(() => {
-    const all = [...allChannels, ...allVod, ...allSeries];
-    return recentIds.slice(0, 10).map(id => all.find(c => c.id === id)).filter(Boolean) as Channel[];
-  }, [recentIds, allChannels, allVod, allSeries]);
-
-  const accountInfo = activePlaylist?.xtreamAccountInfo;
-  let expiresLabel = "—";
-  let daysLeft: number | null = null;
-  if (accountInfo?.exp_date) {
-    const num = Number(accountInfo.exp_date);
-    let expDate: Date | null = null;
-    if (!Number.isNaN(num) && num > 0) {
-      expDate = new Date(num > 1e12 ? num : num * 1000);
-    }
-    if (expDate && !Number.isNaN(expDate.getTime())) {
-      expiresLabel = expDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
-      daysLeft = Math.ceil((expDate.getTime() - Date.now()) / 86400000);
-    }
-  }
-
   return (
     <div className="space-y-5 px-5 py-4">
-      {/* No playlist selector here - it's in the sidebar */}
-
-      {/* 3 Stat cards — transparent premium */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* 3 Stat cards — premium playbox style */}
+      <div className="grid grid-cols-3 gap-4">
         {STAT_CARDS.map((card, i) => (
           <motion.button
             key={card.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
+            transition={{ delay: i * 0.12 }}
             onClick={() => onTabSelect(card.id)}
-            className="group relative rounded-2xl p-4 text-left overflow-hidden transition-all backdrop-blur-md"
+            className="group relative rounded-2xl p-5 text-left overflow-hidden transition-all backdrop-blur-md"
             style={{
               background: card.gradient,
               border: `1px solid ${card.border}`,
               boxShadow: card.accentGlow,
+              minHeight: 170,
             }}
             whileHover={{ scale: 1.03 }}
           >
-            {/* Inner shimmer highlight */}
-            <div className="absolute inset-0 pointer-events-none opacity-60" style={{ background: card.shimmer }} />
-            {/* Metallic icon glow */}
-            <div className="relative mb-2">
-              <card.icon size={24} style={{ color: card.iconColor, filter: `drop-shadow(0 0 6px ${card.iconColor}55)` }} />
+            {/* Glass shimmer */}
+            <div className="absolute inset-0 pointer-events-none opacity-40"
+              style={{ background: `linear-gradient(135deg, ${card.iconColor}10 0%, transparent 60%)` }} />
+
+            {/* Title */}
+            <h3 className="text-[16px] font-bold mb-3" style={{ color: "#F5F5F7" }}>{card.label}</h3>
+
+            {/* Large icon center */}
+            <div className="flex justify-center my-3">
+              <div className="relative">
+                <card.icon size={48} strokeWidth={1.5}
+                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 12px ${card.iconColor}40)` }} />
+              </div>
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: `${card.iconColor}CC` }}>{card.label}</p>
-            <p className="text-2xl font-black mt-0.5 tabular-nums" style={{ color: "#F5F5F7" }}>
-              {counts[card.id as keyof typeof counts].toLocaleString()}
+
+            {/* Count */}
+            <p className="text-[13px] font-semibold mt-3" style={{ color: "#B0B0B5" }}>
+              {card.countPrefix}{counts[card.id as keyof typeof counts].toLocaleString()}{card.countSuffix}
             </p>
-            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors" style={{ color: `${card.iconColor}50` }} />
+
+            {/* Sub label */}
+            <div className="flex items-center gap-1 mt-1">
+              <Clock size={10} style={{ color: "#48484A" }} />
+              <p className="text-[9px]" style={{ color: "#48484A" }}>{card.subLabel}</p>
+            </div>
+
+            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-30 group-hover:opacity-60"
+              style={{ color: card.iconColor }} />
           </motion.button>
         ))}
       </div>
-
-      {/* Continue Watching removed from dashboard - now in Live TV */}
 
       {/* Quick buttons */}
       <div className="grid grid-cols-4 gap-2">
@@ -148,42 +145,46 @@ export function DashboardCards({
         ))}
       </div>
 
-      {/* Premium Banner */}
+      {/* Premium Banner — bottom, matching reference design */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.5 }}
         className="relative overflow-hidden rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
         style={{
-          background: "linear-gradient(135deg, rgba(201,168,76,0.12), rgba(255,109,0,0.06))",
-          border: "1px solid rgba(201,168,76,0.2)",
+          background: "linear-gradient(135deg, rgba(30,25,18,0.95), rgba(20,18,14,0.90))",
+          border: "1px solid rgba(201,168,76,0.15)",
         }}
       >
-        {/* Decorative card element */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10" style={{
-          width: 80, height: 50, borderRadius: 8,
+        {/* Decorative tilted card element */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-[0.07]" style={{
+          width: 100, height: 65, borderRadius: 10,
           background: "linear-gradient(135deg, #C9A84C, #FF6D00)",
           transform: "translateY(-50%) rotate(-12deg)",
         }} />
-        <div className="flex items-center gap-3 px-4 py-3 relative z-10">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: "rgba(201,168,76,0.15)" }}>
-            <Crown size={20} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.5))" }} />
+        <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.04]" style={{
+          width: 100, height: 65, borderRadius: 10,
+          background: "linear-gradient(135deg, #C9A84C, #FF6D00)",
+          transform: "translateY(-50%) rotate(-6deg)",
+        }} />
+
+        <div className="flex items-center gap-4 px-5 py-4 relative z-10">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+            style={{ background: "rgba(201,168,76,0.12)" }}>
+            <Crown size={22} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 6px rgba(201,168,76,0.5))" }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold" style={{ color: "#F5F5F7" }}>
+            <p className="text-[15px] font-bold" style={{ color: "#F5F5F7" }}>
               CHOUF Play <span style={{ color: "#C9A84C" }}>Premium</span>
             </p>
-            <p className="text-[10px]" style={{ color: "#86868B" }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "#86868B" }}>
               Multi-playlists, EPG, Xtream, PiP, thèmes personnalisés
             </p>
-            <p className="text-[11px] font-bold mt-0.5" style={{ color: "#C9A84C" }}>9,99 EUR/an</p>
+            <p className="text-[12px] font-bold mt-1" style={{ color: "#C9A84C" }}>9,99 EUR/an</p>
           </div>
-          <ArrowRight size={16} style={{ color: "#C9A84C" }} />
+          <ArrowRight size={18} style={{ color: "#C9A84C40" }} />
         </div>
       </motion.div>
-
-      {/* Subscription info moved to sidebar */}
     </div>
   );
 }

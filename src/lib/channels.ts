@@ -38,22 +38,22 @@ export const DEMO_CHANNELS: Channel[] = [
 ];
 
 export const RADIO_STATIONS: Channel[] = [
-  { id: "r1", name: "BBC Radio 1", category: "Radio UK", url: "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_p", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/BBC_Radio_1.svg/200px-BBC_Radio_1.svg.png", type: "live" },
-  { id: "r2", name: "BBC Radio 2", category: "Radio UK", url: "http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/BBC_Radio_2.svg/200px-BBC_Radio_2.svg.png", type: "live" },
-  { id: "r3", name: "BBC World Service", category: "Radio World", url: "http://bbcwssc.ic.llnwd.net/stream/bbcwssc_mp1_ws-einws", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/BBC_World_Service_red.svg/200px-BBC_World_Service_red.svg.png", type: "live" },
+  // Radio FR (all HTTPS, verified working)
   { id: "r4", name: "France Inter", category: "Radio FR", url: "https://icecast.radiofrance.fr/franceinter-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/3/38/France_Inter_logo_2021.svg/200px-France_Inter_logo_2021.svg.png", type: "live" },
   { id: "r5", name: "France Info", category: "Radio FR", url: "https://icecast.radiofrance.fr/franceinfo-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f0/France_Info_2021.svg/200px-France_Info_2021.svg.png", type: "live" },
   { id: "r6", name: "France Culture", category: "Radio FR", url: "https://icecast.radiofrance.fr/franceculture-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/France_Culture_logo_2021.svg/200px-France_Culture_logo_2021.svg.png", type: "live" },
   { id: "r7", name: "FIP", category: "Radio FR", url: "https://icecast.radiofrance.fr/fip-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d5/Logo_Fip_2021.svg/200px-Logo_Fip_2021.svg.png", type: "live" },
   { id: "r8", name: "RTL", category: "Radio FR", url: "https://streamer-01.rtl.fr/rtl-1-44-128", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/0/07/RTL_logo_2015.svg/200px-RTL_logo_2015.svg.png", type: "live" },
-  { id: "r9", name: "NRJ", category: "Radio FR", url: "https://scdn.nrjaudio.fm/fr/30001/mp3_128.mp3", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/NRJ_logo_2023.svg/200px-NRJ_logo_2023.svg.png", type: "live" },
-  { id: "r10", name: "Chérie FM", category: "Radio FR", url: "https://scdn.nrjaudio.fm/fr/30201/mp3_128.mp3", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/7/74/Ch%C3%A9rie_FM_2022.svg/200px-Ch%C3%A9rie_FM_2022.svg.png", type: "live" },
   { id: "r11", name: "Skyrock", category: "Radio FR", url: "https://icecast.skyrock.net/s/natio_mp3_128k", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/4/4f/Skyrock_logo_2011.svg/200px-Skyrock_logo_2011.svg.png", type: "live" },
+  { id: "r17", name: "France Musique", category: "Radio FR", url: "https://icecast.radiofrance.fr/francemusique-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/9/95/France_Musique_-_2008.svg/200px-France_Musique_-_2008.svg.png", type: "live" },
+  { id: "r18", name: "Mouv'", category: "Radio FR", url: "https://icecast.radiofrance.fr/mouv-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/1/1f/Mouv%27_logo_2020.svg/200px-Mouv%27_logo_2020.svg.png", type: "live" },
+  // Radio Chill / Jazz / Classique (all HTTPS)
   { id: "r12", name: "Lounge Radio", category: "Radio Chill", url: "https://fr1.streamhosting.ch/lounge128.mp3", logo: "", type: "live" },
   { id: "r13", name: "Jazz Radio", category: "Radio Jazz", url: "https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3", logo: "", type: "live" },
   { id: "r14", name: "Radio Swiss Jazz", category: "Radio Jazz", url: "https://stream.srg-ssr.ch/m/rsj/mp3_128", logo: "", type: "live" },
   { id: "r15", name: "Radio Swiss Classic", category: "Radio Classique", url: "https://stream.srg-ssr.ch/m/rsc_fr/mp3_128", logo: "", type: "live" },
   { id: "r16", name: "Classical KING FM", category: "Radio Classique", url: "https://classicalking.streamguys1.com/king-fm-aac-128k", logo: "", type: "live" },
+  { id: "r19", name: "Radio Swiss Pop", category: "Radio Pop", url: "https://stream.srg-ssr.ch/m/rsp/mp3_128", logo: "", type: "live" },
 ];
 
 export function getCategories(channels: Channel[]): string[] {
