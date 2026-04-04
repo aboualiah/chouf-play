@@ -38,9 +38,11 @@ const NAV_KEYS = [
 export function AppSidebar({
   channels, favorites, activeCategory, activeTab,
   onCategorySelect, onTabSelect, onAddPlaylist,
-  onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse
+  onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse,
+  activePlaylistId, onPlaylistSelect
 }: AppSidebarProps) {
   const { t } = useI18n();
+  const NAV_ITEMS = NAV_KEYS.map(n => ({ ...n, label: t(n.key) }));
   const [catOpen, setCatOpen] = useState(true);
   const [listsOpen, setListsOpen] = useState(true);
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
