@@ -337,8 +337,20 @@ export default function Index() {
             {/* Header: always show when not in player, but adapt for dashboard vs content */}
             {!activeChannel && (
               <>
+              {/* Mobile header - dashboard */}
+                {isMobile && view === "dashboard" && hasContent && (
+                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
+                      activeTab={activeTab} onTabSelect={handleTabSelect} compact
+                      allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
+                  </div>
+                )}
+                {/* Mobile header - content */}
                 {isMobile && view === "content" && (
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
+                      <ArrowLeft size={18} />
+                    </button>
                     <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#86868B" }}>
                       <Menu size={18} />
                     </button>
@@ -347,7 +359,8 @@ export default function Index() {
                       allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
                   </div>
                 )}
-                {!isMobile && (hasContent || view === "content") && (
+                {/* Desktop header */}
+                {!isMobile && hasContent && (
                   <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
