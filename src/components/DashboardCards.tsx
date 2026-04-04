@@ -51,6 +51,7 @@ const QUICK_BUTTONS = [
 export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
+  onShowEpg, onShowRecordings,
 }: DashboardCardsProps) {
   const [playlistDropdown, setPlaylistDropdown] = useState(false);
 
