@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
+import { TermsScreen } from "@/components/TermsScreen";
+import { PermissionsScreen } from "@/components/PermissionsScreen";
 import { HeaderBar } from "@/components/HeaderBar";
 import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
@@ -30,9 +32,15 @@ import { toast } from "sonner";
 export default function Index() {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const SPLASH_DURATION = 3000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
+  const isOnboardingDone = () => localStorage.getItem("chouf_onboarding_done") === "true";
+
+  // Onboarding step: "splash" | "terms" | "permissions" | "welcome" | "app"
+  const [onboardingStep, setOnboardingStep] = useState<"splash" | "terms" | "permissions" | "welcome" | "app">("splash");
+
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [view, setView] = useState<"dashboard" | "content">("dashboard");
@@ -61,9 +69,30 @@ export default function Index() {
     const t = setTimeout(() => {
       setSplash(false);
       sessionStorage.setItem("chouf_splash_done", "1");
+      // Determine next step after splash
+      if (!isOnboardingDone()) {
+        setOnboardingStep("terms");
+      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
+        setOnboardingStep("app");
+      } else {
+        setOnboardingStep("welcome");
+      }
     }, SPLASH_DURATION);
     return () => clearTimeout(t);
   }, [splash]);
+
+  // If splash already done on mount, set correct step
+  useEffect(() => {
+    if (!splash) {
+      if (!isOnboardingDone()) {
+        setOnboardingStep("terms");
+      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
+        setOnboardingStep("app");
+      } else {
+        setOnboardingStep("welcome");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadPlaylistsAsync().then(p => { if (p.length > 0) setPlaylists(p); });
@@ -438,7 +467,37 @@ export default function Index() {
     <>
       <SplashScreen show={splash} />
 
-      {!splash && (
+      {/* Onboarding: Terms */}
+      {!splash && onboardingStep === "terms" && (
+        <TermsScreen onAccept={() => setOnboardingStep("permissions")} />
+      )}
+
+      {/* Onboarding: Permissions */}
+      {!splash && onboardingStep === "permissions" && (
+        <PermissionsScreen onContinue={() => {
+          if (hasCompletedSetup() && getPlaylists().length > 0) {
+            setOnboardingStep("app");
+          } else {
+            setOnboardingStep("welcome");
+          }
+        }} />
+      )}
+
+      {/* Welcome / Setup screen */}
+      {!splash && onboardingStep === "welcome" && (
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
+          <WelcomeScreen
+            onAddPlaylist={() => setPlaylistModalOpen(true)}
+            onSkipTrial={() => {
+              handleLoadDemo();
+              setOnboardingStep("app");
+            }}
+          />
+        </div>
+      )}
+
+      {/* Main App */}
+      {!splash && onboardingStep === "app" && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Header */}
@@ -547,10 +606,6 @@ export default function Index() {
                       </div>
                     </div>
                   </motion.div>
-                ) : !hasContent ? (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
-                    <WelcomeScreen onAddPlaylist={() => setPlaylistModalOpen(true)} onSkipTrial={handleLoadDemo} />
-                  </motion.div>
                 ) : view === "dashboard" ? (
                   <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
@@ -561,7 +616,6 @@ export default function Index() {
                       allSeries={allSeries}
                       onTabSelect={(tab) => {
                         if (demoLoaded && allChannels.length === 0 && tab === "live") {
-                          // Demo mode: go to demo channels page
                           window.location.href = "/demo";
                           return;
                         }
@@ -572,8 +626,8 @@ export default function Index() {
                       onPlaylistSelect={setActivePlaylistId}
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
-                      onAddPlaylist={() => { window.location.href = "/playlists"; }}
-                      onOpenSettings={() => { window.location.href = "/settings"; }}
+                      onAddPlaylist={() => { navigate("/playlists"); }}
+                      onOpenSettings={() => { navigate("/settings"); }}
                     />
                   </motion.div>
                 ) : (
@@ -599,8 +653,21 @@ export default function Index() {
 
       <PlaylistModal
         open={playlistModalOpen}
-        onClose={() => setPlaylistModalOpen(false)}
-        onPlaylistLoaded={handlePlaylistLoaded}
+        onClose={() => {
+          setPlaylistModalOpen(false);
+          // After adding a playlist from welcome screen, go to app
+          if (onboardingStep === "welcome" && getPlaylists().length > 0) {
+            setPlaylists(getPlaylists());
+            setOnboardingStep("app");
+          }
+        }}
+        onPlaylistLoaded={(name, channels, xtreamData) => {
+          handlePlaylistLoaded(name, channels, xtreamData);
+          // Transition to app after playlist added
+          setTimeout(() => {
+            setOnboardingStep("app");
+          }, 500);
+        }}
         onLoadDemo={handleLoadDemo}
       />
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard } from "lucide-react";
 import { Playlist } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
@@ -220,6 +221,7 @@ function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?
 }
 
 function PremiumBanner() {
+  const navigate = useNavigate();
   const [qrOpen, setQrOpen] = useState(false);
   const paymentUrl = "https://choufplay.app/premium";
 
@@ -229,7 +231,7 @@ function PremiumBanner() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        onClick={() => setQrOpen(true)}
+        onClick={() => navigate("/premium")}
         className="relative overflow-hidden rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
         style={{
           background: "linear-gradient(135deg, rgba(30,25,18,0.95), rgba(20,18,14,0.90))",
