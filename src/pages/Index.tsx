@@ -100,8 +100,7 @@ export default function Index() {
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
-    if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile]);
+  }, []);
 
   const parentalFilter = useCallback((ch: Channel) => {
     const ps = getParentalSettings();
