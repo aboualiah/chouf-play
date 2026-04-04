@@ -360,7 +360,8 @@ export default function Index() {
                   <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
-                    onBackToDashboard={view === "content" ? handleBackToDashboard : undefined} />
+                    onBackToDashboard={view === "content" ? handleBackToDashboard : undefined}
+                    onOpenSettings={() => { window.location.href = "/settings"; }} />
                 )}
               </>
             )}
@@ -473,6 +474,7 @@ export default function Index() {
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
                       onAddPlaylist={() => setPlaylistModalOpen(true)}
+                      onOpenSettings={() => { window.location.href = "/settings"; }}
                     />
                   </motion.div>
                 ) : (

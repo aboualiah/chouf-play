@@ -1,4 +1,4 @@
-import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard, Radio, Monitor } from "lucide-react";
+import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard, Radio, Monitor, Settings, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
@@ -20,6 +20,7 @@ interface HeaderBarProps {
   allSeries?: Channel[];
   onPlay?: (ch: Channel) => void;
   onBackToDashboard?: () => void;
+  onOpenSettings?: () => void;
 }
 
 const TABS = [
@@ -41,7 +42,7 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard, onOpenSettings }: HeaderBarProps) {
   const now = useClock();
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
@@ -121,6 +122,28 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           <p className="text-[14px] font-semibold tabular-nums tracking-tight" style={{ color: "#F5F5F7", fontFamily: APPLE_FONT, letterSpacing: "-0.02em" }}>{time}</p>
           <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: APPLE_FONT }}>{date}</p>
         </div>
+
+        {/* Dashboard */}
+        {onBackToDashboard && (
+          <button
+            onClick={onBackToDashboard}
+            className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
+            title="Dashboard"
+          >
+            <LayoutDashboard size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          </button>
+        )}
+
+        {/* Settings */}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
+            title="Paramètres"
+          >
+            <Settings size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          </button>
+        )}
 
         {/* Refresh */}
         <button
