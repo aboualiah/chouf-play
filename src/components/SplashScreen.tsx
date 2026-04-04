@@ -66,7 +66,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 120, opacity: 1 }}
-            transition={{ delay: 3.0, duration: 1, ease: "easeInOut" }}
+            transition={{ delay: 1.5, duration: 0.6, ease: "easeInOut" }}
             className="mt-6 h-[1.5px] rounded-full"
             style={{ background: "linear-gradient(90deg, transparent, hsl(var(--cp-gold)), transparent)" }}
           />
@@ -75,7 +75,7 @@ export function SplashScreen({ show }: SplashScreenProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 3.5, duration: 0.4 }}
+            transition={{ delay: 1.8, duration: 0.3 }}
             className="mt-8 flex gap-1.5"
           >
             {[0, 1, 2].map(i => (
