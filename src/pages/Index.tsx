@@ -274,10 +274,10 @@ export default function Index() {
         {activeTab === "live" && (
           <div className="flex items-center gap-2 px-5 py-3">
             {[
-              { id: "all", label: "Toutes", icon: Radio },
-              { id: "favorites", label: "Favoris", icon: Star },
-              { id: "recent", label: "Récentes", icon: Clock },
-            ].map(t => (
+              { id: "all", label: t("cat.all"), icon: Radio },
+              { id: "favorites", label: t("nav.favorites"), icon: Star },
+              { id: "recent", label: t("cat.recent"), icon: Clock },
+            ].map(tab => (
               <button
                 key={t.id}
                 onClick={() => { setActiveSubTab(t.id); setShowEpgGrid(false); setShowRecordings(false); }}
