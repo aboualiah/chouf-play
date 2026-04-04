@@ -1,6 +1,5 @@
 import { LayoutGrid, List, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { WeatherWidget } from "./WeatherWidget";
 import { SearchOverlay } from "./SearchOverlay";
 import { Channel } from "@/lib/channels";
 
@@ -50,7 +49,6 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         <SearchOverlay query={searchQuery} onQueryChange={onSearchChange}
           allChannels={allChannels} allVod={allVod} allSeries={allSeries}
           onPlay={handlePlay} onTabSelect={onTabSelect} compact />
-        <WeatherWidget />
       </div>
     );
   }
@@ -111,7 +109,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           </button>
         </div>
 
-        <WeatherWidget />
+        
 
         <div className="text-right hidden sm:block">
           <p className="text-[14px] font-semibold tabular-nums tracking-tight" style={{ color: "#F5F5F7", fontFamily: APPLE_FONT, letterSpacing: "-0.02em" }}>{time}</p>

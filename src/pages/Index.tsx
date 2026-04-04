@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Clock } from "lucide-react";
+import { Radio, Star, Clock, Play } from "lucide-react";
+import { getRecent } from "@/lib/storage";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
@@ -272,29 +273,67 @@ export default function Index() {
     if (activeTab === "radio") {
       return <RadioList channels={allChannels} activeStation={radioStation} onSelect={handleRadioSelect} />;
     }
+    // Live TV with Continue Watching
+    const recentIds = getRecent();
+    const allContent = [...allChannels, ...allVod, ...allSeries];
+    const recentChannels = recentIds.slice(0, 10).map(id => allContent.find(c => c.id === id)).filter(Boolean) as Channel[];
+
     return (
       <>
         {activeTab === "live" && (
-          <div className="flex items-center gap-2 px-5 py-3">
-            {[
-              { id: "all", label: t("cat.all"), icon: Radio },
-              { id: "favorites", label: t("nav.favorites"), icon: Star },
-              { id: "recent", label: t("cat.recent"), icon: Clock },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => { setActiveSubTab(tab.id); setShowEpgGrid(false); setShowRecordings(false); }}
-                className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
-                style={activeSubTab === tab.id
-                  ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
-                  : { color: "#86868B", border: "1px solid #1C1C24" }
-                }
-              >
-                <tab.icon size={13} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="flex items-center gap-2 px-5 py-3">
+              {[
+                { id: "all", label: t("cat.all"), icon: Radio },
+                { id: "favorites", label: t("nav.favorites"), icon: Star },
+                { id: "recent", label: t("cat.recent"), icon: Clock },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveSubTab(tab.id); setShowEpgGrid(false); setShowRecordings(false); }}
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
+                  style={activeSubTab === tab.id
+                    ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
+                    : { color: "#86868B", border: "1px solid #1C1C24" }
+                  }
+                >
+                  <tab.icon size={13} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Continue Watching */}
+            {recentChannels.length > 0 && (
+              <div className="px-5 pb-3">
+                <p className="text-[12px] font-semibold mb-2 flex items-center gap-2" style={{ color: "#F5F5F7" }}>
+                  <Clock size={13} style={{ color: "#FF6D00" }} /> Continuer à regarder
+                </p>
+                <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
+                  {recentChannels.map(ch => (
+                    <button key={ch.id} onClick={() => handlePlay(ch)}
+                      className="group shrink-0 rounded-xl overflow-hidden transition-all hover:scale-105 backdrop-blur-sm"
+                      style={{ width: 110, background: "rgba(19,19,24,0.7)", border: "1px solid rgba(28,28,36,0.6)" }}>
+                      <div className="relative h-[64px] flex items-center justify-center" style={{ background: "rgba(28,28,36,0.5)" }}>
+                        {ch.logo ? (
+                          <img src={ch.logo} className="h-9 w-9 object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        ) : (
+                          <span className="text-[12px] font-bold" style={{ color: "#48484A" }}>
+                            {ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
+                          </span>
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ background: "rgba(0,0,0,0.5)" }}>
+                          <Play size={18} className="text-white" fill="white" />
+                        </div>
+                      </div>
+                      <p className="px-2 py-1.5 text-[9px] font-medium truncate" style={{ color: "#B0B0B5" }}>{ch.name}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
         <ChannelGrid
           channels={filteredChannels}
