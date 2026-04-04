@@ -130,8 +130,8 @@ export default function PlaylistManager() {
         )}
       </div>
 
-      <PlaylistModal open={modalOpen} onClose={() => setModalOpen(false)} onPlaylistLoaded={handlePlaylistLoaded} />
-      {showQr && <QRCodePortal onClose={() => setShowQr(false)} />}
+      <PlaylistModal open={modalOpen} onClose={() => setModalOpen(false)} onPlaylistLoaded={handlePlaylistLoaded} onLoadDemo={() => {}} />
+      {showQr && <QRCodePortal open={showQr} onClose={() => setShowQr(false)} />}
     </div>
   );
 }
