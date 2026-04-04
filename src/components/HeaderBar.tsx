@@ -1,4 +1,4 @@
-import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard, Radio, Monitor } from "lucide-react";
+import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard, Radio, Monitor, Settings, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
