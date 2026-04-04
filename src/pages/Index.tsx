@@ -474,6 +474,7 @@ export default function Index() {
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
                       onAddPlaylist={() => setPlaylistModalOpen(true)}
+                      onOpenSettings={() => { window.location.href = "/settings"; }}
                     />
                   </motion.div>
                 ) : (
