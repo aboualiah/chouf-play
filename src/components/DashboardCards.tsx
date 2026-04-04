@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown, Clock } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown } from "lucide-react";
 import { Playlist, getRecent } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
