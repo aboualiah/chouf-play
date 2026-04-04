@@ -63,6 +63,16 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         borderBottom: "1px solid #1C1C24",
       }}
     >
+      {/* Logo + Brand */}
+      {!onBackToDashboard && (
+        <div className="flex items-center gap-2 shrink-0">
+          <ChoufPlayLogo size={28} showCP={false} />
+          <div className="leading-none">
+            <span className="text-[14px] font-black" style={{ color: "#F5F5F7" }}>CHOUF</span>
+            <span className="text-[14px] font-light" style={{ color: "#FF6D00" }}>Play</span>
+          </div>
+        </div>
+      )}
       {/* Back to dashboard */}
       {onBackToDashboard && (
         <button onClick={onBackToDashboard} className="rounded-lg p-2 transition-colors hover:bg-white/5" style={{ color: "#FF6D00" }}>
