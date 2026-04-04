@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown } from "lucide-react";
 import { Playlist, getRecent } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ interface DashboardCardsProps {
   onPlaylistSelect: (id: string | null) => void;
   onShowEpg?: () => void;
   onShowRecordings?: () => void;
+  onAddPlaylist?: () => void;
 }
 
 const STAT_CARDS = [
@@ -57,13 +58,13 @@ const QUICK_BUTTONS = [
   { label: "Guide EPG", icon: BookOpen, action: "epg" },
   { label: "Rattrapage", icon: Rewind, action: "catchup" },
   { label: "Enregistrements", icon: Circle, action: "recordings" },
-  { label: "Radio", icon: Radio, action: "radio" },
+  { label: "Playlist", icon: Layers, action: "playlist" },
 ];
 
 export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
-  onShowEpg, onShowRecordings,
+  onShowEpg, onShowRecordings, onAddPlaylist,
 }: DashboardCardsProps) {
   const counts = useMemo(() => ({
     live: allChannels.length,
@@ -73,7 +74,7 @@ export function DashboardCards({
 
   return (
     <div className="space-y-5 px-5 py-4">
-      {/* 3 Stat cards — premium playbox style */}
+      {/* 3 Stat cards */}
       <div className="grid grid-cols-3 gap-4">
         {STAT_CARDS.map((card, i) => (
           <motion.button
@@ -91,15 +92,10 @@ export function DashboardCards({
             }}
             whileHover={{ scale: 1.03 }}
           >
-            {/* Premium background texture */}
             <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
             <div className="absolute inset-0 pointer-events-none opacity-20"
               style={{ background: `linear-gradient(180deg, transparent 0%, ${card.iconColor}08 100%)` }} />
-
-            {/* Title */}
             <h3 className="text-[15px] font-bold mb-2" style={{ color: "#F5F5F7" }}>{card.label}</h3>
-
-            {/* Large icon center */}
             <div className="flex justify-center my-4">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ background: card.iconColor }} />
@@ -107,15 +103,12 @@ export function DashboardCards({
                   style={{ color: card.iconColor, filter: `drop-shadow(0 0 14px ${card.iconColor}50)` }} />
               </div>
             </div>
-
-            {/* Count */}
             <p className="text-[22px] font-black" style={{ color: "#F5F5F7" }}>
               {counts[card.id as keyof typeof counts].toLocaleString()}
             </p>
             <p className="text-[11px] font-medium -mt-0.5" style={{ color: "#86868B" }}>
               {card.countSuffix}
             </p>
-
             <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-20 group-hover:opacity-60"
               style={{ color: card.iconColor }} />
           </motion.button>
@@ -128,7 +121,7 @@ export function DashboardCards({
           <button
             key={btn.label}
             onClick={() => {
-              if (btn.action === "radio") onTabSelect("radio");
+              if (btn.action === "playlist") onAddPlaylist?.();
               else if (btn.action === "epg") onShowEpg?.();
               else if (btn.action === "recordings") onShowRecordings?.();
             }}
@@ -141,7 +134,7 @@ export function DashboardCards({
         ))}
       </div>
 
-      {/* Premium Banner — click opens QR for payment */}
+      {/* Premium Banner */}
       <PremiumBanner />
     </div>
   );
@@ -174,7 +167,6 @@ function PremiumBanner() {
           background: "linear-gradient(135deg, #C9A84C, #FF6D00)",
           transform: "translateY(-50%) rotate(-6deg)",
         }} />
-
         <div className="flex items-center gap-4 px-5 py-4 relative z-10">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
             style={{ background: "rgba(201,168,76,0.12)" }}>
@@ -193,7 +185,6 @@ function PremiumBanner() {
         </div>
       </motion.div>
 
-      {/* QR Code modal for payment */}
       {qrOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
           onClick={() => setQrOpen(false)}>
