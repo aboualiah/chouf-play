@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Clock, Play } from "lucide-react";
+import { Radio, Star, Clock, Play, Filter } from "lucide-react";
 import { getRecent } from "@/lib/storage";
 import { SplashScreen } from "@/components/SplashScreen";
 import { AppSidebar } from "@/components/AppSidebar";
