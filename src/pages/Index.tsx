@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Play, Filter, ArrowLeft } from "lucide-react";
+import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { HeaderBar } from "@/components/HeaderBar";
