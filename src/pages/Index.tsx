@@ -32,6 +32,7 @@ export default function Index() {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
+  const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
