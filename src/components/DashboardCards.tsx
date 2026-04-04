@@ -201,7 +201,8 @@ function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?
             <span className="text-[11px]" style={{ color: "#48484A" }}>Expire</span>
             <span className="text-[12px] tracking-wide" style={{
               color: exp.days > 30 ? "#34C759" : exp.days > 7 ? "#FFD60A" : "#FF3B30",
-              fontFamily: "'Share Tech Mono', 'SF Mono', 'Fira Code', monospace",
+              fontFamily: "'Roboto Mono', 'SF Mono', monospace",
+              fontWeight: 400,
             }}>
               {exp.date}
             </span>

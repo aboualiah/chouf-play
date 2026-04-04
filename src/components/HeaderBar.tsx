@@ -119,8 +119,8 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
       {/* Clock + Date + Action icons */}
       <div className="flex items-center gap-3">
         <div className="text-right hidden sm:block">
-          <p className="text-[14px] font-semibold tabular-nums tracking-tight" style={{ color: "#F5F5F7", fontFamily: APPLE_FONT, letterSpacing: "-0.02em" }}>{time}</p>
-          <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: APPLE_FONT }}>{date}</p>
+          <p className="text-[22px] font-light tabular-nums" style={{ color: "#F5F5F7", fontFamily: CLOCK_FONT, letterSpacing: "0.04em", lineHeight: 1 }}>{time}</p>
+          <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: CLOCK_FONT }}>{date}</p>
         </div>
 
         {/* Dashboard */}
