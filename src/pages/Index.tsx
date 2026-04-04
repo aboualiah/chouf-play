@@ -460,10 +460,17 @@ export default function Index() {
                     className="flex-1 overflow-y-auto scrollbar-thin">
                     <DashboardCards
                       playlists={playlists}
-                      allChannels={allChannels}
+                      allChannels={demoLoaded && allChannels.length === 0 ? DEMO_CHANNELS : allChannels}
                       allVod={allVod}
                       allSeries={allSeries}
-                      onTabSelect={handleTabSelect}
+                      onTabSelect={(tab) => {
+                        if (demoLoaded && allChannels.length === 0 && tab === "live") {
+                          // Demo mode: go to demo channels page
+                          window.location.href = "/demo";
+                          return;
+                        }
+                        handleTabSelect(tab);
+                      }}
                       onPlay={handlePlay}
                       activePlaylistId={activePlaylistId}
                       onPlaylistSelect={setActivePlaylistId}
