@@ -171,7 +171,7 @@ export default function Index() {
       savePlaylists(updated);
       return updated;
     });
-    toast.success("Playlist supprimée");
+    toast.success(t("msg.playlist_deleted"));
   }, []);
 
   const handlePrevChannel = useCallback(() => {
