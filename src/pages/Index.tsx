@@ -29,6 +29,7 @@ import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
