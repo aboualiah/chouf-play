@@ -108,7 +108,7 @@ export function AppSidebar({
   }
 
   return (
-    <aside className="flex h-screen w-[260px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
+    <aside className="flex h-screen w-[220px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3.5">
         <button onClick={onToggleCollapse} className="shrink-0 transition-transform hover:scale-110" title="Réduire">
