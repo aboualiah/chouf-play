@@ -163,6 +163,7 @@ export default function Index() {
     setPlaylists(prev => {
       const updated = [...prev, newPlaylist];
       savePlaylists(updated);
+      localStorage.setItem("chouf_has_setup", "true");
       return updated;
     });
   }, []);
