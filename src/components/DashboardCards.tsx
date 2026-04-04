@@ -54,8 +54,8 @@ const STAT_CARDS = [
 ];
 
 const QUICK_BUTTONS = [
-  { label: "EPG Guide", icon: BookOpen, action: "epg" },
-  { label: "Catch Up", icon: Rewind, action: "catchup" },
+  { label: "Guide EPG", icon: BookOpen, action: "epg" },
+  { label: "Rattrapage", icon: Rewind, action: "catchup" },
   { label: "Enregistrements", icon: Circle, action: "recordings" },
   { label: "Radio", icon: Radio, action: "radio" },
 ];
