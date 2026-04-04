@@ -362,7 +362,8 @@ export default function Index() {
               </div>
             )}
           </>
-        )}
+          );
+        })()}
         <ChannelGrid
           channels={filteredChannels}
           favorites={favorites}
