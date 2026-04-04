@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, QrCode, Globe, Zap, Shield, Crown, Gift, ArrowRight } from "lucide-react";
+import { Plus, QrCode, Globe, Zap, Shield, Crown, Gift, ArrowRight, Fingerprint } from "lucide-react";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import { QRCodePortal } from "./QRCodePortal";
 
@@ -9,11 +9,22 @@ interface WelcomeScreenProps {
   onSkipTrial: () => void;
 }
 
+function getDeviceId(): string {
+  let id = localStorage.getItem("chouf_device_id");
+  if (!id) {
+    const hex = () => Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, "0");
+    id = Array.from({ length: 6 }, hex).join(":");
+    localStorage.setItem("chouf_device_id", id);
+  }
+  return id;
+}
+
 export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps) {
   const [qrOpen, setQrOpen] = useState(false);
+  const [deviceId] = useState(getDeviceId);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto" style={{ background: "#0A0A0F" }}>
+    <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto relative" style={{ background: "#0A0A0F" }}>
       {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
         style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(255,109,0,0.06), transparent 70%)" }} />
@@ -164,16 +175,35 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
           </button>
         </motion.div>
 
-        {/* Footer */}
-        <motion.p
+        {/* Footer — Device ID + Version + Privacy */}
+        <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 1.3 }}
-          className="mt-8 text-[10px]"
-          style={{ color: "#48484A" }}
+          className="mt-10 flex flex-col items-center gap-2"
         >
-          par I-Success · v2.0.0
-        </motion.p>
+          {/* Device ID */}
+          <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+            style={{ background: "rgba(19,19,24,0.6)", border: "1px solid rgba(28,28,36,0.4)" }}>
+            <Fingerprint size={12} style={{ color: "#48484A" }} />
+            <span className="text-[10px] font-mono" style={{ color: "#48484A" }}>
+              Appareil : {deviceId}
+            </span>
+          </div>
+
+          {/* Version + Privacy */}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px]" style={{ color: "#3A3A3C" }}>v2.0.0</span>
+            <span style={{ color: "#3A3A3C" }}>·</span>
+            <a href="/privacy" className="text-[10px] hover:underline" style={{ color: "#3A3A3C" }}>
+              Politique de confidentialité
+            </a>
+          </div>
+
+          <p className="text-[9px] mt-1" style={{ color: "#2C2C2E" }}>
+            par I-Success
+          </p>
+        </motion.div>
       </div>
 
       <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />

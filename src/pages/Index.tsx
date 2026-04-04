@@ -32,6 +32,7 @@ export default function Index() {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
+  const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
@@ -144,6 +145,7 @@ export default function Index() {
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
+    localStorage.setItem("chouf_has_setup", "true");
     toast.success(t("msg.demo_loaded"));
   }, []);
 
@@ -161,6 +163,7 @@ export default function Index() {
     setPlaylists(prev => {
       const updated = [...prev, newPlaylist];
       savePlaylists(updated);
+      localStorage.setItem("chouf_has_setup", "true");
       return updated;
     });
   }, []);
@@ -169,10 +172,13 @@ export default function Index() {
     setPlaylists(prev => {
       const updated = prev.filter(p => p.id !== id);
       savePlaylists(updated);
+      if (updated.length === 0 && !demoLoaded) {
+        localStorage.removeItem("chouf_has_setup");
+      }
       return updated;
     });
     toast.success(t("msg.playlist_deleted"));
-  }, []);
+  }, [demoLoaded]);
 
   const handlePrevChannel = useCallback(() => {
     if (!activeChannel) return;
