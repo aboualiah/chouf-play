@@ -42,7 +42,7 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard, onOpenSettings }: HeaderBarProps) {
   const now = useClock();
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
