@@ -2,6 +2,10 @@ import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard,
 import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface HeaderBarProps {
   searchQuery: string;
@@ -39,6 +43,7 @@ function useClock() {
 
 export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard }: HeaderBarProps) {
   const now = useClock();
+  const [showQuitDialog, setShowQuitDialog] = useState(false);
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });
 
@@ -128,13 +133,40 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
 
         {/* Quit */}
         <button
-          onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }}
+          onClick={() => setShowQuitDialog(true)}
           className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
           title="Quitter"
         >
           <LogOut size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
         </button>
       </div>
+
+      {/* Quit confirmation dialog */}
+      <AlertDialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
+        <AlertDialogContent style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle style={{ color: "#F5F5F7" }}>Quitter CHOUF Play ?</AlertDialogTitle>
+            <AlertDialogDescription style={{ color: "#86868B" }}>
+              Vous allez être déconnecté et redirigé vers la page d'accueil.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="border-[#1C1C24] hover:bg-[#1C1C24]"
+              style={{ background: "transparent", color: "#86868B" }}
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }}
+              style={{ background: "#FF6D00", color: "#fff" }}
+              className="hover:opacity-90"
+            >
+              Quitter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 }
