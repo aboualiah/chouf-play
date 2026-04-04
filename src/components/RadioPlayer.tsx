@@ -123,18 +123,28 @@ export function RadioList({ channels, activeStation, onSelect }: {
       </div>
 
       {grouped.map(([cat, stations]) => (
-        <div key={cat} className="mb-3">
-          <h3 className="px-5 mb-1 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>{cat}</h3>
-          <div className="space-y-0.5 px-3">
+        <div key={cat} className="mb-4">
+          <h3 className="px-5 mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>{cat}</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 px-3">
             {stations.map(s => (
               <button key={s.id} onClick={() => onSelect(s)}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-[#1C1C24]"
-                style={activeStation?.id === s.id ? { background: "rgba(52,199,89,0.08)", borderLeft: "2px solid #34C759" } : {}}>
-                <Radio size={14} style={{ color: activeStation?.id === s.id ? "#34C759" : "#48484A" }} />
-                <span className="flex-1 text-left text-[12px] font-medium truncate"
-                  style={{ color: activeStation?.id === s.id ? "#F5F5F7" : "#B0B0B5" }}>{s.name}</span>
-                {activeStation?.id === s.id && <AnimatedBars playing={true} />}
-                <Play size={12} style={{ color: "#48484A" }} />
+                className="group flex flex-col items-center gap-2 rounded-xl p-3 transition-all hover:scale-105"
+                style={{
+                  background: activeStation?.id === s.id ? "rgba(52,199,89,0.1)" : "rgba(19,19,24,0.7)",
+                  border: activeStation?.id === s.id ? "1px solid rgba(52,199,89,0.3)" : "1px solid rgba(28,28,36,0.6)",
+                }}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ background: activeStation?.id === s.id ? "rgba(52,199,89,0.15)" : "rgba(28,28,36,0.5)" }}>
+                  {activeStation?.id === s.id ? (
+                    <AnimatedBars playing={true} />
+                  ) : (
+                    <Radio size={18} style={{ color: "#48484A" }} />
+                  )}
+                </div>
+                <span className="text-[11px] font-medium text-center truncate w-full"
+                  style={{ color: activeStation?.id === s.id ? "#34C759" : "#B0B0B5" }}>
+                  {s.name}
+                </span>
               </button>
             ))}
           </div>
