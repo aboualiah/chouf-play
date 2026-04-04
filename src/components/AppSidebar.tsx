@@ -159,7 +159,7 @@ export function AppSidebar({
               className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
               style={{ color: "#48484A" }}
             >
-              <span>Catégories</span>
+              <span>{t("cat.categories")}</span>
               {catOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
             {catOpen && (
