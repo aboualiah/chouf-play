@@ -91,33 +91,32 @@ export function DashboardCards({
             }}
             whileHover={{ scale: 1.03 }}
           >
-            {/* Glass shimmer */}
-            <div className="absolute inset-0 pointer-events-none opacity-40"
-              style={{ background: `linear-gradient(135deg, ${card.iconColor}10 0%, transparent 60%)` }} />
+            {/* Premium background texture */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
+            <div className="absolute inset-0 pointer-events-none opacity-20"
+              style={{ background: `linear-gradient(180deg, transparent 0%, ${card.iconColor}08 100%)` }} />
 
             {/* Title */}
-            <h3 className="text-[16px] font-bold mb-3" style={{ color: "#F5F5F7" }}>{card.label}</h3>
+            <h3 className="text-[15px] font-bold mb-2" style={{ color: "#F5F5F7" }}>{card.label}</h3>
 
             {/* Large icon center */}
-            <div className="flex justify-center my-3">
+            <div className="flex justify-center my-4">
               <div className="relative">
-                <card.icon size={48} strokeWidth={1.5}
-                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 12px ${card.iconColor}40)` }} />
+                <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ background: card.iconColor }} />
+                <card.icon size={44} strokeWidth={1.5}
+                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 14px ${card.iconColor}50)` }} />
               </div>
             </div>
 
             {/* Count */}
-            <p className="text-[13px] font-semibold mt-3" style={{ color: "#B0B0B5" }}>
-              {card.countPrefix}{counts[card.id as keyof typeof counts].toLocaleString()}{card.countSuffix}
+            <p className="text-[22px] font-black" style={{ color: "#F5F5F7" }}>
+              {counts[card.id as keyof typeof counts].toLocaleString()}
+            </p>
+            <p className="text-[11px] font-medium -mt-0.5" style={{ color: "#86868B" }}>
+              {card.countSuffix}
             </p>
 
-            {/* Sub label */}
-            <div className="flex items-center gap-1 mt-1">
-              <Clock size={10} style={{ color: "#48484A" }} />
-              <p className="text-[9px]" style={{ color: "#48484A" }}>{card.subLabel}</p>
-            </div>
-
-            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-30 group-hover:opacity-60"
+            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-20 group-hover:opacity-60"
               style={{ color: card.iconColor }} />
           </motion.button>
         ))}
