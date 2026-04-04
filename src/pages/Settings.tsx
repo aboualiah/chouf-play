@@ -338,11 +338,22 @@ export default function Settings() {
       content: (
         <div className="space-y-0">
           <SettingRow label={t("s.language")} subtitle={t("s.language_sub")}>
-            <select value={lang} onChange={e => { setLang(e.target.value as Lang); }}
-              className="rounded-xl px-3 py-2 text-[12px] font-medium border-0 outline-none cursor-pointer"
-              style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
-            </select>
+            <div className="flex flex-wrap gap-1.5">
+              {LANGUAGES.map(l => (
+                <button
+                  key={l.code}
+                  onClick={() => setLang(l.code)}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all"
+                  style={lang === l.code
+                    ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
+                    : { background: "#1C1C24", color: "#86868B", border: "1px solid transparent" }
+                  }
+                >
+                  <span className="text-[9px] font-black tracking-wider opacity-60">{l.flag}</span>
+                  <span>{l.label}</span>
+                </button>
+              ))}
+            </div>
           </SettingRow><Divider />
           <SettingRow label={t("s.start_page")} subtitle={t("s.start_page_sub")}>
             <SelectField value={startPage} onChange={setStartPage}

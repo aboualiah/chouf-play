@@ -3,14 +3,14 @@ import { createContext, useContext } from "react";
 export type Lang = "fr" | "en" | "es" | "ar" | "de" | "nl" | "tr" | "pt";
 
 export const LANGUAGES: { code: Lang; label: string; flag: string; rtl?: boolean }[] = [
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "ar", label: "العربية", flag: "🇸🇦", rtl: true },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "nl", label: "Nederlands", flag: "🇳🇱" },
-  { code: "tr", label: "Türkçe", flag: "🇹🇷" },
-  { code: "pt", label: "Português", flag: "🇵🇹" },
+  { code: "fr", label: "Français", flag: "FR" },
+  { code: "en", label: "English", flag: "EN" },
+  { code: "es", label: "Español", flag: "ES" },
+  { code: "ar", label: "العربية", flag: "AR", rtl: true },
+  { code: "de", label: "Deutsch", flag: "DE" },
+  { code: "nl", label: "Nederlands", flag: "NL" },
+  { code: "tr", label: "Türkçe", flag: "TR" },
+  { code: "pt", label: "Português", flag: "PT" },
 ];
 
 const translations: Record<Lang, Record<string, string>> = {

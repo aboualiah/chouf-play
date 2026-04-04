@@ -108,7 +108,7 @@ export function AppSidebar({
   }
 
   return (
-    <aside className="flex h-screen w-[260px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
+    <aside className="flex h-screen w-[220px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3.5">
         <button onClick={onToggleCollapse} className="shrink-0 transition-transform hover:scale-110" title="Réduire">
@@ -152,43 +152,6 @@ export function AppSidebar({
           })}
         </nav>
 
-        {/* Categories from playlist */}
-        {categories.length > 1 && (
-          <div>
-            <button
-              onClick={() => setCatOpen(!catOpen)}
-              className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "#48484A" }}
-            >
-              <span>Catégories ({categories.length})</span>
-              {catOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-            </button>
-            {catOpen && (
-              <div className="mt-0.5 max-h-[200px] overflow-y-auto scrollbar-thin space-y-0.5">
-                <button
-                  onClick={() => onCategorySelect(null)}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] transition-colors"
-                  style={!activeCategory ? { background: "rgba(255,109,0,0.08)", color: "#FF6D00" } : { color: "#86868B" }}
-                >
-                  <span>Toutes</span>
-                </button>
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => onCategorySelect(cat)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] transition-colors truncate"
-                    style={activeCategory === cat ? { background: "rgba(255,109,0,0.08)", color: "#FF6D00" } : { color: "#86868B" }}
-                  >
-                    <span className="truncate">{cat}</span>
-                    <span className="ml-auto text-[9px] shrink-0" style={{ color: "#48484A" }}>
-                      {channels.filter(c => c.category === cat).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
 
 

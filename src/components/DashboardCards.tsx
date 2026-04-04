@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown, Clock } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Radio, ArrowRight, Crown } from "lucide-react";
 import { Playlist, getRecent } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -20,45 +20,42 @@ interface DashboardCardsProps {
 const STAT_CARDS = [
   {
     id: "live",
-    label: "Live TV's",
+    label: "Chaînes TV",
     icon: Tv,
-    gradient: "linear-gradient(135deg, rgba(0,206,209,0.18), rgba(0,128,128,0.10))",
-    border: "rgba(0,206,209,0.25)",
-    iconColor: "#00CED1",
-    accentGlow: "0 0 40px rgba(0,206,209,0.08)",
-    countPrefix: "+",
-    countSuffix: " Channels",
-    subLabel: "Last Update : 2 days ago",
+    gradient: "linear-gradient(135deg, rgba(255,109,0,0.14), rgba(255,214,10,0.06))",
+    border: "rgba(255,109,0,0.18)",
+    iconColor: "#FF6D00",
+    accentGlow: "0 0 40px rgba(255,109,0,0.06)",
+    countSuffix: " Chaînes",
+    bgImage: "radial-gradient(ellipse at 80% 20%, rgba(255,109,0,0.08) 0%, transparent 60%)",
   },
   {
     id: "films",
-    label: "Movies",
+    label: "Films",
     icon: Film,
-    gradient: "linear-gradient(135deg, rgba(201,168,76,0.15), rgba(160,130,50,0.08))",
-    border: "rgba(201,168,76,0.20)",
+    gradient: "linear-gradient(135deg, rgba(201,168,76,0.14), rgba(160,130,50,0.06))",
+    border: "rgba(201,168,76,0.18)",
     iconColor: "#C9A84C",
-    accentGlow: "0 0 40px rgba(201,168,76,0.08)",
-    countPrefix: "+",
-    countSuffix: " Movies",
-    subLabel: "Last Update : 2 days ago",
+    accentGlow: "0 0 40px rgba(201,168,76,0.06)",
+    countSuffix: " Films",
+    bgImage: "radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 60%)",
   },
   {
     id: "series",
-    label: "Series",
+    label: "Séries",
     icon: Clapperboard,
-    gradient: "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.08))",
-    border: "rgba(124,58,237,0.20)",
+    gradient: "linear-gradient(135deg, rgba(124,58,237,0.14), rgba(59,130,246,0.06))",
+    border: "rgba(124,58,237,0.18)",
     iconColor: "#7C3AED",
-    accentGlow: "0 0 40px rgba(124,58,237,0.08)",
-    countPrefix: "+",
-    countSuffix: " Series",
-    subLabel: "Last Update : 2 days ago",
+    accentGlow: "0 0 40px rgba(124,58,237,0.06)",
+    countSuffix: " Séries",
+    bgImage: "radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.08) 0%, transparent 60%)",
   },
 ];
 
 const QUICK_BUTTONS = [
-  { label: "EPG Guide", icon: BookOpen, action: "epg" },
-  { label: "Catch Up", icon: Rewind, action: "catchup" },
+  { label: "Guide EPG", icon: BookOpen, action: "epg" },
+  { label: "Rattrapage", icon: Rewind, action: "catchup" },
   { label: "Enregistrements", icon: Circle, action: "recordings" },
   { label: "Radio", icon: Radio, action: "radio" },
 ];
@@ -94,33 +91,32 @@ export function DashboardCards({
             }}
             whileHover={{ scale: 1.03 }}
           >
-            {/* Glass shimmer */}
-            <div className="absolute inset-0 pointer-events-none opacity-40"
-              style={{ background: `linear-gradient(135deg, ${card.iconColor}10 0%, transparent 60%)` }} />
+            {/* Premium background texture */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
+            <div className="absolute inset-0 pointer-events-none opacity-20"
+              style={{ background: `linear-gradient(180deg, transparent 0%, ${card.iconColor}08 100%)` }} />
 
             {/* Title */}
-            <h3 className="text-[16px] font-bold mb-3" style={{ color: "#F5F5F7" }}>{card.label}</h3>
+            <h3 className="text-[15px] font-bold mb-2" style={{ color: "#F5F5F7" }}>{card.label}</h3>
 
             {/* Large icon center */}
-            <div className="flex justify-center my-3">
+            <div className="flex justify-center my-4">
               <div className="relative">
-                <card.icon size={48} strokeWidth={1.5}
-                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 12px ${card.iconColor}40)` }} />
+                <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ background: card.iconColor }} />
+                <card.icon size={44} strokeWidth={1.5}
+                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 14px ${card.iconColor}50)` }} />
               </div>
             </div>
 
             {/* Count */}
-            <p className="text-[13px] font-semibold mt-3" style={{ color: "#B0B0B5" }}>
-              {card.countPrefix}{counts[card.id as keyof typeof counts].toLocaleString()}{card.countSuffix}
+            <p className="text-[22px] font-black" style={{ color: "#F5F5F7" }}>
+              {counts[card.id as keyof typeof counts].toLocaleString()}
+            </p>
+            <p className="text-[11px] font-medium -mt-0.5" style={{ color: "#86868B" }}>
+              {card.countSuffix}
             </p>
 
-            {/* Sub label */}
-            <div className="flex items-center gap-1 mt-1">
-              <Clock size={10} style={{ color: "#48484A" }} />
-              <p className="text-[9px]" style={{ color: "#48484A" }}>{card.subLabel}</p>
-            </div>
-
-            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-30 group-hover:opacity-60"
+            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-20 group-hover:opacity-60"
               style={{ color: card.iconColor }} />
           </motion.button>
         ))}
