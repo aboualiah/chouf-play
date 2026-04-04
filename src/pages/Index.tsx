@@ -279,16 +279,16 @@ export default function Index() {
               { id: "recent", label: t("cat.recent"), icon: Clock },
             ].map(tab => (
               <button
-                key={t.id}
-                onClick={() => { setActiveSubTab(t.id); setShowEpgGrid(false); setShowRecordings(false); }}
+                key={tab.id}
+                onClick={() => { setActiveSubTab(tab.id); setShowEpgGrid(false); setShowRecordings(false); }}
                 className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
-                style={activeSubTab === t.id
+                style={activeSubTab === tab.id
                   ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
                   : { color: "#86868B", border: "1px solid #1C1C24" }
                 }
               >
-                <t.icon size={13} />
-                <span>{t.label}</span>
+                <tab.icon size={13} />
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
