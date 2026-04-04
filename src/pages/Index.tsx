@@ -45,6 +45,9 @@ export default function Index() {
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
   const [showEpg, setShowEpg] = useState(false);
+  const [showCatchup, setShowCatchup] = useState(false);
+  const [showEpgGrid, setShowEpgGrid] = useState(false);
+  const [showRecordings, setShowRecordings] = useState(false);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
