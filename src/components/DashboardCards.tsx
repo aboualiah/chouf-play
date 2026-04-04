@@ -95,55 +95,7 @@ export function DashboardCards({
 
   return (
     <div className="space-y-5 px-5 py-4">
-      {/* Playlist selector */}
-      <div className="relative">
-        <button
-          onClick={() => setPlaylistDropdown(!playlistDropdown)}
-          className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all w-full backdrop-blur-md"
-          style={{
-            background: "rgba(255,109,0,0.06)",
-            border: "1px solid rgba(255,109,0,0.12)",
-            color: "#F5F5F7",
-          }}
-        >
-          <span className="text-base">📡</span>
-          <span className="flex-1 text-left truncate">
-            {activePlaylist?.name || "Sélectionner une playlist"}
-          </span>
-          <span className="text-[11px] font-normal" style={{ color: "#86868B" }}>
-            {activePlaylist ? `${(activePlaylist.channels?.length || 0)} chaînes` : ""}
-          </span>
-          <ChevronDown size={14} style={{ color: "#FF6D00" }} className={`transition-transform ${playlistDropdown ? "rotate-180" : ""}`} />
-        </button>
-        {playlistDropdown && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 right-0 z-30 mt-1 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
-            style={{ background: "rgba(19,19,24,0.95)", border: "1px solid rgba(28,28,36,0.8)" }}
-          >
-            <button
-              onClick={() => { onPlaylistSelect(null); setPlaylistDropdown(false); }}
-              className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-white/5 transition-colors"
-              style={{ color: !activePlaylistId ? "#FF6D00" : "#86868B" }}
-            >
-              Toutes les playlists
-            </button>
-            {playlists.map(p => (
-              <button
-                key={p.id}
-                onClick={() => { onPlaylistSelect(p.id); setPlaylistDropdown(false); }}
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-white/5 transition-colors"
-                style={{ color: activePlaylistId === p.id ? "#FF6D00" : "#F5F5F7" }}
-              >
-                <span className="truncate flex-1 text-left">{p.name}</span>
-                <span className="text-[10px]" style={{ color: "#48484A" }}>
-                  {p.channels.length + (p.vodStreams?.length || 0)}
-                </span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </div>
+      {/* No playlist selector here - it's in the sidebar */}
 
       {/* 3 Stat cards — transparent premium */}
       <div className="grid grid-cols-3 gap-3">
