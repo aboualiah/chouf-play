@@ -252,95 +252,86 @@ export default function Index() {
     if (activeTab === "radio") {
       return <RadioList channels={allChannels} activeStation={radioStation} onSelect={handleRadioSelect} />;
     }
-    // Live TV with Continue Watching
-    const recentIds = getRecent();
-    const allContent = [...allChannels, ...allVod, ...allSeries];
-    const recentChannels = recentIds.slice(0, 10).map(id => allContent.find(c => c.id === id)).filter(Boolean) as Channel[];
-
+    // Live TV with category panel on the left
     return (
       <>
         {activeTab === "live" && (() => {
           const categories = getCategories(allChannels);
           return (
-            <>
-              <div className="flex items-center gap-2 px-5 py-3 overflow-x-auto scrollbar-none">
-                {[
-                  { id: "all", label: t("cat.all"), icon: Radio },
-                  { id: "favorites", label: t("nav.favorites"), icon: Star },
-                  { id: "recent", label: t("cat.recent"), icon: Clock },
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => { setActiveSubTab(tab.id); setActiveCategory(null); setShowEpgGrid(false); setShowRecordings(false); }}
-                    className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all shrink-0"
-                    style={activeSubTab === tab.id && !activeCategory
-                      ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
-                      : { color: "#86868B", border: "1px solid #1C1C24" }
-                    }
-                  >
-                    <tab.icon size={13} />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-                {categories.length > 0 && (
-                  <div className="h-4 w-px mx-1 shrink-0" style={{ background: "#1C1C24" }} />
-                )}
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => { setActiveCategory(activeCategory === cat ? null : cat); setActiveSubTab("all"); }}
-                    className="rounded-full px-3 py-1.5 text-[11px] font-medium transition-all shrink-0 whitespace-nowrap"
-                    style={activeCategory === cat
-                      ? { background: "rgba(201,168,76,0.15)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }
-                      : { color: "#48484A", border: "1px solid #1C1C24" }
-                    }
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-            {/* Continue Watching */}
-            {recentChannels.length > 0 && (
-              <div className="px-5 pb-3">
-                <p className="text-[12px] font-semibold mb-2 flex items-center gap-2" style={{ color: "#F5F5F7" }}>
-                  <Clock size={13} style={{ color: "#FF6D00" }} /> Continuer à regarder
-                </p>
-                <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
-                  {recentChannels.map(ch => (
-                    <button key={ch.id} onClick={() => handlePlay(ch)}
-                      className="group shrink-0 rounded-xl overflow-hidden transition-all hover:scale-105 backdrop-blur-sm"
-                      style={{ width: 110, background: "rgba(19,19,24,0.7)", border: "1px solid rgba(28,28,36,0.6)" }}>
-                      <div className="relative h-[64px] flex items-center justify-center" style={{ background: "rgba(28,28,36,0.5)" }}>
-                        {ch.logo ? (
-                          <img src={ch.logo} className="h-9 w-9 object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        ) : (
-                          <span className="text-[12px] font-bold" style={{ color: "#48484A" }}>
-                            {ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                          </span>
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          style={{ background: "rgba(0,0,0,0.5)" }}>
-                          <Play size={18} className="text-white" fill="white" />
-                        </div>
-                      </div>
-                      <p className="px-2 py-1.5 text-[9px] font-medium truncate" style={{ color: "#B0B0B5" }}>{ch.name}</p>
+            <div className="flex flex-1 overflow-hidden">
+              {/* Categories panel - left side */}
+              {categories.length > 0 && (
+                <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0D0D12", borderColor: "#1C1C24" }}>
+                  <div className="px-3 py-2.5" style={{ borderBottom: "1px solid #1C1C24" }}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Catégories</p>
+                  </div>
+                  {/* Quick filters */}
+                  {[
+                    { id: null, label: t("cat.all"), icon: Radio, count: allChannels.length },
+                    { id: "__fav", label: t("nav.favorites"), icon: Star, count: allChannels.filter(c => favorites.includes(c.id)).length },
+                  ].map(item => (
+                    <button
+                      key={item.id || "all"}
+                      onClick={() => { setActiveCategory(item.id === "__fav" ? "__fav" as any : null); setActiveSubTab(item.id === "__fav" ? "favorites" : "all"); }}
+                      className="flex items-center gap-2 px-3 py-2 text-left transition-all hover:bg-[#131318]"
+                      style={
+                        (item.id === null && !activeCategory && activeSubTab === "all") ||
+                        (item.id === "__fav" && activeSubTab === "favorites")
+                          ? { background: "rgba(255,109,0,0.08)", borderLeft: "2px solid #FF6D00" }
+                          : { borderLeft: "2px solid transparent" }
+                      }
+                    >
+                      <item.icon size={13} style={{ color: (item.id === null && !activeCategory) || (item.id === "__fav" && activeSubTab === "favorites") ? "#FF6D00" : "#48484A" }} />
+                      <span className="text-[11px] font-medium flex-1 truncate" style={{ color: (item.id === null && !activeCategory) || (item.id === "__fav" && activeSubTab === "favorites") ? "#F5F5F7" : "#86868B" }}>{item.label}</span>
+                      <span className="text-[9px] tabular-nums" style={{ color: "#48484A" }}>{item.count}</span>
                     </button>
                   ))}
+                  <div className="h-px mx-3 my-1" style={{ background: "#1C1C24" }} />
+                  {/* Category list */}
+                  {categories.map(cat => {
+                    const count = allChannels.filter(c => c.category === cat).length;
+                    const isActive = activeCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => { setActiveCategory(isActive ? null : cat); setActiveSubTab("all"); }}
+                        className="flex items-center gap-2 px-3 py-1.5 text-left transition-all hover:bg-[#131318]"
+                        style={isActive
+                          ? { background: "rgba(201,168,76,0.08)", borderLeft: "2px solid #C9A84C" }
+                          : { borderLeft: "2px solid transparent" }
+                        }
+                      >
+                        <span className="text-[11px] font-medium flex-1 truncate" style={{ color: isActive ? "#F5F5F7" : "#86868B" }}>{cat}</span>
+                        <span className="text-[9px] tabular-nums" style={{ color: "#48484A" }}>{count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+              )}
+              {/* Channels list - right side */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin">
+                <ChannelGrid
+                  channels={filteredChannels}
+                  favorites={favorites}
+                  activeChannelId={activeChannel?.id}
+                  onPlay={handlePlay}
+                  onToggleFavorite={handleToggleFavorite}
+                  viewMode={viewMode}
+                />
               </div>
-            )}
-          </>
+            </div>
           );
         })()}
-        <ChannelGrid
-          channels={filteredChannels}
-          favorites={favorites}
-          activeChannelId={activeChannel?.id}
-          onPlay={handlePlay}
-          onToggleFavorite={handleToggleFavorite}
-          viewMode={viewMode}
-        />
+        {activeTab !== "live" && (
+          <ChannelGrid
+            channels={filteredChannels}
+            favorites={favorites}
+            activeChannelId={activeChannel?.id}
+            onPlay={handlePlay}
+            onToggleFavorite={handleToggleFavorite}
+            viewMode={viewMode}
+          />
+        )}
       </>
     );
   };
