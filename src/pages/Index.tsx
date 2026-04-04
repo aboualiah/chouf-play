@@ -226,32 +226,8 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
-  const sidebarContent = (
-    <AppSidebar
-      channels={activeTab === "films" ? allVod : activeTab === "series" ? allSeries : allChannels}
-      favorites={favorites}
-      activeCategory={activeCategory}
-      activeTab={activeTab}
-      onCategorySelect={handleCategorySelect}
-      onTabSelect={handleTabSelect}
-      onAddPlaylist={() => setPlaylistModalOpen(true)}
-      onDeletePlaylist={handleDeletePlaylist}
-      onRefreshPlaylist={() => {}}
-      playlists={playlists}
-      collapsed={!isMobile && sidebarCollapsed}
-      onToggleCollapse={() => {
-        if (isMobile) {
-          setMobileDrawerOpen(false);
-        } else {
-          const next = !sidebarCollapsed;
-          setSidebarCollapsed(next);
-          localStorage.setItem("chouf_sidebar_collapsed", String(next));
-        }
-      }}
-      activePlaylistId={activePlaylistId}
-      onPlaylistSelect={setActivePlaylistId}
-    />
-  );
+
+
 
   const COLOR_PASTILLES = [
     { color: "#FF3B30", glow: "rgba(255,59,48,0.4)", label: "Favoris", action: () => activeChannel && handleToggleFavorite(activeChannel.id) },
