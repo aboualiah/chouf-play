@@ -123,6 +123,28 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: APPLE_FONT }}>{date}</p>
         </div>
 
+        {/* Dashboard */}
+        {onBackToDashboard && (
+          <button
+            onClick={onBackToDashboard}
+            className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
+            title="Dashboard"
+          >
+            <LayoutDashboard size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          </button>
+        )}
+
+        {/* Settings */}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
+            title="Paramètres"
+          >
+            <Settings size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          </button>
+        )}
+
         {/* Refresh */}
         <button
           onClick={() => window.location.reload()}

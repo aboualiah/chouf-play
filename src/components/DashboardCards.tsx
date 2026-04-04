@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown } from "lucide-react";
-import { Playlist, getRecent } from "@/lib/storage";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard } from "lucide-react";
+import { Playlist } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
 
@@ -16,6 +16,7 @@ interface DashboardCardsProps {
   onShowEpg?: () => void;
   onShowRecordings?: () => void;
   onAddPlaylist?: () => void;
+  onOpenSettings?: () => void;
 }
 
 const STAT_CARDS = [
@@ -27,7 +28,7 @@ const STAT_CARDS = [
     border: "rgba(255,109,0,0.18)",
     iconColor: "#FF6D00",
     accentGlow: "0 0 40px rgba(255,109,0,0.06)",
-    countSuffix: " Chaînes",
+    countSuffix: "Chaînes",
     bgImage: "radial-gradient(ellipse at 80% 20%, rgba(255,109,0,0.08) 0%, transparent 60%)",
   },
   {
@@ -38,7 +39,7 @@ const STAT_CARDS = [
     border: "rgba(201,168,76,0.18)",
     iconColor: "#C9A84C",
     accentGlow: "0 0 40px rgba(201,168,76,0.06)",
-    countSuffix: " Films",
+    countSuffix: "Films",
     bgImage: "radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 60%)",
   },
   {
@@ -49,7 +50,7 @@ const STAT_CARDS = [
     border: "rgba(124,58,237,0.18)",
     iconColor: "#7C3AED",
     accentGlow: "0 0 40px rgba(124,58,237,0.06)",
-    countSuffix: " Séries",
+    countSuffix: "Séries",
     bgImage: "radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.08) 0%, transparent 60%)",
   },
 ];
@@ -64,7 +65,7 @@ const QUICK_BUTTONS = [
 export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
-  onShowEpg, onShowRecordings, onAddPlaylist,
+  onShowEpg, onShowRecordings, onAddPlaylist, onOpenSettings,
 }: DashboardCardsProps) {
   const counts = useMemo(() => ({
     live: allChannels.length,
@@ -72,70 +73,146 @@ export function DashboardCards({
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
+  // Get MAC and expiration from first xtream playlist
+  const xtreamPlaylist = playlists.find(p => p.isXtream && p.xtreamAccountInfo);
+  const macAddress = xtreamPlaylist?.xtreamMac || localStorage.getItem("chouf_device_mac") || generateMac();
+  const expDate = xtreamPlaylist?.xtreamAccountInfo?.exp_date;
+
   return (
-    <div className="space-y-5 px-5 py-4">
-      {/* 3 Stat cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {STAT_CARDS.map((card, i) => (
-          <motion.button
-            key={card.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.12 }}
-            onClick={() => onTabSelect(card.id)}
-            className="group relative rounded-2xl p-5 text-left overflow-hidden transition-all backdrop-blur-md"
-            style={{
-              background: card.gradient,
-              border: `1px solid ${card.border}`,
-              boxShadow: card.accentGlow,
-              minHeight: 170,
-            }}
-            whileHover={{ scale: 1.03 }}
-          >
-            <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
-            <div className="absolute inset-0 pointer-events-none opacity-20"
-              style={{ background: `linear-gradient(180deg, transparent 0%, ${card.iconColor}08 100%)` }} />
-            <h3 className="text-[15px] font-bold mb-2" style={{ color: "#F5F5F7" }}>{card.label}</h3>
-            <div className="flex justify-center my-4">
-              <div className="relative">
-                <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ background: card.iconColor }} />
-                <card.icon size={44} strokeWidth={1.5}
-                  style={{ color: card.iconColor, filter: `drop-shadow(0 0 14px ${card.iconColor}50)` }} />
+    <div className="flex flex-col h-full">
+      {/* Main content - centered vertically */}
+      <div className="flex-1 flex flex-col justify-center px-8 py-6 max-w-[1400px] mx-auto w-full">
+        
+        {/* 3 Stat cards - bigger for TV */}
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          {STAT_CARDS.map((card, i) => (
+            <motion.button
+              key={card.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.12 }}
+              onClick={() => onTabSelect(card.id)}
+              className="group relative rounded-2xl p-6 text-left overflow-hidden transition-all backdrop-blur-md"
+              style={{
+                background: card.gradient,
+                border: `1px solid ${card.border}`,
+                boxShadow: card.accentGlow,
+                minHeight: 200,
+              }}
+              whileHover={{ scale: 1.03 }}
+            >
+              <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
+              <div className="absolute inset-0 pointer-events-none opacity-20"
+                style={{ background: `linear-gradient(180deg, transparent 0%, ${card.iconColor}08 100%)` }} />
+              <h3 className="text-[17px] font-bold mb-3" style={{ color: "#F5F5F7" }}>{card.label}</h3>
+              <div className="flex justify-center my-5">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full blur-xl opacity-20" style={{ background: card.iconColor }} />
+                  <card.icon size={52} strokeWidth={1.5}
+                    style={{ color: card.iconColor, filter: `drop-shadow(0 0 14px ${card.iconColor}50)` }} />
+                </div>
               </div>
-            </div>
-            <p className="text-[22px] font-black" style={{ color: "#F5F5F7" }}>
-              {counts[card.id as keyof typeof counts].toLocaleString()}
-            </p>
-            <p className="text-[11px] font-medium -mt-0.5" style={{ color: "#86868B" }}>
-              {card.countSuffix}
-            </p>
-            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors opacity-20 group-hover:opacity-60"
-              style={{ color: card.iconColor }} />
-          </motion.button>
-        ))}
+              <p className="text-[28px] font-black" style={{ color: "#F5F5F7" }}>
+                {counts[card.id as keyof typeof counts].toLocaleString()}
+              </p>
+              <p className="text-[12px] font-medium -mt-0.5" style={{ color: "#86868B" }}>
+                {card.countSuffix}
+              </p>
+              <ArrowRight size={18} className="absolute bottom-5 right-5 transition-colors opacity-20 group-hover:opacity-60"
+                style={{ color: card.iconColor }} />
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Quick buttons - more spacious */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {QUICK_BUTTONS.map(btn => (
+            <button
+              key={btn.label}
+              onClick={() => {
+                if (btn.action === "playlist") onAddPlaylist?.();
+                else if (btn.action === "epg") onShowEpg?.();
+                else if (btn.action === "recordings") onShowRecordings?.();
+              }}
+              className="flex flex-col items-center gap-2.5 rounded-xl py-4 px-3 transition-all hover:bg-white/5 backdrop-blur-sm"
+              style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}
+            >
+              <btn.icon size={20} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+              <span className="text-[11px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Premium Banner */}
+        <PremiumBanner />
       </div>
 
-      {/* Quick buttons */}
-      <div className="grid grid-cols-4 gap-2">
-        {QUICK_BUTTONS.map(btn => (
-          <button
-            key={btn.label}
-            onClick={() => {
-              if (btn.action === "playlist") onAddPlaylist?.();
-              else if (btn.action === "epg") onShowEpg?.();
-              else if (btn.action === "recordings") onShowRecordings?.();
-            }}
-            className="flex flex-col items-center gap-2 rounded-xl py-3 px-2 transition-all hover:bg-white/5 backdrop-blur-sm"
-            style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}
-          >
-            <btn.icon size={18} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
-            <span className="text-[10px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
-          </button>
-        ))}
+      {/* Footer - MAC + Expiration */}
+      <DashboardFooter macAddress={macAddress} expDate={expDate} />
+    </div>
+  );
+}
+
+function generateMac(): string {
+  const stored = localStorage.getItem("chouf_device_mac");
+  if (stored) return stored;
+  const hex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0").toUpperCase();
+  const mac = `00:1A:${hex()}:${hex()}:${hex()}:${hex()}`;
+  localStorage.setItem("chouf_device_mac", mac);
+  return mac;
+}
+
+function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?: string }) {
+  const formatExp = () => {
+    if (!expDate) return null;
+    try {
+      const d = new Date(Number(expDate) * 1000);
+      if (isNaN(d.getTime())) return null;
+      const now = new Date();
+      const diff = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const formatted = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      return { date: formatted, days: diff };
+    } catch { return null; }
+  };
+
+  const exp = formatExp();
+
+  return (
+    <div className="shrink-0 px-8 py-3 flex items-center justify-between"
+      style={{ borderTop: "1px solid rgba(28,28,36,0.5)", background: "rgba(10,10,15,0.6)" }}>
+      <div className="flex items-center gap-6">
+        {/* MAC */}
+        <div className="flex items-center gap-2">
+          <Fingerprint size={14} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
+          <span className="text-[11px]" style={{ color: "#48484A" }}>MAC</span>
+          <span className="text-[12px] tracking-wider" style={{ 
+            color: "#C9A84C", 
+            fontFamily: "'Share Tech Mono', 'SF Mono', 'Fira Code', monospace",
+            letterSpacing: "0.08em"
+          }}>{macAddress}</span>
+        </div>
       </div>
 
-      {/* Premium Banner */}
-      <PremiumBanner />
+      <div className="flex items-center gap-6">
+        {/* Expiration */}
+        {exp && (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px]" style={{ color: "#48484A" }}>Expire</span>
+            <span className="text-[12px] tracking-wide" style={{
+              color: exp.days > 30 ? "#34C759" : exp.days > 7 ? "#FFD60A" : "#FF3B30",
+              fontFamily: "'Share Tech Mono', 'SF Mono', 'Fira Code', monospace",
+            }}>
+              {exp.date}
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{
+              background: exp.days > 30 ? "rgba(52,199,89,0.1)" : exp.days > 7 ? "rgba(255,214,10,0.1)" : "rgba(255,59,48,0.1)",
+              color: exp.days > 30 ? "#34C759" : exp.days > 7 ? "#FFD60A" : "#FF3B30",
+            }}>
+              {exp.days}j
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
