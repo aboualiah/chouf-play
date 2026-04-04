@@ -37,6 +37,7 @@ export default function Index() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const [view, setView] = useState<"dashboard" | "content">("dashboard");
   const [activeTab, setActiveTab] = useState("live");
   const [activeSubTab, setActiveSubTab] = useState("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
