@@ -169,7 +169,7 @@ export function AppSidebar({
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${!activeCategory ? "font-medium" : "hover:bg-[#1C1C24]"}`}
                   style={!activeCategory ? { color: "#FF6D00" } : { color: "#86868B" }}
                 >
-                  <span>Toutes</span>
+                  <span>{t("cat.all")}</span>
                   <span className="text-[10px]" style={{ color: "#48484A" }}>{channels.length}</span>
                 </button>
                 {categories.map(cat => {
