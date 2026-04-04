@@ -352,55 +352,22 @@ export default function Index() {
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
-          {/* Sidebar: only in dashboard view */}
-          {hasContent && view === "dashboard" && (
-            <>
-              <div className="hidden md:flex">{sidebarContent}</div>
-              <AnimatePresence>
-                {isMobile && mobileDrawerOpen && (
-                  <>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }}
-                      onClick={() => setMobileDrawerOpen(false)} />
-                    <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
-                      transition={{ type: "spring", damping: 25, stiffness: 250 }}
-                      className="fixed left-0 top-0 z-50 h-full">
-                      {sidebarContent}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </>
-          )}
-
           <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Header: always show when not in player, but adapt for dashboard vs content */}
-            {!activeChannel && (
+            {/* Header */}
+            {!activeChannel && hasContent && (
               <>
-              {/* Mobile header - dashboard */}
-                {isMobile && view === "dashboard" && hasContent && (
+                {isMobile ? (
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
-                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#C9A84C" }}>
-                      <Menu size={18} />
-                    </button>
+                    {view === "content" && (
+                      <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
+                        <ArrowLeft size={18} />
+                      </button>
+                    )}
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
                       allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
                   </div>
-                )}
-                {/* Mobile header - content */}
-                {isMobile && view === "content" && (
-                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
-                    <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
-                      <ArrowLeft size={18} />
-                    </button>
-                    <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                      activeTab={activeTab} onTabSelect={handleTabSelect} compact
-                      allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
-                  </div>
-                )}
-                {/* Desktop header */}
-                {!isMobile && hasContent && (
+                ) : (
                   <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
