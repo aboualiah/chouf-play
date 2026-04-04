@@ -1,22 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft, Trophy, Monitor, Shield, Info, Globe, Mail, Code,
   PlayCircle, Tv, RefreshCw, Lock, LayoutDashboard, Languages,
   ChevronRight, Eye, EyeOff, Clock, Hash, Image, Columns,
   Wifi, Palette, Download, HardDrive, Zap, Volume2, Subtitles,
-  ScreenShare, Ratio, ListOrdered, Smartphone
+  ScreenShare, Ratio, ListOrdered, Smartphone, Upload, Trash2,
+  Plus, X, Save, RotateCcw, FileDown, FileUp, Radio
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useI18n, LANGUAGES, Lang } from "@/lib/i18n";
+import { getParentalSettings, saveParentalSettings, ParentalSettings } from "@/lib/parental";
+import { toast } from "sonner";
 
-const SETTINGS_KEY = "chouf_settings";
 const PLAYER_SETTINGS_KEY = "chouf_player_settings";
 const DISPLAY_SETTINGS_KEY = "chouf_display_settings";
 const EPG_SETTINGS_KEY = "chouf_epg_settings";
-const PARENTAL_SETTINGS_KEY = "chouf_parental_settings";
+const CATCHUP_SETTINGS_KEY = "chouf_catchup_settings";
+const SETTINGS_KEY = "chouf_settings";
 const DASHBOARD_SETTINGS_KEY = "chouf_dashboard_settings";
 const REFRESH_SETTINGS_KEY = "chouf_refresh_settings";
 const STREAM_SETTINGS_KEY = "chouf_stream_settings";
 const INTERFACE_SETTINGS_KEY = "chouf_interface_settings";
+const RECORDING_SETTINGS_KEY = "chouf_recording_settings";
 
 // ── Match Settings ──
 export interface MatchSettings {
@@ -80,6 +85,41 @@ function SelectField({ value, onChange, options }: { value: string; onChange: (v
   );
 }
 
+// ── PIN Input (4 boxes) ──
+function PinInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const refs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const digits = value.padEnd(4, "").split("").slice(0, 4);
+
+  const handleChange = (idx: number, val: string) => {
+    if (!/^\d?$/.test(val)) return;
+    const arr = [...digits];
+    arr[idx] = val;
+    onChange(arr.join("").replace(/ /g, ""));
+    if (val && idx < 3) refs[idx + 1].current?.focus();
+  };
+
+  const handleKeyDown = (idx: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      refs[idx - 1].current?.focus();
+    }
+  };
+
+  return (
+    <div className="flex gap-2">
+      {[0, 1, 2, 3].map(i => (
+        <input
+          key={i} ref={refs[i]} type="text" inputMode="numeric" maxLength={1}
+          value={digits[i]?.trim() || ""}
+          onChange={e => handleChange(i, e.target.value)}
+          onKeyDown={e => handleKeyDown(i, e)}
+          className="h-12 w-12 rounded-xl text-center text-lg font-bold border outline-none transition-colors focus:border-[#FF3B30]"
+          style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Section Header ──
 function SectionHeader({ icon: Icon, label, subtitle, color = "#FF6D00", active, onClick, badge }: {
   icon: React.ElementType; label: string; subtitle: string; color?: string; active: boolean; onClick: () => void; badge?: string;
@@ -105,6 +145,7 @@ function SectionHeader({ icon: Icon, label, subtitle, color = "#FF6D00", active,
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { t, lang, setLang } = useI18n();
   const [activeSection, setActiveSection] = useState<string>("");
 
   // States
@@ -112,53 +153,55 @@ export default function Settings() {
   const [hardwareDecoding, setHardwareDecoding] = useState(true);
   const [resumePlayback, setResumePlayback] = useState(true);
   const [preferredQuality, setPreferredQuality] = useState("auto");
-  const [bufferSize, setBufferSize] = useState(30);
-  const [audioTrack, setAudioTrack] = useState("auto");
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
-  const [subtitleSize, setSubtitleSize] = useState("medium");
+  const [bufferSize, setBufferSize] = useState("medium");
+  const [streamFormat, setStreamFormat] = useState("auto");
+  const [decoder, setDecoder] = useState("hardware");
   const [aspectRatio, setAspectRatio] = useState("auto");
 
   const [showLogos, setShowLogos] = useState(true);
   const [showNumbers, setShowNumbers] = useState(false);
   const [compactMode, setCompactMode] = useState(false);
   const [showClock, setShowClock] = useState(true);
-  const [channelPreview, setChannelPreview] = useState(true);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [channelStyle, setChannelStyle] = useState("normal");
+  const [textSize, setTextSize] = useState("normal");
 
   const [epgEnabled, setEpgEnabled] = useState(false);
+  const [epgSource, setEpgSource] = useState("auto");
   const [epgUrl, setEpgUrl] = useState("");
+  const [epgOffset, setEpgOffset] = useState("0");
   const [showEpgInList, setShowEpgInList] = useState(false);
-  const [epgAutoRefresh, setEpgAutoRefresh] = useState(true);
-  const [epgRefreshInterval, setEpgRefreshInterval] = useState("24");
 
-  const [parentalEnabled, setParentalEnabled] = useState(false);
-  const [parentalPin, setParentalPin] = useState("");
-  const [hideAdultCats, setHideAdultCats] = useState(true);
+  const [catchupEnabled, setCatchupEnabled] = useState(false);
+  const [catchupDuration, setCatchupDuration] = useState("48");
 
-  const [dashboardPin, setDashboardPin] = useState("1234");
+  const [parental, setParental] = useState<ParentalSettings>(getParentalSettings());
+  const [customCatInput, setCustomCatInput] = useState("");
 
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(24);
+  const [recQuality, setRecQuality] = useState("original");
+
+  const [weatherCity, setWeatherCity] = useState("Brussels");
+  const [startPage, setStartPage] = useState("home");
+  const [autoUpdate, setAutoUpdate] = useState("never");
 
   const [streamType, setStreamType] = useState("auto");
   const [connectionTimeout, setConnectionTimeout] = useState(15);
   const [retryOnError, setRetryOnError] = useState(true);
   const [userAgent, setUserAgent] = useState("default");
 
-  const [startPage, setStartPage] = useState("home");
-  const [language, setLanguage] = useState("fr");
-  const [channelSortOrder, setChannelSortOrder] = useState("default");
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(24);
 
-  // Load
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load settings
   useEffect(() => {
     try { const p = JSON.parse(localStorage.getItem(PLAYER_SETTINGS_KEY) || "{}");
       if (p.hardwareDecoding !== undefined) setHardwareDecoding(p.hardwareDecoding);
       if (p.resumePlayback !== undefined) setResumePlayback(p.resumePlayback);
       if (p.preferredQuality) setPreferredQuality(p.preferredQuality);
       if (p.bufferSize) setBufferSize(p.bufferSize);
-      if (p.audioTrack) setAudioTrack(p.audioTrack);
-      if (p.subtitlesEnabled !== undefined) setSubtitlesEnabled(p.subtitlesEnabled);
-      if (p.subtitleSize) setSubtitleSize(p.subtitleSize);
+      if (p.streamFormat) setStreamFormat(p.streamFormat);
+      if (p.decoder) setDecoder(p.decoder);
       if (p.aspectRatio) setAspectRatio(p.aspectRatio);
     } catch {}
     try { const d = JSON.parse(localStorage.getItem(DISPLAY_SETTINGS_KEY) || "{}");
@@ -166,27 +209,19 @@ export default function Settings() {
       if (d.showNumbers !== undefined) setShowNumbers(d.showNumbers);
       if (d.compactMode !== undefined) setCompactMode(d.compactMode);
       if (d.showClock !== undefined) setShowClock(d.showClock);
-      if (d.channelPreview !== undefined) setChannelPreview(d.channelPreview);
-      if (d.animationsEnabled !== undefined) setAnimationsEnabled(d.animationsEnabled);
+      if (d.channelStyle) setChannelStyle(d.channelStyle);
+      if (d.textSize) setTextSize(d.textSize);
     } catch {}
     try { const e = JSON.parse(localStorage.getItem(EPG_SETTINGS_KEY) || "{}");
       if (e.epgEnabled !== undefined) setEpgEnabled(e.epgEnabled);
+      if (e.epgSource) setEpgSource(e.epgSource);
       if (e.epgUrl) setEpgUrl(e.epgUrl);
+      if (e.epgOffset) setEpgOffset(e.epgOffset);
       if (e.showEpgInList !== undefined) setShowEpgInList(e.showEpgInList);
-      if (e.epgAutoRefresh !== undefined) setEpgAutoRefresh(e.epgAutoRefresh);
-      if (e.epgRefreshInterval) setEpgRefreshInterval(e.epgRefreshInterval);
     } catch {}
-    try { const pa = JSON.parse(localStorage.getItem(PARENTAL_SETTINGS_KEY) || "{}");
-      if (pa.parentalEnabled !== undefined) setParentalEnabled(pa.parentalEnabled);
-      if (pa.parentalPin) setParentalPin(pa.parentalPin);
-      if (pa.hideAdultCats !== undefined) setHideAdultCats(pa.hideAdultCats);
-    } catch {}
-    try { const da = JSON.parse(localStorage.getItem(DASHBOARD_SETTINGS_KEY) || "{}");
-      if (da.dashboardPin) setDashboardPin(da.dashboardPin);
-    } catch {}
-    try { const r = JSON.parse(localStorage.getItem(REFRESH_SETTINGS_KEY) || "{}");
-      if (r.autoRefresh !== undefined) setAutoRefresh(r.autoRefresh);
-      if (r.refreshInterval) setRefreshInterval(r.refreshInterval);
+    try { const c = JSON.parse(localStorage.getItem(CATCHUP_SETTINGS_KEY) || "{}");
+      if (c.catchupEnabled !== undefined) setCatchupEnabled(c.catchupEnabled);
+      if (c.catchupDuration) setCatchupDuration(c.catchupDuration);
     } catch {}
     try { const s = JSON.parse(localStorage.getItem(STREAM_SETTINGS_KEY) || "{}");
       if (s.streamType) setStreamType(s.streamType);
@@ -196,21 +231,29 @@ export default function Settings() {
     } catch {}
     try { const i = JSON.parse(localStorage.getItem(INTERFACE_SETTINGS_KEY) || "{}");
       if (i.startPage) setStartPage(i.startPage);
-      if (i.language) setLanguage(i.language);
-      if (i.channelSortOrder) setChannelSortOrder(i.channelSortOrder);
+      if (i.weatherCity) setWeatherCity(i.weatherCity);
+      if (i.autoUpdate) setAutoUpdate(i.autoUpdate);
+    } catch {}
+    try { const r = JSON.parse(localStorage.getItem(REFRESH_SETTINGS_KEY) || "{}");
+      if (r.autoRefresh !== undefined) setAutoRefresh(r.autoRefresh);
+      if (r.refreshInterval) setRefreshInterval(r.refreshInterval);
+    } catch {}
+    try { const rec = JSON.parse(localStorage.getItem(RECORDING_SETTINGS_KEY) || "{}");
+      if (rec.recQuality) setRecQuality(rec.recQuality);
     } catch {}
   }, []);
 
-  // Save
+  // Save effects
   useEffect(() => { saveSettings(SETTINGS_KEY, matchSettings); }, [matchSettings]);
-  useEffect(() => { saveSettings(PLAYER_SETTINGS_KEY, { hardwareDecoding, resumePlayback, preferredQuality, bufferSize, audioTrack, subtitlesEnabled, subtitleSize, aspectRatio }); }, [hardwareDecoding, resumePlayback, preferredQuality, bufferSize, audioTrack, subtitlesEnabled, subtitleSize, aspectRatio]);
-  useEffect(() => { saveSettings(DISPLAY_SETTINGS_KEY, { showLogos, showNumbers, compactMode, showClock, channelPreview, animationsEnabled }); }, [showLogos, showNumbers, compactMode, showClock, channelPreview, animationsEnabled]);
-  useEffect(() => { saveSettings(EPG_SETTINGS_KEY, { epgEnabled, epgUrl, showEpgInList, epgAutoRefresh, epgRefreshInterval }); }, [epgEnabled, epgUrl, showEpgInList, epgAutoRefresh, epgRefreshInterval]);
-  useEffect(() => { saveSettings(PARENTAL_SETTINGS_KEY, { parentalEnabled, parentalPin, hideAdultCats }); }, [parentalEnabled, parentalPin, hideAdultCats]);
-  useEffect(() => { saveSettings(DASHBOARD_SETTINGS_KEY, { dashboardPin }); }, [dashboardPin]);
-  useEffect(() => { saveSettings(REFRESH_SETTINGS_KEY, { autoRefresh, refreshInterval }); }, [autoRefresh, refreshInterval]);
+  useEffect(() => { saveSettings(PLAYER_SETTINGS_KEY, { hardwareDecoding, resumePlayback, preferredQuality, bufferSize, streamFormat, decoder, aspectRatio }); }, [hardwareDecoding, resumePlayback, preferredQuality, bufferSize, streamFormat, decoder, aspectRatio]);
+  useEffect(() => { saveSettings(DISPLAY_SETTINGS_KEY, { showLogos, showNumbers, compactMode, showClock, channelStyle, textSize }); }, [showLogos, showNumbers, compactMode, showClock, channelStyle, textSize]);
+  useEffect(() => { saveSettings(EPG_SETTINGS_KEY, { epgEnabled, epgSource, epgUrl, epgOffset, showEpgInList }); }, [epgEnabled, epgSource, epgUrl, epgOffset, showEpgInList]);
+  useEffect(() => { saveSettings(CATCHUP_SETTINGS_KEY, { catchupEnabled, catchupDuration }); }, [catchupEnabled, catchupDuration]);
+  useEffect(() => { saveParentalSettings(parental); }, [parental]);
   useEffect(() => { saveSettings(STREAM_SETTINGS_KEY, { streamType, connectionTimeout, retryOnError, userAgent }); }, [streamType, connectionTimeout, retryOnError, userAgent]);
-  useEffect(() => { saveSettings(INTERFACE_SETTINGS_KEY, { startPage, language, channelSortOrder }); }, [startPage, language, channelSortOrder]);
+  useEffect(() => { saveSettings(INTERFACE_SETTINGS_KEY, { startPage, weatherCity, autoUpdate }); }, [startPage, weatherCity, autoUpdate]);
+  useEffect(() => { saveSettings(REFRESH_SETTINGS_KEY, { autoRefresh, refreshInterval }); }, [autoRefresh, refreshInterval]);
+  useEffect(() => { saveSettings(RECORDING_SETTINGS_KEY, { recQuality }); }, [recQuality]);
 
   const toggleSection = (s: string) => setActiveSection(prev => prev === s ? "" : s);
 
@@ -221,6 +264,56 @@ export default function Settings() {
     const comps: Record<string, boolean> = {};
     [...FOOTBALL_COMPS, ...OTHER_COMPS].forEach(c => (comps[c] = val));
     setMatchSettings(prev => ({ ...prev, competitions: comps }));
+  };
+
+  const addCustomCategory = () => {
+    const cat = customCatInput.trim();
+    if (!cat || parental.customCategories.includes(cat)) return;
+    setParental(p => ({ ...p, customCategories: [...p.customCategories, cat] }));
+    setCustomCatInput("");
+  };
+
+  const removeCustomCategory = (cat: string) => {
+    setParental(p => ({ ...p, customCategories: p.customCategories.filter(c => c !== cat) }));
+  };
+
+  const handleExport = () => {
+    const data: Record<string, unknown> = {};
+    const keys = [PLAYER_SETTINGS_KEY, DISPLAY_SETTINGS_KEY, EPG_SETTINGS_KEY, CATCHUP_SETTINGS_KEY, SETTINGS_KEY, STREAM_SETTINGS_KEY, INTERFACE_SETTINGS_KEY, REFRESH_SETTINGS_KEY, RECORDING_SETTINGS_KEY, "chouf_parental_settings", "chouf_language"];
+    keys.forEach(k => { try { data[k] = JSON.parse(localStorage.getItem(k) || "null"); } catch {} });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "chouf_settings.json"; a.click();
+    URL.revokeObjectURL(url);
+    toast.success(t("msg.settings_exported"));
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        Object.entries(data).forEach(([k, v]) => {
+          if (v !== null) localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v));
+        });
+        toast.success(t("msg.settings_imported"));
+        window.location.reload();
+      } catch {
+        toast.error("Invalid file");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleReset = () => {
+    if (!confirm(t("msg.reset_confirm"))) return;
+    const keys = [PLAYER_SETTINGS_KEY, DISPLAY_SETTINGS_KEY, EPG_SETTINGS_KEY, CATCHUP_SETTINGS_KEY, SETTINGS_KEY, STREAM_SETTINGS_KEY, INTERFACE_SETTINGS_KEY, REFRESH_SETTINGS_KEY, RECORDING_SETTINGS_KEY, "chouf_parental_settings", DASHBOARD_SETTINGS_KEY];
+    keys.forEach(k => localStorage.removeItem(k));
+    toast.success(t("msg.settings_reset"));
+    window.location.reload();
   };
 
   const CompChip = ({ name }: { name: string }) => (
@@ -235,139 +328,191 @@ export default function Settings() {
 
   const Divider = () => <div className="h-px mx-1" style={{ background: "#1C1C2440" }} />;
 
+  const DEFAULT_HIDDEN_CATS = ["Adult", "XXX", "+18", "Pour adultes", "Adults"];
+
   const sections = [
+    // ── General ──
     {
-      id: "player", icon: PlayCircle, label: "Lecteur vidéo", subtitle: "Décodage, qualité, sous-titres, tampon",
+      id: "general", icon: Globe, label: t("settings.general"), subtitle: t("s.language") + ", " + t("s.weather_city"),
+      color: "#34C759",
+      content: (
+        <div className="space-y-0">
+          <SettingRow label={t("s.language")} subtitle={t("s.language_sub")}>
+            <select value={lang} onChange={e => { setLang(e.target.value as Lang); }}
+              className="rounded-xl px-3 py-2 text-[12px] font-medium border-0 outline-none cursor-pointer"
+              style={{ background: "#1C1C24", color: "#F5F5F7" }}>
+              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
+            </select>
+          </SettingRow><Divider />
+          <SettingRow label={t("s.weather_city")} subtitle={t("s.weather_city_sub")}>
+            <SelectField value={weatherCity} onChange={setWeatherCity}
+              options={[
+                { value: "Brussels", label: "Bruxelles" }, { value: "Paris", label: "Paris" },
+                { value: "Casablanca", label: "Casablanca" }, { value: "London", label: "London" },
+                { value: "Amsterdam", label: "Amsterdam" }, { value: "Berlin", label: "Berlin" },
+                { value: "Madrid", label: "Madrid" }, { value: "Istanbul", label: "Istanbul" },
+                { value: "Dubai", label: "Dubaï" }, { value: "Riyadh", label: "Riyad" },
+              ]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.start_page")} subtitle={t("s.start_page_sub")}>
+            <SelectField value={startPage} onChange={setStartPage}
+              options={[{ value: "home", label: t("misc.home") }, { value: "live", label: t("nav.live") }, { value: "last", label: t("misc.last_channel") }]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.auto_update")} subtitle={t("s.auto_update_sub")}>
+            <SelectField value={autoUpdate} onChange={setAutoUpdate}
+              options={[{ value: "never", label: t("misc.never") }, { value: "1", label: "1h" }, { value: "6", label: "6h" }, { value: "12", label: "12h" }, { value: "24", label: "24h" }]} />
+          </SettingRow>
+        </div>
+      ),
+    },
+    // ── Player ──
+    {
+      id: "player", icon: PlayCircle, label: t("settings.player"), subtitle: t("s.hw_decode") + ", " + t("s.quality"),
       color: "#FF6D00", badge: "PRO",
       content: (
         <div className="space-y-0">
-          <SettingRow label="Décodage matériel" subtitle="Accélération GPU pour de meilleures performances">
+          <SettingRow label={t("s.format")} subtitle={t("s.format_sub")}>
+            <SelectField value={streamFormat} onChange={setStreamFormat}
+              options={[{ value: "auto", label: t("misc.auto") }, { value: "hls", label: "HLS (.m3u8)" }, { value: "ts", label: "MPEG-TS (.ts)" }]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.quality")} subtitle={t("s.quality_sub")}>
+            <SelectField value={preferredQuality} onChange={setPreferredQuality}
+              options={[{ value: "auto", label: t("misc.auto") }, { value: "360p", label: "360p" }, { value: "480p", label: "480p SD" }, { value: "720p", label: "720p HD" }, { value: "1080p", label: "1080p FHD" }, { value: "4k", label: "4K UHD" }]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.decoder")} subtitle={t("s.decoder_sub")}>
+            <SelectField value={decoder} onChange={setDecoder}
+              options={[{ value: "hardware", label: t("misc.hardware") }, { value: "software", label: t("misc.software") }]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.buffer")} subtitle={t("s.buffer_sub")}>
+            <SelectField value={bufferSize} onChange={setBufferSize}
+              options={[{ value: "small", label: t("misc.small") }, { value: "medium", label: t("misc.medium") }, { value: "large", label: t("misc.large") }]} />
+          </SettingRow><Divider />
+          <SettingRow label={t("s.hw_decode")} subtitle={t("s.hw_decode_sub")}>
             <Toggle checked={hardwareDecoding} onChange={setHardwareDecoding} />
           </SettingRow><Divider />
-          <SettingRow label="Reprendre la lecture" subtitle="Reprendre là où vous étiez">
+          <SettingRow label={t("s.resume")} subtitle={t("s.resume_sub")}>
             <Toggle checked={resumePlayback} onChange={setResumePlayback} />
           </SettingRow><Divider />
-          <SettingRow label="Qualité préférée" subtitle="Résolution par défaut du flux">
-            <SelectField value={preferredQuality} onChange={setPreferredQuality}
-              options={[{ value: "auto", label: "Auto" }, { value: "1080p", label: "1080p FHD" }, { value: "720p", label: "720p HD" }, { value: "480p", label: "480p SD" }, { value: "360p", label: "360p" }]} />
-          </SettingRow><Divider />
-          <SettingRow label="Ratio d'affichage" subtitle="Format de l'image vidéo">
+          <SettingRow label={t("s.aspect")} subtitle={t("s.aspect_sub")}>
             <SelectField value={aspectRatio} onChange={setAspectRatio}
-              options={[{ value: "auto", label: "Auto" }, { value: "16:9", label: "16:9" }, { value: "4:3", label: "4:3" }, { value: "fill", label: "Remplir" }]} />
-          </SettingRow><Divider />
-          <SettingRow label={`Taille du tampon : ${bufferSize}s`} subtitle="Buffer de lecture (5s - 60s)">
-            <input type="range" min={5} max={60} value={bufferSize} onChange={e => setBufferSize(+e.target.value)} className="w-28 accent-[#FF6D00]" />
-          </SettingRow><Divider />
-          <SettingRow label="Piste audio" subtitle="Langue audio préférée">
-            <SelectField value={audioTrack} onChange={setAudioTrack}
-              options={[{ value: "auto", label: "Auto" }, { value: "fr", label: "Français" }, { value: "en", label: "English" }, { value: "ar", label: "العربية" }]} />
-          </SettingRow><Divider />
-          <SettingRow label="Sous-titres" subtitle="Activer les sous-titres intégrés">
-            <Toggle checked={subtitlesEnabled} onChange={setSubtitlesEnabled} />
+              options={[{ value: "auto", label: t("misc.auto") }, { value: "16:9", label: "16:9" }, { value: "4:3", label: "4:3" }, { value: "fill", label: "Fill" }]} />
           </SettingRow>
-          {subtitlesEnabled && (
+        </div>
+      ),
+    },
+    // ── Stream ──
+    {
+      id: "stream", icon: Wifi, label: t("settings.stream"), subtitle: "Timeout, User-Agent, retry",
+      color: "#5856D6",
+      content: (
+        <div className="space-y-0">
+          <SettingRow label="Type de flux" subtitle={t("s.format_sub")}>
+            <SelectField value={streamType} onChange={setStreamType}
+              options={[{ value: "auto", label: t("misc.auto") }, { value: "hls", label: "HLS" }, { value: "ts", label: "MPEG-TS" }, { value: "mpegts", label: "mpegts.js" }]} />
+          </SettingRow><Divider />
+          <SettingRow label={`Timeout : ${connectionTimeout}s`} subtitle="Délai de connexion max">
+            <input type="range" min={5} max={60} value={connectionTimeout} onChange={e => setConnectionTimeout(+e.target.value)} className="w-28 accent-[#5856D6]" />
+          </SettingRow><Divider />
+          <SettingRow label="Réessayer en cas d'erreur" subtitle="Reconnecter automatiquement">
+            <Toggle checked={retryOnError} onChange={setRetryOnError} color="#5856D6" />
+          </SettingRow><Divider />
+          <SettingRow label="User-Agent" subtitle="Identifiant serveur">
+            <SelectField value={userAgent} onChange={setUserAgent}
+              options={[{ value: "default", label: "Par défaut" }, { value: "vlc", label: "VLC" }, { value: "tivimate", label: "TiviMate" }, { value: "custom", label: t("misc.custom") }]} />
+          </SettingRow>
+        </div>
+      ),
+    },
+    // ── Interface ──
+    {
+      id: "display", icon: Monitor, label: t("settings.display"), subtitle: t("s.logos") + ", " + t("s.channel_style"),
+      color: "#007AFF",
+      content: (
+        <div className="space-y-0">
+          <SettingRow label={t("s.channel_style")} subtitle={t("s.channel_style_sub")}>
+            <div className="flex gap-1.5">
+              {[{ v: "classic", l: t("misc.classic") }, { v: "normal", l: t("misc.normal") }, { v: "modern", l: t("misc.modern") }].map(o => (
+                <button key={o.v} onClick={() => setChannelStyle(o.v)}
+                  className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium border transition-all"
+                  style={channelStyle === o.v
+                    ? { background: "rgba(0,122,255,0.12)", color: "#007AFF", borderColor: "rgba(0,122,255,0.3)" }
+                    : { background: "#0A0A0F", color: "#48484A", borderColor: "#1C1C24" }
+                  }>
+                  {o.l}
+                </button>
+              ))}
+            </div>
+          </SettingRow><Divider />
+          <SettingRow label={t("s.logos")} subtitle={t("s.logos_sub")}><Toggle checked={showLogos} onChange={setShowLogos} color="#007AFF" /></SettingRow><Divider />
+          <SettingRow label={t("s.numbers")} subtitle={t("s.numbers_sub")}><Toggle checked={showNumbers} onChange={setShowNumbers} color="#007AFF" /></SettingRow><Divider />
+          <SettingRow label={t("s.compact")} subtitle={t("s.compact_sub")}><Toggle checked={compactMode} onChange={setCompactMode} color="#007AFF" /></SettingRow><Divider />
+          <SettingRow label={t("s.clock")} subtitle={t("s.clock_sub")}><Toggle checked={showClock} onChange={setShowClock} color="#007AFF" /></SettingRow><Divider />
+          <SettingRow label={t("s.text_size")} subtitle={t("s.text_size_sub")}>
+            <SelectField value={textSize} onChange={setTextSize}
+              options={[{ value: "small", label: t("misc.small") }, { value: "normal", label: t("misc.normal") }, { value: "large", label: t("misc.large") }]} />
+          </SettingRow>
+        </div>
+      ),
+    },
+    // ── EPG ──
+    {
+      id: "epg", icon: Tv, label: t("settings.epg"), subtitle: t("s.epg_enable_sub"),
+      color: "#34C759",
+      content: (
+        <div className="space-y-0">
+          <SettingRow label={t("s.epg_enable")} subtitle={t("s.epg_enable_sub")}><Toggle checked={epgEnabled} onChange={setEpgEnabled} color="#34C759" /></SettingRow>
+          {epgEnabled && (
             <>
               <Divider />
-              <SettingRow label="Taille des sous-titres" subtitle="Taille du texte des sous-titres">
-                <SelectField value={subtitleSize} onChange={setSubtitleSize}
-                  options={[{ value: "small", label: "Petit" }, { value: "medium", label: "Moyen" }, { value: "large", label: "Grand" }, { value: "xlarge", label: "Très grand" }]} />
+              <SettingRow label={t("s.epg_source")} subtitle={t("s.epg_source_sub")}>
+                <SelectField value={epgSource} onChange={setEpgSource}
+                  options={[{ value: "auto", label: t("misc.auto") + " (Xtream)" }, { value: "custom", label: t("misc.custom") + " URL" }]} />
+              </SettingRow>
+              {epgSource === "custom" && (
+                <>
+                  <Divider />
+                  <div className="pt-3 px-1">
+                    <label className="text-[11px] font-medium block mb-1.5" style={{ color: "#86868B" }}>{t("s.epg_url")}</label>
+                    <input value={epgUrl} onChange={e => setEpgUrl(e.target.value)}
+                      placeholder="https://example.com/epg.xml.gz"
+                      className="w-full rounded-xl px-3 py-2.5 text-[12px] border outline-none focus:border-[#34C759] transition-colors"
+                      style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+                  </div>
+                </>
+              )}
+              <Divider />
+              <SettingRow label={t("s.epg_offset")} subtitle={t("s.epg_offset_sub")}>
+                <SelectField value={epgOffset} onChange={setEpgOffset}
+                  options={Array.from({ length: 25 }, (_, i) => ({ value: String(i - 12), label: `${i - 12 >= 0 ? "+" : ""}${i - 12}h` }))} />
+              </SettingRow><Divider />
+              <SettingRow label={t("s.epg_in_list")} subtitle={t("s.epg_in_list_sub")}><Toggle checked={showEpgInList} onChange={setShowEpgInList} color="#34C759" /></SettingRow>
+            </>
+          )}
+        </div>
+      ),
+    },
+    // ── Catch-up ──
+    {
+      id: "catchup", icon: RotateCcw, label: t("settings.catchup"), subtitle: t("s.catchup_enable_sub"),
+      color: "#FF9500",
+      content: (
+        <div className="space-y-0">
+          <SettingRow label={t("s.catchup_enable")} subtitle={t("s.catchup_enable_sub")}><Toggle checked={catchupEnabled} onChange={setCatchupEnabled} color="#FF9500" /></SettingRow>
+          {catchupEnabled && (
+            <>
+              <Divider />
+              <SettingRow label={t("s.catchup_duration")} subtitle={t("s.catchup_duration_sub")}>
+                <SelectField value={catchupDuration} onChange={setCatchupDuration}
+                  options={[{ value: "24", label: "24h" }, { value: "48", label: "48h" }, { value: "72", label: "72h" }]} />
               </SettingRow>
             </>
           )}
         </div>
       ),
     },
+    // ── Matchs ──
     {
-      id: "stream", icon: Wifi, label: "Flux & Connexion", subtitle: "Type de flux, timeout, user-agent",
-      color: "#5856D6",
-      content: (
-        <div className="space-y-0">
-          <SettingRow label="Type de flux préféré" subtitle="Format du flux vidéo">
-            <SelectField value={streamType} onChange={setStreamType}
-              options={[{ value: "auto", label: "Auto" }, { value: "hls", label: "HLS (m3u8)" }, { value: "ts", label: "MPEG-TS" }, { value: "mpegts", label: "mpegts.js" }]} />
-          </SettingRow><Divider />
-          <SettingRow label={`Timeout : ${connectionTimeout}s`} subtitle="Délai de connexion max">
-            <input type="range" min={5} max={60} value={connectionTimeout} onChange={e => setConnectionTimeout(+e.target.value)} className="w-28 accent-[#5856D6]" />
-          </SettingRow><Divider />
-          <SettingRow label="Réessayer en cas d'erreur" subtitle="Reconnecter automatiquement si le flux coupe">
-            <Toggle checked={retryOnError} onChange={setRetryOnError} color="#5856D6" />
-          </SettingRow><Divider />
-          <SettingRow label="User-Agent" subtitle="Identifiant envoyé au serveur">
-            <SelectField value={userAgent} onChange={setUserAgent}
-              options={[{ value: "default", label: "Par défaut" }, { value: "vlc", label: "VLC" }, { value: "tivimate", label: "TiviMate" }, { value: "custom", label: "Personnalisé" }]} />
-          </SettingRow>
-        </div>
-      ),
-    },
-    {
-      id: "display", icon: Monitor, label: "Affichage", subtitle: "Interface, logos, animations",
-      color: "#007AFF",
-      content: (
-        <div className="space-y-0">
-          <SettingRow label="Afficher les logos" subtitle="Logos des chaînes dans la liste"><Toggle checked={showLogos} onChange={setShowLogos} color="#007AFF" /></SettingRow><Divider />
-          <SettingRow label="Numéros de chaînes" subtitle="Numérotation dans la liste"><Toggle checked={showNumbers} onChange={setShowNumbers} color="#007AFF" /></SettingRow><Divider />
-          <SettingRow label="Mode compact" subtitle="Réduire l'espacement"><Toggle checked={compactMode} onChange={setCompactMode} color="#007AFF" /></SettingRow><Divider />
-          <SettingRow label="Horloge" subtitle="Afficher l'heure dans le header"><Toggle checked={showClock} onChange={setShowClock} color="#007AFF" /></SettingRow><Divider />
-          <SettingRow label="Aperçu de chaîne" subtitle="Mini-aperçu au survol"><Toggle checked={channelPreview} onChange={setChannelPreview} color="#007AFF" /></SettingRow><Divider />
-          <SettingRow label="Animations" subtitle="Transitions et animations de l'interface"><Toggle checked={animationsEnabled} onChange={setAnimationsEnabled} color="#007AFF" /></SettingRow>
-        </div>
-      ),
-    },
-    {
-      id: "interface", icon: Smartphone, label: "Interface générale", subtitle: "Page de démarrage, langue, tri",
-      color: "#FF9500",
-      content: (
-        <div className="space-y-0">
-          <SettingRow label="Page de démarrage" subtitle="Page affichée au lancement">
-            <SelectField value={startPage} onChange={setStartPage}
-              options={[{ value: "home", label: "Accueil" }, { value: "live", label: "TV en direct" }, { value: "last", label: "Dernière chaîne" }]} />
-          </SettingRow><Divider />
-          <SettingRow label="Langue" subtitle="Langue de l'interface">
-            <SelectField value={language} onChange={setLanguage}
-              options={[{ value: "fr", label: "Français" }, { value: "en", label: "English" }, { value: "ar", label: "العربية" }]} />
-          </SettingRow><Divider />
-          <SettingRow label="Tri des chaînes" subtitle="Ordre d'affichage par défaut">
-            <SelectField value={channelSortOrder} onChange={setChannelSortOrder}
-              options={[{ value: "default", label: "Par défaut" }, { value: "name", label: "Alphabétique" }, { value: "category", label: "Par catégorie" }, { value: "recent", label: "Récentes" }]} />
-          </SettingRow>
-        </div>
-      ),
-    },
-    {
-      id: "epg", icon: Tv, label: "EPG", subtitle: "Guide électronique des programmes",
-      color: "#34C759",
-      content: (
-        <div className="space-y-0">
-          <SettingRow label="Activer l'EPG" subtitle="Guide des programmes"><Toggle checked={epgEnabled} onChange={setEpgEnabled} color="#34C759" /></SettingRow>
-          {epgEnabled && (
-            <>
-              <Divider />
-              <SettingRow label="Afficher dans la liste" subtitle="Voir le programme en cours"><Toggle checked={showEpgInList} onChange={setShowEpgInList} color="#34C759" /></SettingRow><Divider />
-              <SettingRow label="Auto-refresh EPG" subtitle="Mettre à jour automatiquement"><Toggle checked={epgAutoRefresh} onChange={setEpgAutoRefresh} color="#34C759" /></SettingRow>
-              {epgAutoRefresh && (
-                <>
-                  <Divider />
-                  <SettingRow label="Intervalle de refresh" subtitle="Fréquence de mise à jour">
-                    <SelectField value={epgRefreshInterval} onChange={setEpgRefreshInterval}
-                      options={[{ value: "6", label: "6h" }, { value: "12", label: "12h" }, { value: "24", label: "24h" }, { value: "48", label: "48h" }]} />
-                  </SettingRow>
-                </>
-              )}
-              <Divider />
-              <div className="pt-3 px-1">
-                <label className="text-[11px] font-medium block mb-1.5" style={{ color: "#86868B" }}>URL du fichier EPG (XMLTV)</label>
-                <input value={epgUrl} onChange={e => setEpgUrl(e.target.value)}
-                  placeholder="https://example.com/epg.xml.gz"
-                  className="w-full rounded-xl px-3 py-2.5 text-[12px] border outline-none focus:border-[#34C759] transition-colors"
-                  style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
-              </div>
-            </>
-          )}
-        </div>
-      ),
-    },
-    {
-      id: "matchs", icon: Trophy, label: "Matchs & Sports", subtitle: "Bannière matchs et compétitions",
+      id: "matchs", icon: Trophy, label: t("settings.matchs"), subtitle: "Bannière matchs et compétitions",
       color: "#C9A84C",
       content: (
         <div className="space-y-4">
@@ -388,65 +533,141 @@ export default function Settings() {
         </div>
       ),
     },
+    // ── Parental Control ──
     {
-      id: "parental", icon: Lock, label: "Contrôle parental", subtitle: "Restrictions, code PIN, catégories adultes",
+      id: "parental", icon: Lock, label: t("settings.parental"), subtitle: t("s.parental_enable_sub"),
       color: "#FF3B30",
       content: (
         <div className="space-y-0">
-          <SettingRow label="Contrôle parental" subtitle="Bloquer les contenus sensibles"><Toggle checked={parentalEnabled} onChange={setParentalEnabled} color="#FF3B30" /></SettingRow>
-          {parentalEnabled && (
+          <SettingRow label={t("s.parental_enable")} subtitle={t("s.parental_enable_sub")}>
+            <Toggle checked={parental.enabled} onChange={v => setParental(p => ({ ...p, enabled: v }))} color="#FF3B30" />
+          </SettingRow>
+          {parental.enabled && (
             <>
               <Divider />
-              <SettingRow label="Masquer catégories adultes" subtitle="Cacher automatiquement le contenu XXX"><Toggle checked={hideAdultCats} onChange={setHideAdultCats} color="#FF3B30" /></SettingRow>
+              <div className="pt-3 px-1">
+                <label className="text-[11px] font-medium block mb-2" style={{ color: "#86868B" }}>{t("s.parental_pin")}</label>
+                <PinInput value={parental.pin} onChange={pin => setParental(p => ({ ...p, pin }))} />
+              </div>
               <Divider />
               <div className="pt-3 px-1">
-                <label className="text-[11px] font-medium block mb-1.5" style={{ color: "#86868B" }}>Code PIN (4 chiffres)</label>
-                <input value={parentalPin} onChange={e => { if (e.target.value.length <= 4 && /^\d*$/.test(e.target.value)) setParentalPin(e.target.value); }}
-                  placeholder="0000" maxLength={4}
-                  className="w-32 rounded-xl px-3 py-2.5 text-[14px] font-mono text-center border outline-none tracking-widest focus:border-[#FF3B30] transition-colors"
-                  style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+                <label className="text-[11px] font-medium block mb-2" style={{ color: "#86868B" }}>{t("s.parental_cats")}</label>
+                <p className="text-[10px] mb-2" style={{ color: "#48484A" }}>{t("s.parental_cats_sub")}</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {DEFAULT_HIDDEN_CATS.map(cat => {
+                    const active = parental.hiddenCategories.includes(cat);
+                    return (
+                      <button key={cat} onClick={() => {
+                        setParental(p => ({
+                          ...p,
+                          hiddenCategories: active
+                            ? p.hiddenCategories.filter(c => c !== cat)
+                            : [...p.hiddenCategories, cat]
+                        }));
+                      }}
+                        className="rounded-lg px-3 py-1.5 text-[11px] font-medium border transition-all"
+                        style={active
+                          ? { background: "rgba(255,59,48,0.12)", color: "#FF3B30", borderColor: "rgba(255,59,48,0.3)" }
+                          : { background: "#0A0A0F", color: "#48484A", borderColor: "#1C1C24" }
+                        }>
+                        {active ? "🔒 " : ""}{cat}
+                      </button>
+                    );
+                  })}
+                </div>
+                {parental.customCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {parental.customCategories.map(cat => (
+                      <span key={cat} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-medium"
+                        style={{ background: "rgba(255,59,48,0.12)", color: "#FF3B30", border: "1px solid rgba(255,59,48,0.3)" }}>
+                        🔒 {cat}
+                        <button onClick={() => removeCustomCategory(cat)} className="hover:opacity-70"><X size={12} /></button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <input value={customCatInput} onChange={e => setCustomCatInput(e.target.value)}
+                    placeholder={t("s.parental_custom")}
+                    onKeyDown={e => e.key === "Enter" && addCustomCategory()}
+                    className="flex-1 rounded-xl px-3 py-2 text-[12px] border outline-none focus:border-[#FF3B30] transition-colors"
+                    style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+                  <button onClick={addCustomCategory} className="rounded-xl px-3 py-2 text-[12px] font-medium transition-colors"
+                    style={{ background: "rgba(255,59,48,0.12)", color: "#FF3B30" }}>
+                    <Plus size={16} />
+                  </button>
+                </div>
               </div>
             </>
           )}
         </div>
       ),
     },
+    // ── Recording ──
     {
-      id: "dashboard", icon: LayoutDashboard, label: "Dashboard", subtitle: "Gestion à distance, code PIN",
-      color: "#C9A84C",
-      content: (
-        <div className="pt-1 px-1">
-          <label className="text-[11px] font-medium block mb-1.5" style={{ color: "#86868B" }}>Code PIN Dashboard (4 chiffres)</label>
-          <input value={dashboardPin} onChange={e => { if (e.target.value.length <= 4 && /^\d*$/.test(e.target.value)) setDashboardPin(e.target.value); }}
-            placeholder="1234" maxLength={4}
-            className="w-32 rounded-xl px-3 py-2.5 text-[14px] font-mono text-center border outline-none tracking-widest focus:border-[#C9A84C] transition-colors"
-            style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
-        </div>
-      ),
-    },
-    {
-      id: "refresh", icon: RefreshCw, label: "Actualisation auto", subtitle: "Mise à jour automatique des playlists",
-      color: "#007AFF",
+      id: "recording", icon: HardDrive, label: t("settings.recording"), subtitle: t("s.rec_quality"),
+      color: "#FF3B30",
       content: (
         <div className="space-y-0">
-          <SettingRow label="Actualisation automatique" subtitle="Rafraîchir les playlists périodiquement"><Toggle checked={autoRefresh} onChange={setAutoRefresh} color="#007AFF" /></SettingRow>
-          {autoRefresh && (
-            <><Divider />
-              <SettingRow label={`Intervalle : ${refreshInterval}h`} subtitle="Fréquence de mise à jour">
-                <input type="range" min={1} max={72} value={refreshInterval} onChange={e => setRefreshInterval(+e.target.value)} className="w-28 accent-[#007AFF]" />
-              </SettingRow>
-            </>
-          )}
+          <SettingRow label={t("s.rec_quality")} subtitle={t("s.rec_quality_sub")}>
+            <SelectField value={recQuality} onChange={setRecQuality}
+              options={[{ value: "original", label: t("misc.original") }, { value: "high", label: t("misc.high") }, { value: "medium", label: t("misc.medium") }]} />
+          </SettingRow><Divider />
+          <div className="px-1 py-3">
+            <div className="flex items-center gap-2 rounded-xl px-3 py-3" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
+              <Smartphone size={16} style={{ color: "#48484A" }} />
+              <p className="text-[11px]" style={{ color: "#86868B" }}>{t("msg.android_only")}</p>
+            </div>
+          </div>
         </div>
       ),
     },
+    // ── Backup ──
     {
-      id: "about", icon: Info, label: "À propos", subtitle: "Version, développeur, contact",
+      id: "backup", icon: Save, label: t("settings.backup"), subtitle: t("s.export") + " / " + t("s.import"),
+      color: "#5856D6",
+      content: (
+        <div className="space-y-2 px-1 py-2">
+          <button onClick={handleExport}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium transition-colors"
+            style={{ background: "#0A0A0F", color: "#5856D6", border: "1px solid #1C1C24" }}>
+            <FileDown size={18} />
+            <div className="text-left">
+              <p>{t("s.export")}</p>
+              <p className="text-[10px] font-normal" style={{ color: "#48484A" }}>{t("s.export_sub")}</p>
+            </div>
+          </button>
+          <button onClick={() => fileInputRef.current?.click()}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium transition-colors"
+            style={{ background: "#0A0A0F", color: "#34C759", border: "1px solid #1C1C24" }}>
+            <FileUp size={18} />
+            <div className="text-left">
+              <p>{t("s.import")}</p>
+              <p className="text-[10px] font-normal" style={{ color: "#48484A" }}>{t("s.import_sub")}</p>
+            </div>
+          </button>
+          <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+          <Divider />
+          <button onClick={handleReset}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium transition-colors"
+            style={{ background: "rgba(255,59,48,0.06)", color: "#FF3B30", border: "1px solid rgba(255,59,48,0.2)" }}>
+            <Trash2 size={18} />
+            <div className="text-left">
+              <p>{t("s.reset")}</p>
+              <p className="text-[10px] font-normal" style={{ color: "#48484A" }}>{t("s.reset_sub")}</p>
+            </div>
+          </button>
+        </div>
+      ),
+    },
+    // ── About ──
+    {
+      id: "about", icon: Info, label: t("settings.about"), subtitle: "Version, I-Success",
       color: "#86868B",
       content: (
         <div className="space-y-3">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-orange">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6D00] to-[#FFD60A]">
               <span className="text-lg font-bold text-white">CP</span>
             </div>
             <div>
@@ -456,11 +677,10 @@ export default function Settings() {
           </div>
           <div className="space-y-1.5">
             {[
-              { icon: Code, label: "Version", value: "2.1.0" },
-              { icon: Info, label: "Développeur", value: "I-Success" },
-              { icon: Globe, label: "Site web", value: "choufplay.app" },
-              { icon: Mail, label: "Contact", value: "support@choufplay.app" },
-              { icon: HardDrive, label: "Stockage", value: "localStorage" },
+              { icon: Code, label: t("s.version"), value: "2.0.0" },
+              { icon: Info, label: t("s.developer"), value: "I-Success" },
+              { icon: Globe, label: t("s.website"), value: "choufplay.app" },
+              { icon: Mail, label: t("s.contact"), value: "support@choufplay.app" },
             ].map(item => (
               <div key={item.label} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: "#0A0A0F" }}>
                 <item.icon size={14} style={{ color: "#48484A" }} className="shrink-0" />
@@ -469,6 +689,17 @@ export default function Settings() {
               </div>
             ))}
           </div>
+          <Divider />
+          <div className="space-y-1.5">
+            <button onClick={() => navigate("/privacy")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+              <Shield size={14} /><span>{t("s.privacy")}</span><ChevronRight size={14} className="ml-auto" style={{ color: "#48484A" }} />
+            </button>
+            <button onClick={() => navigate("/terms")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+              <Info size={14} /><span>{t("s.terms")}</span><ChevronRight size={14} className="ml-auto" style={{ color: "#48484A" }} />
+            </button>
+          </div>
+          <Divider />
+          <p className="text-[10px] px-1 py-2 leading-relaxed" style={{ color: "#48484A" }}>{t("s.disclaimer")}</p>
         </div>
       ),
     },
@@ -482,14 +713,27 @@ export default function Settings() {
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Paramètres</h1>
-          <p className="text-[10px]" style={{ color: "#48484A" }}>Configuration avancée</p>
+          <h1 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>{t("settings.title")}</h1>
+          <p className="text-[10px]" style={{ color: "#48484A" }}>{t("settings.subtitle")}</p>
         </div>
+        {parental.enabled && <Lock size={16} className="ml-auto" style={{ color: "#FF3B30" }} />}
       </header>
 
       <div className="mx-auto max-w-2xl p-4 sm:p-6 space-y-2">
+        {/* Group: Général */}
+        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-2 pb-1" style={{ color: "#48484A" }}>{t("settings.general")}</p>
+        {sections.filter(s => s.id === "general").map(section => (
+          <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
+              color={section.color} active={activeSection === section.id} onClick={() => toggleSection(section.id)} badge={section.badge} />
+            {activeSection === section.id && (
+              <div className="px-4 pb-4" style={{ borderTop: "1px solid #1C1C24" }}><div className="pt-2">{section.content}</div></div>
+            )}
+          </section>
+        ))}
+
         {/* Group: Lecture */}
-        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-2 pb-1" style={{ color: "#48484A" }}>Lecture</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Lecture</p>
         {sections.filter(s => ["player", "stream"].includes(s.id)).map(section => (
           <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
             <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
@@ -502,7 +746,7 @@ export default function Settings() {
 
         {/* Group: Interface */}
         <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Interface</p>
-        {sections.filter(s => ["display", "interface"].includes(s.id)).map(section => (
+        {sections.filter(s => s.id === "display").map(section => (
           <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
             <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
               color={section.color} active={activeSection === section.id} onClick={() => toggleSection(section.id)} />
@@ -514,7 +758,7 @@ export default function Settings() {
 
         {/* Group: Contenu */}
         <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Contenu</p>
-        {sections.filter(s => ["epg", "matchs"].includes(s.id)).map(section => (
+        {sections.filter(s => ["epg", "catchup", "matchs"].includes(s.id)).map(section => (
           <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
             <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
               color={section.color} active={activeSection === section.id} onClick={() => toggleSection(section.id)} />
@@ -524,9 +768,21 @@ export default function Settings() {
           </section>
         ))}
 
-        {/* Group: Sécurité & Maintenance */}
-        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Sécurité & Maintenance</p>
-        {sections.filter(s => ["parental", "dashboard", "refresh"].includes(s.id)).map(section => (
+        {/* Group: Sécurité */}
+        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Sécurité</p>
+        {sections.filter(s => ["parental", "recording"].includes(s.id)).map(section => (
+          <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
+              color={section.color} active={activeSection === section.id} onClick={() => toggleSection(section.id)} />
+            {activeSection === section.id && (
+              <div className="px-4 pb-4" style={{ borderTop: "1px solid #1C1C24" }}><div className="pt-2">{section.content}</div></div>
+            )}
+          </section>
+        ))}
+
+        {/* Group: Maintenance */}
+        <p className="text-[10px] font-bold uppercase tracking-widest px-2 pt-4 pb-1" style={{ color: "#48484A" }}>Maintenance</p>
+        {sections.filter(s => s.id === "backup").map(section => (
           <section key={section.id} className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
             <SectionHeader icon={section.icon} label={section.label} subtitle={section.subtitle}
               color={section.color} active={activeSection === section.id} onClick={() => toggleSection(section.id)} />
