@@ -1,4 +1,4 @@
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WeatherWidget } from "./WeatherWidget";
 import { SearchOverlay } from "./SearchOverlay";
