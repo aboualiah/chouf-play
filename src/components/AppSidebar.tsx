@@ -1,4 +1,4 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu, Clock, CalendarDays } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu, Clock, CalendarDays, LogOut, RotateCcw } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
 import { useState, useEffect, useMemo } from "react";
