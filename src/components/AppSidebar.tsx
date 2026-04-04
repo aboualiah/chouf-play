@@ -154,49 +154,7 @@ export function AppSidebar({
 
         <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
 
-        {/* Categories */}
-        {activeTab === "live" && (
-          <div className="mb-2">
-            <button
-              onClick={() => setCatOpen(!catOpen)}
-              className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: "#48484A" }}
-            >
-              <span>{t("cat.categories")}</span>
-              {catOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-            </button>
-            {catOpen && (
-              <div className="mt-0.5 space-y-0.5 max-h-48 overflow-y-auto scrollbar-thin">
-                <button
-                  onClick={() => onCategorySelect(null)}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${!activeCategory ? "font-medium" : "hover:bg-[#1C1C24]"}`}
-                  style={!activeCategory ? { color: "#FF6D00" } : { color: "#86868B" }}
-                >
-                  <span>{t("cat.all")}</span>
-                  <span className="text-[10px]" style={{ color: "#48484A" }}>{channels.length}</span>
-                </button>
-                {categories.map(cat => {
-                  const count = channels.filter(c => c.category === cat).length;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => onCategorySelect(cat)}
-                      className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${activeCategory === cat ? "font-medium" : "hover:bg-[#1C1C24]"}`}
-                      style={activeCategory === cat ? { color: "#FF6D00" } : { color: "#86868B" }}
-                    >
-                      <span className="truncate">{cat}</span>
-                      <span className="text-[10px]" style={{ color: "#48484A" }}>{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mx-2 my-2 h-px" style={{ background: "#1C1C24" }} />
-
-        {/* Mes Listes */}
+        {/* Mes Listes — integrated playlist selector + expiration */}
         <div>
           <button
             onClick={() => setListsOpen(!listsOpen)}
@@ -208,40 +166,65 @@ export function AppSidebar({
           </button>
           {listsOpen && (
             <div className="mt-0.5 space-y-0.5">
-              {playlists.map(p => (
-                <div
-                  key={p.id}
-                  className="group rounded-lg px-3 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] cursor-pointer"
-                  style={{ color: "#86868B" }}
-                  onMouseEnter={() => setHoverPlaylist(p.id)}
-                  onMouseLeave={() => setHoverPlaylist(null)}
-                >
-                  <div className="flex items-start gap-2">
-                    <Layers size={14} className="mt-0.5 shrink-0" style={{ color: "#48484A" }} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate flex-1">{p.name}</span>
-                        {p.isXtream && <Badge variant="outline" className="border-[#FF6D0030] bg-[#FF6D0012] text-[9px] uppercase tracking-wide" style={{ color: "#FF6D00" }}>Xtream</Badge>}
-                        {hoverPlaylist === p.id ? (
-                          <div className="flex gap-0.5">
-                            <button onClick={(e) => { e.stopPropagation(); onRefreshPlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430]">
-                              <RefreshCw size={11} />
-                            </button>
-                            <button onClick={(e) => { e.stopPropagation(); onDeletePlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430] text-destructive">
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-[10px]" style={{ color: "#48484A" }}>
-                            {p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}
-                          </span>
-                        )}
+              {playlists.map(p => {
+                const isActive = activePlaylistId === p.id || (!activePlaylistId && playlists.length === 1);
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => onPlaylistSelect?.(p.id)}
+                    className="group rounded-lg px-3 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] cursor-pointer"
+                    style={{
+                      color: isActive ? "#FF6D00" : "#86868B",
+                      background: isActive ? "rgba(255,109,0,0.06)" : undefined,
+                      borderLeft: isActive ? "2px solid #FF6D00" : "2px solid transparent",
+                    }}
+                    onMouseEnter={() => setHoverPlaylist(p.id)}
+                    onMouseLeave={() => setHoverPlaylist(null)}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Layers size={14} className="mt-0.5 shrink-0" style={{ color: isActive ? "#FF6D00" : "#48484A" }} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate flex-1">{p.name}</span>
+                          {p.isXtream && <Badge variant="outline" className="border-[#FF6D0030] bg-[#FF6D0012] text-[9px] uppercase tracking-wide" style={{ color: "#FF6D00" }}>Xtream</Badge>}
+                          {hoverPlaylist === p.id ? (
+                            <div className="flex gap-0.5">
+                              <button onClick={(e) => { e.stopPropagation(); onRefreshPlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430]">
+                                <RefreshCw size={11} />
+                              </button>
+                              <button onClick={(e) => { e.stopPropagation(); onDeletePlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430] text-destructive">
+                                <Trash2 size={11} />
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px]" style={{ color: "#48484A" }}>
+                              {p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}
+                            </span>
+                          )}
+                        </div>
+                        <XtreamAccountBadge playlist={p} />
+                        {/* Expiration per playlist */}
+                        {p.xtreamAccountInfo?.exp_date && (() => {
+                          const num = Number(p.xtreamAccountInfo.exp_date);
+                          if (Number.isNaN(num) || num <= 0) return null;
+                          const expDate = new Date(num > 1e12 ? num : num * 1000);
+                          if (Number.isNaN(expDate.getTime())) return null;
+                          const daysLeft = Math.ceil((expDate.getTime() - Date.now()) / 86400000);
+                          return (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <CalendarDays size={10} style={{ color: daysLeft < 7 ? "#FF9F0A" : "#34C759", filter: "drop-shadow(0 0 3px rgba(52,199,89,0.3))" }} />
+                              <span className="text-[9px]" style={{ color: daysLeft < 7 ? "#FF9F0A" : "#48484A" }}>
+                                {expDate.toLocaleDateString("fr-FR")}
+                                <span style={{ color: daysLeft < 7 ? "#FF9F0A" : "#34C759" }}> ({daysLeft}j)</span>
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
-                      <XtreamAccountBadge playlist={p} />
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={onAddPlaylist}
