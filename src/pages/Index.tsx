@@ -91,11 +91,15 @@ export default function Index() {
   }, [isMobile, activeTab, radioPlaying, stopRadio]);
 
   const handleBackToDashboard = useCallback(() => {
+    // Stop radio when going back to dashboard
+    if (activeTab === "radio" && radioPlaying) {
+      stopRadio();
+    }
     setActiveChannel(null);
     setView("dashboard");
     setShowEpgGrid(false);
     setShowRecordings(false);
-  }, []);
+  }, [activeTab, radioPlaying, stopRadio]);
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
