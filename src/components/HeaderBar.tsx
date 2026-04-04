@@ -1,4 +1,4 @@
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WeatherWidget } from "./WeatherWidget";
 import { SearchOverlay } from "./SearchOverlay";
@@ -16,6 +16,7 @@ interface HeaderBarProps {
   allVod?: Channel[];
   allSeries?: Channel[];
   onPlay?: (ch: Channel) => void;
+  onBackToDashboard?: () => void;
 }
 
 const TABS = [
@@ -36,7 +37,7 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard }: HeaderBarProps) {
   const now = useClock();
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });
@@ -63,6 +64,12 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         borderBottom: "1px solid #1C1C24",
       }}
     >
+      {/* Back to dashboard */}
+      {onBackToDashboard && (
+        <button onClick={onBackToDashboard} className="rounded-lg p-2 transition-colors hover:bg-white/5" style={{ color: "#FF6D00" }}>
+          <ArrowLeft size={18} />
+        </button>
+      )}
       {/* Tabs */}
       <div className="flex items-center gap-0.5">
         {TABS.map(tab => (

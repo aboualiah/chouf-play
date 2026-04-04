@@ -25,7 +25,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useI18n } from "@/lib/i18n";
 import { getParentalSettings, isCategoryHidden, isChannelLocked, verifyPin } from "@/lib/parental";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -37,6 +37,7 @@ export default function Index() {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const [view, setView] = useState<"dashboard" | "content">("dashboard");
   const [activeTab, setActiveTab] = useState("live");
   const [activeSubTab, setActiveSubTab] = useState("all");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -79,8 +80,16 @@ export default function Index() {
   const handleTabSelect = useCallback((tab: string) => {
     setActiveTab(tab);
     setActiveCategory(null);
+    setView("content");
     if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile]);
+
+  const handleBackToDashboard = useCallback(() => {
+    setActiveChannel(null);
+    setView("dashboard");
+    setShowEpgGrid(false);
+    setShowRecordings(false);
+  }, []);
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
@@ -244,7 +253,7 @@ export default function Index() {
     { color: "#007AFF", glow: "rgba(0,122,255,0.4)", label: "Options", action: () => {} },
   ];
 
-  // Determine which content view to render
+  // Determine which content view to render (content mode only, not dashboard)
   const renderContent = () => {
     if (showEpgGrid) {
       return <EpgGrid channels={allChannels} onPlay={handlePlay} />;
@@ -263,20 +272,6 @@ export default function Index() {
     }
     return (
       <>
-        {activeTab === "live" && playlists.length > 0 && !activeCategory && (
-          <DashboardCards
-            playlists={playlists}
-            allChannels={allChannels}
-            allVod={allVod}
-            allSeries={allSeries}
-            onTabSelect={handleTabSelect}
-            onPlay={handlePlay}
-            activePlaylistId={activePlaylistId}
-            onPlaylistSelect={setActivePlaylistId}
-            onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); }}
-            onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); }}
-          />
-        )}
         {activeTab === "live" && (
           <div className="flex items-center gap-2 px-5 py-3">
             {[
@@ -317,43 +312,61 @@ export default function Index() {
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
-          {/* Desktop sidebar */}
-          <div className="hidden md:flex">{sidebarContent}</div>
-
-          {/* Mobile drawer */}
-          <AnimatePresence>
-            {isMobile && mobileDrawerOpen && (
-              <>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }}
-                  onClick={() => setMobileDrawerOpen(false)} />
-                <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 250 }}
-                  className="fixed left-0 top-0 z-50 h-full">
-                  {sidebarContent}
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
+          {/* Sidebar: only in content view */}
+          {hasContent && view === "content" && (
+            <>
+              <div className="hidden md:flex">{sidebarContent}</div>
+              <AnimatePresence>
+                {isMobile && mobileDrawerOpen && (
+                  <>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }}
+                      onClick={() => setMobileDrawerOpen(false)} />
+                    <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                      className="fixed left-0 top-0 z-50 h-full">
+                      {sidebarContent}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </>
+          )}
 
           <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Mobile header */}
-            {isMobile && !activeChannel && (
-              <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
-                <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#86868B" }}>
-                  <Menu size={18} />
-                </button>
-                <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                  activeTab={activeTab} onTabSelect={handleTabSelect} compact
-                  allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
-              </div>
-            )}
-
-            {/* Desktop header */}
-            {!isMobile && !activeChannel && (
-              <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                activeTab={activeTab} onTabSelect={handleTabSelect}
-                allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
+            {/* Header: always show when not in player, but adapt for dashboard vs content */}
+            {!activeChannel && (
+              <>
+              {/* Mobile header - dashboard */}
+                {isMobile && view === "dashboard" && hasContent && (
+                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
+                      activeTab={activeTab} onTabSelect={handleTabSelect} compact
+                      allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
+                  </div>
+                )}
+                {/* Mobile header - content */}
+                {isMobile && view === "content" && (
+                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
+                      <ArrowLeft size={18} />
+                    </button>
+                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#86868B" }}>
+                      <Menu size={18} />
+                    </button>
+                    <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
+                      activeTab={activeTab} onTabSelect={handleTabSelect} compact
+                      allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
+                  </div>
+                )}
+                {/* Desktop header */}
+                {!isMobile && hasContent && (
+                  <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
+                    activeTab={activeTab} onTabSelect={handleTabSelect}
+                    allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
+                    onBackToDashboard={view === "content" ? handleBackToDashboard : undefined} />
+                )}
+              </>
             )}
 
             <div className="flex flex-1 overflow-hidden">
@@ -441,6 +454,22 @@ export default function Index() {
                 ) : !hasContent ? (
                   <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
                     <WelcomeScreen onAddPlaylist={() => setPlaylistModalOpen(true)} onSkipTrial={handleLoadDemo} />
+                  </motion.div>
+                ) : view === "dashboard" ? (
+                  <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="flex-1 overflow-y-auto scrollbar-thin">
+                    <DashboardCards
+                      playlists={playlists}
+                      allChannels={allChannels}
+                      allVod={allVod}
+                      allSeries={allSeries}
+                      onTabSelect={handleTabSelect}
+                      onPlay={handlePlay}
+                      activePlaylistId={activePlaylistId}
+                      onPlaylistSelect={setActivePlaylistId}
+                      onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
+                      onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
+                    />
                   </motion.div>
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
