@@ -10,6 +10,9 @@ import { PlaylistModal } from "@/components/PlaylistModal";
 import { DashboardCards } from "@/components/DashboardCards";
 import { EmptyState } from "@/components/EmptyState";
 import { EpgPanel } from "@/components/EpgPanel";
+import { EpgGrid } from "@/components/EpgGrid";
+import { CatchupPanel } from "@/components/CatchupPanel";
+import { RecordingsPanel } from "@/components/RecordingsPanel";
 import { FilmsGrid } from "@/components/FilmsGrid";
 import { SeriesGrid } from "@/components/SeriesGrid";
 import { RadioList, RadioMiniPlayer, useRadioPlayer } from "@/components/RadioPlayer";
@@ -42,6 +45,9 @@ export default function Index() {
   const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(false);
   const [showEpg, setShowEpg] = useState(false);
+  const [showCatchup, setShowCatchup] = useState(false);
+  const [showEpgGrid, setShowEpgGrid] = useState(false);
+  const [showRecordings, setShowRecordings] = useState(false);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
@@ -223,6 +229,12 @@ export default function Index() {
 
   // Determine which content view to render
   const renderContent = () => {
+    if (showEpgGrid) {
+      return <EpgGrid channels={allChannels} onPlay={handlePlay} />;
+    }
+    if (showRecordings) {
+      return <RecordingsPanel />;
+    }
     if (activeTab === "films" && allVod.length > 0) {
       return <FilmsGrid films={filteredChannels} favorites={favorites} onPlay={handlePlay} onToggleFavorite={handleToggleFavorite} />;
     }
@@ -244,6 +256,8 @@ export default function Index() {
             onPlay={handlePlay}
             activePlaylistId={activePlaylistId}
             onPlaylistSelect={setActivePlaylistId}
+            onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); }}
+            onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); }}
           />
         )}
         {activeTab === "live" && (
@@ -255,7 +269,7 @@ export default function Index() {
             ].map(t => (
               <button
                 key={t.id}
-                onClick={() => setActiveSubTab(t.id)}
+                onClick={() => { setActiveSubTab(t.id); setShowEpgGrid(false); setShowRecordings(false); }}
                 className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
                 style={activeSubTab === t.id
                   ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
@@ -374,6 +388,8 @@ export default function Index() {
                             onToggleFavorite={() => handleToggleFavorite(activeChannel.id)}
                             onPrev={handlePrevChannel}
                             onNext={handleNextChannel}
+                            onShowCatchup={() => setShowCatchup(true)}
+                            onShowEpg={() => setShowEpg(!showEpg)}
                           />
                         </div>
                         <AnimatePresence>
@@ -436,6 +452,16 @@ export default function Index() {
         onPlaylistLoaded={handlePlaylistLoaded}
         onLoadDemo={handleLoadDemo}
       />
+
+      {/* Catchup panel */}
+      {activeChannel && (
+        <CatchupPanel
+          channel={activeChannel}
+          open={showCatchup}
+          onClose={() => setShowCatchup(false)}
+          onPlay={(url) => { setShowCatchup(false); toast.info("Catch-up sera disponible dans une future version"); }}
+        />
+      )}
     </>
   );
 }

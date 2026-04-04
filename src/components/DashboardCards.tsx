@@ -13,6 +13,8 @@ interface DashboardCardsProps {
   onPlay: (channel: Channel) => void;
   activePlaylistId: string | null;
   onPlaylistSelect: (id: string | null) => void;
+  onShowEpg?: () => void;
+  onShowRecordings?: () => void;
 }
 
 const STAT_CARDS = [
@@ -49,6 +51,7 @@ const QUICK_BUTTONS = [
 export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
+  onShowEpg, onShowRecordings,
 }: DashboardCardsProps) {
   const [playlistDropdown, setPlaylistDropdown] = useState(false);
 
@@ -194,7 +197,11 @@ export function DashboardCards({
         {QUICK_BUTTONS.map(btn => (
           <button
             key={btn.label}
-            onClick={() => { if (btn.action === "radio") onTabSelect("radio"); }}
+            onClick={() => {
+              if (btn.action === "radio") onTabSelect("radio");
+              else if (btn.action === "epg") onShowEpg?.();
+              else if (btn.action === "recordings") onShowRecordings?.();
+            }}
             className="flex flex-col items-center gap-2 rounded-xl py-3 px-2 transition-all hover:bg-[#1C1C24]"
             style={{ background: "#131318", border: "1px solid #1C1C24" }}
           >
