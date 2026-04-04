@@ -35,8 +35,6 @@ export default function Index() {
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const SPLASH_DURATION = 3000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [view, setView] = useState<"dashboard" | "content">("dashboard");
