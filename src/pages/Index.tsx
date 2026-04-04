@@ -388,6 +388,8 @@ export default function Index() {
                             onToggleFavorite={() => handleToggleFavorite(activeChannel.id)}
                             onPrev={handlePrevChannel}
                             onNext={handleNextChannel}
+                            onShowCatchup={() => setShowCatchup(true)}
+                            onShowEpg={() => setShowEpg(!showEpg)}
                           />
                         </div>
                         <AnimatePresence>
