@@ -25,7 +25,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useI18n } from "@/lib/i18n";
 import { getParentalSettings, isCategoryHidden, isChannelLocked, verifyPin } from "@/lib/parental";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
