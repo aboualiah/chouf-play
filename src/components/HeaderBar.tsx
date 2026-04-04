@@ -16,6 +16,7 @@ interface HeaderBarProps {
   allVod?: Channel[];
   allSeries?: Channel[];
   onPlay?: (ch: Channel) => void;
+  onBackToDashboard?: () => void;
 }
 
 const TABS = [
