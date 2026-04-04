@@ -185,15 +185,15 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
           {/* Device ID */}
           <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
             style={{ background: "rgba(19,19,24,0.6)", border: "1px solid rgba(28,28,36,0.4)" }}>
-            <Fingerprint size={12} style={{ color: "#C9A84C" }} />
-            <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "1.5px" }}>
+            <Fingerprint size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
+            <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
               MAC : {deviceId}
             </span>
           </div>
           <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
             style={{ background: "rgba(19,19,24,0.6)", border: "1px solid rgba(28,28,36,0.4)" }}>
-            <span className="text-[10px]" style={{ color: "#C9A84C" }}>🔑</span>
-            <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "1.5px" }}>
+            <Shield size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
+            <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
               KEY : {deviceId.replace(/:/g, "").slice(0, 8)}
             </span>
           </div>

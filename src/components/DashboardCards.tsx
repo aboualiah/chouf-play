@@ -182,25 +182,7 @@ export function DashboardCards({
         ))}
       </div>
 
-      {/* Subscription bar */}
-      {accountInfo && (
-        <div className="flex items-center gap-3 rounded-xl px-4 py-2.5 backdrop-blur-sm" style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}>
-          <span className="text-[11px] font-medium" style={{ color: "#86868B" }}>
-            Expire: <span style={{ color: daysLeft !== null && daysLeft < 7 ? "#FF9F0A" : "#F5F5F7" }}>{expiresLabel}</span>
-            {daysLeft !== null && (
-              <span style={{ color: daysLeft < 7 ? "#FF9F0A" : "#34C759" }}> ({daysLeft}j)</span>
-            )}
-          </span>
-          {daysLeft !== null && (
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(28,28,36,0.8)" }}>
-              <div className="h-full rounded-full" style={{
-                width: `${Math.max(0, Math.min(100, (daysLeft / 365) * 100))}%`,
-                background: daysLeft < 7 ? "#FF9F0A" : daysLeft < 30 ? "#FFD60A" : "#34C759",
-              }} />
-            </div>
-          )}
-        </div>
-      )}
+      {/* Subscription info moved to sidebar */}
     </div>
   );
 }
