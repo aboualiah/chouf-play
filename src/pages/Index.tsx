@@ -85,7 +85,6 @@ export default function Index() {
     setActiveTab(tab);
     setActiveCategory(null);
     setView("content");
-    if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile, activeTab, radioPlaying, stopRadio]);
 
   const handleBackToDashboard = useCallback(() => {
