@@ -1,6 +1,5 @@
 import { LayoutGrid, List, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { WeatherWidget } from "./WeatherWidget";
 import { SearchOverlay } from "./SearchOverlay";
 import { Channel } from "@/lib/channels";
 
