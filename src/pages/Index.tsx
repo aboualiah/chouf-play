@@ -118,7 +118,7 @@ export default function Index() {
       case "films": return allVod;
       case "series": return allSeries;
       case "favorites": return [...allChannels, ...allVod, ...allSeries].filter(c => favorites.includes(c.id));
-      case "radio": return allChannels.filter(c => c.category?.toLowerCase().includes("radio"));
+      case "radio": return [...allChannels.filter(c => c.category?.toLowerCase().includes("radio")), ...RADIO_STATIONS];
       default: return allChannels;
     }
   }, [activeTab, allChannels, allVod, allSeries, favorites]);
