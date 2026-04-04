@@ -243,6 +243,8 @@ export default function Index() {
           localStorage.setItem("chouf_sidebar_collapsed", String(next));
         }
       }}
+      activePlaylistId={activePlaylistId}
+      onPlaylistSelect={setActivePlaylistId}
     />
   );
 
