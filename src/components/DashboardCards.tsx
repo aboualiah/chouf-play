@@ -22,22 +22,31 @@ const STAT_CARDS = [
     id: "live",
     label: "LIVE TV",
     icon: Tv,
-    gradient: "linear-gradient(135deg, #FF6D00, #FFD60A)",
-    shadow: "0 8px 32px rgba(255,109,0,0.3)",
+    gradient: "linear-gradient(135deg, rgba(255,109,0,0.20), rgba(255,214,10,0.12))",
+    border: "rgba(255,109,0,0.25)",
+    iconColor: "#FF6D00",
+    accentGlow: "0 0 40px rgba(255,109,0,0.10)",
+    shimmer: "linear-gradient(135deg, rgba(255,109,0,0.08) 0%, transparent 60%)",
   },
   {
     id: "films",
     label: "FILMS",
     icon: Film,
-    gradient: "linear-gradient(135deg, #FF3B80, #8B5CF6)",
-    shadow: "0 8px 32px rgba(255,59,128,0.3)",
+    gradient: "linear-gradient(135deg, rgba(201,168,76,0.20), rgba(255,159,10,0.12))",
+    border: "rgba(201,168,76,0.25)",
+    iconColor: "#C9A84C",
+    accentGlow: "0 0 40px rgba(201,168,76,0.10)",
+    shimmer: "linear-gradient(135deg, rgba(201,168,76,0.08) 0%, transparent 60%)",
   },
   {
     id: "series",
     label: "SÉRIES",
     icon: Clapperboard,
-    gradient: "linear-gradient(135deg, #7C3AED, #3B82F6)",
-    shadow: "0 8px 32px rgba(124,58,237,0.3)",
+    gradient: "linear-gradient(135deg, rgba(124,58,237,0.20), rgba(59,130,246,0.12))",
+    border: "rgba(124,58,237,0.25)",
+    iconColor: "#7C3AED",
+    accentGlow: "0 0 40px rgba(124,58,237,0.10)",
+    shimmer: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, transparent 60%)",
   },
 ];
 
@@ -63,14 +72,12 @@ export function DashboardCards({
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
-  // Recent channels
   const recentIds = getRecent();
   const recentChannels = useMemo(() => {
     const all = [...allChannels, ...allVod, ...allSeries];
     return recentIds.slice(0, 10).map(id => all.find(c => c.id === id)).filter(Boolean) as Channel[];
   }, [recentIds, allChannels, allVod, allSeries]);
 
-  // Subscription info from active playlist
   const accountInfo = activePlaylist?.xtreamAccountInfo;
   let expiresLabel = "—";
   let daysLeft: number | null = null;
@@ -92,8 +99,12 @@ export function DashboardCards({
       <div className="relative">
         <button
           onClick={() => setPlaylistDropdown(!playlistDropdown)}
-          className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all w-full"
-          style={{ background: "rgba(255,109,0,0.08)", border: "1px solid rgba(255,109,0,0.15)", color: "#F5F5F7" }}
+          className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all w-full backdrop-blur-md"
+          style={{
+            background: "rgba(255,109,0,0.06)",
+            border: "1px solid rgba(255,109,0,0.12)",
+            color: "#F5F5F7",
+          }}
         >
           <span className="text-base">📡</span>
           <span className="flex-1 text-left truncate">
@@ -107,12 +118,12 @@ export function DashboardCards({
         {playlistDropdown && (
           <motion.div
             initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 right-0 z-30 mt-1 rounded-xl overflow-hidden shadow-2xl"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}
+            className="absolute top-full left-0 right-0 z-30 mt-1 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
+            style={{ background: "rgba(19,19,24,0.95)", border: "1px solid rgba(28,28,36,0.8)" }}
           >
             <button
               onClick={() => { onPlaylistSelect(null); setPlaylistDropdown(false); }}
-              className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-[#1C1C24] transition-colors"
+              className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-white/5 transition-colors"
               style={{ color: !activePlaylistId ? "#FF6D00" : "#86868B" }}
             >
               Toutes les playlists
@@ -121,7 +132,7 @@ export function DashboardCards({
               <button
                 key={p.id}
                 onClick={() => { onPlaylistSelect(p.id); setPlaylistDropdown(false); }}
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-[#1C1C24] transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-2.5 text-[12px] hover:bg-white/5 transition-colors"
                 style={{ color: activePlaylistId === p.id ? "#FF6D00" : "#F5F5F7" }}
               >
                 <span className="truncate flex-1 text-left">{p.name}</span>
@@ -134,7 +145,7 @@ export function DashboardCards({
         )}
       </div>
 
-      {/* 3 Stat cards */}
+      {/* 3 Stat cards — transparent premium */}
       <div className="grid grid-cols-3 gap-3">
         {STAT_CARDS.map((card, i) => (
           <motion.button
@@ -143,17 +154,25 @@ export function DashboardCards({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             onClick={() => onTabSelect(card.id)}
-            className="group relative rounded-2xl p-4 text-left overflow-hidden transition-all hover:scale-[1.03]"
-            style={{ background: card.gradient, boxShadow: card.shadow }}
+            className="group relative rounded-2xl p-4 text-left overflow-hidden transition-all backdrop-blur-md"
+            style={{
+              background: card.gradient,
+              border: `1px solid ${card.border}`,
+              boxShadow: card.accentGlow,
+            }}
             whileHover={{ scale: 1.03 }}
           >
-            {/* Shimmer */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none"
-              style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%)" }} />
-            <card.icon size={24} className="text-white/90 mb-2" />
-            <p className="text-[11px] font-bold text-white/80 uppercase tracking-wider">{card.label}</p>
-            <p className="text-2xl font-black text-white mt-0.5 tabular-nums">{counts[card.id as keyof typeof counts].toLocaleString()}</p>
-            <ArrowRight size={16} className="absolute bottom-4 right-4 text-white/50 group-hover:text-white/80 transition-colors" />
+            {/* Inner shimmer highlight */}
+            <div className="absolute inset-0 pointer-events-none opacity-60" style={{ background: card.shimmer }} />
+            {/* Metallic icon glow */}
+            <div className="relative mb-2">
+              <card.icon size={24} style={{ color: card.iconColor, filter: `drop-shadow(0 0 6px ${card.iconColor}55)` }} />
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: `${card.iconColor}CC` }}>{card.label}</p>
+            <p className="text-2xl font-black mt-0.5 tabular-nums" style={{ color: "#F5F5F7" }}>
+              {counts[card.id as keyof typeof counts].toLocaleString()}
+            </p>
+            <ArrowRight size={16} className="absolute bottom-4 right-4 transition-colors" style={{ color: `${card.iconColor}50` }} />
           </motion.button>
         ))}
       </div>
@@ -169,10 +188,10 @@ export function DashboardCards({
               <button
                 key={ch.id}
                 onClick={() => onPlay(ch)}
-                className="group shrink-0 rounded-xl overflow-hidden transition-all hover:scale-105"
-                style={{ width: 120, background: "#131318", border: "1px solid #1C1C24" }}
+                className="group shrink-0 rounded-xl overflow-hidden transition-all hover:scale-105 backdrop-blur-sm"
+                style={{ width: 120, background: "rgba(19,19,24,0.7)", border: "1px solid rgba(28,28,36,0.6)" }}
               >
-                <div className="relative h-[72px] flex items-center justify-center" style={{ background: "#1C1C24" }}>
+                <div className="relative h-[72px] flex items-center justify-center" style={{ background: "rgba(28,28,36,0.5)" }}>
                   {ch.logo ? (
                     <img src={ch.logo} className="h-10 w-10 object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   ) : (
@@ -202,10 +221,10 @@ export function DashboardCards({
               else if (btn.action === "epg") onShowEpg?.();
               else if (btn.action === "recordings") onShowRecordings?.();
             }}
-            className="flex flex-col items-center gap-2 rounded-xl py-3 px-2 transition-all hover:bg-[#1C1C24]"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}
+            className="flex flex-col items-center gap-2 rounded-xl py-3 px-2 transition-all hover:bg-white/5 backdrop-blur-sm"
+            style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}
           >
-            <btn.icon size={18} style={{ color: "#C9A84C" }} />
+            <btn.icon size={18} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
             <span className="text-[10px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
           </button>
         ))}
@@ -213,7 +232,7 @@ export function DashboardCards({
 
       {/* Subscription bar */}
       {accountInfo && (
-        <div className="flex items-center gap-3 rounded-xl px-4 py-2.5" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="flex items-center gap-3 rounded-xl px-4 py-2.5 backdrop-blur-sm" style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}>
           <span className="text-[11px] font-medium" style={{ color: "#86868B" }}>
             Expire: <span style={{ color: daysLeft !== null && daysLeft < 7 ? "#FF9F0A" : "#F5F5F7" }}>{expiresLabel}</span>
             {daysLeft !== null && (
@@ -221,7 +240,7 @@ export function DashboardCards({
             )}
           </span>
           {daysLeft !== null && (
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "#1C1C24" }}>
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(28,28,36,0.8)" }}>
               <div className="h-full rounded-full" style={{
                 width: `${Math.max(0, Math.min(100, (daysLeft / 365) * 100))}%`,
                 background: daysLeft < 7 ? "#FF9F0A" : daysLeft < 30 ? "#FFD60A" : "#34C759",
