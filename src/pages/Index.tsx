@@ -145,6 +145,7 @@ export default function Index() {
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
+    localStorage.setItem("chouf_has_setup", "true");
     toast.success(t("msg.demo_loaded"));
   }, []);
 
