@@ -22,11 +22,14 @@ import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useI18n } from "@/lib/i18n";
+import { getParentalSettings, isCategoryHidden, isChannelLocked, verifyPin } from "@/lib/parental";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
@@ -83,14 +86,22 @@ export default function Index() {
     if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile]);
 
+  const parentalFilter = useCallback((ch: Channel) => {
+    const ps = getParentalSettings();
+    if (!ps.enabled) return true;
+    if (isChannelLocked(ch.id)) return false;
+    if (ch.category && isCategoryHidden(ch.category)) return false;
+    return true;
+  }, []);
+
   const allChannels = useMemo(() => {
     const base = demoLoaded ? DEMO_CHANNELS : [];
     const extra = playlists.flatMap(p => p.channels);
-    return [...base, ...extra];
-  }, [playlists, demoLoaded]);
+    return [...base, ...extra].filter(parentalFilter);
+  }, [playlists, demoLoaded, parentalFilter]);
 
-  const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []), [playlists]);
-  const allSeries = useMemo(() => playlists.flatMap(p => p.series || []), [playlists]);
+  const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []).filter(parentalFilter), [playlists, parentalFilter]);
+  const allSeries = useMemo(() => playlists.flatMap(p => p.series || []).filter(parentalFilter), [playlists, parentalFilter]);
 
   const contentForTab = useMemo(() => {
     switch (activeTab) {
@@ -133,7 +144,7 @@ export default function Index() {
 
   const handleLoadDemo = useCallback(() => {
     setDemoLoaded(true);
-    toast.success("15 chaînes démo chargées");
+    toast.success(t("msg.demo_loaded"));
   }, []);
 
   const handlePlaylistLoaded = useCallback((name: string, channels: Channel[], xtreamData?: XtreamPlaylistData) => {
@@ -160,7 +171,7 @@ export default function Index() {
       savePlaylists(updated);
       return updated;
     });
-    toast.success("Playlist supprimée");
+    toast.success(t("msg.playlist_deleted"));
   }, []);
 
   const handlePrevChannel = useCallback(() => {
@@ -263,21 +274,21 @@ export default function Index() {
         {activeTab === "live" && (
           <div className="flex items-center gap-2 px-5 py-3">
             {[
-              { id: "all", label: "Toutes", icon: Radio },
-              { id: "favorites", label: "Favoris", icon: Star },
-              { id: "recent", label: "Récentes", icon: Clock },
-            ].map(t => (
+              { id: "all", label: t("cat.all"), icon: Radio },
+              { id: "favorites", label: t("nav.favorites"), icon: Star },
+              { id: "recent", label: t("cat.recent"), icon: Clock },
+            ].map(tab => (
               <button
-                key={t.id}
-                onClick={() => { setActiveSubTab(t.id); setShowEpgGrid(false); setShowRecordings(false); }}
+                key={tab.id}
+                onClick={() => { setActiveSubTab(tab.id); setShowEpgGrid(false); setShowRecordings(false); }}
                 className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium transition-all"
-                style={activeSubTab === t.id
+                style={activeSubTab === tab.id
                   ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" }
                   : { color: "#86868B", border: "1px solid #1C1C24" }
                 }
               >
-                <t.icon size={13} />
-                <span>{t.label}</span>
+                <tab.icon size={13} />
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>

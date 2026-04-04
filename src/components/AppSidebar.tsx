@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { XtreamAccountBadge } from "./XtreamAccountBadge";
 import { QRCodePortal } from "./QRCodePortal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useI18n } from "@/lib/i18n";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -24,12 +25,12 @@ interface AppSidebarProps {
   onToggleCollapse: () => void;
 }
 
-const NAV_ITEMS = [
-  { id: "live", label: "TV en direct", icon: Tv },
-  { id: "films", label: "Films", icon: Film },
-  { id: "series", label: "Séries", icon: Clapperboard },
-  { id: "favorites", label: "Favoris", icon: Heart },
-  { id: "radio", label: "Radio", icon: Radio },
+const NAV_KEYS = [
+  { id: "live", key: "nav.live", icon: Tv },
+  { id: "films", key: "nav.films", icon: Film },
+  { id: "series", key: "nav.series", icon: Clapperboard },
+  { id: "favorites", key: "nav.favorites", icon: Heart },
+  { id: "radio", key: "nav.radio", icon: Radio },
 ];
 
 export function AppSidebar({
@@ -37,6 +38,8 @@ export function AppSidebar({
   onCategorySelect, onTabSelect, onAddPlaylist,
   onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
+  const { t } = useI18n();
+  const NAV_ITEMS = NAV_KEYS.map(n => ({ ...n, label: t(n.key) }));
   const [catOpen, setCatOpen] = useState(true);
   const [listsOpen, setListsOpen] = useState(true);
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
@@ -55,7 +58,7 @@ export function AppSidebar({
                 <Menu size={20} style={{ color: "#C9A84C" }} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right"><p>Ouvrir le menu</p></TooltipContent>
+            <TooltipContent side="right"><p>{t("sidebar.open")}</p></TooltipContent>
           </Tooltip>
 
           <nav className="flex flex-col items-center gap-1">
@@ -156,7 +159,7 @@ export function AppSidebar({
               className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
               style={{ color: "#48484A" }}
             >
-              <span>Catégories</span>
+              <span>{t("cat.categories")}</span>
               {catOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
             {catOpen && (
@@ -166,7 +169,7 @@ export function AppSidebar({
                   className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[12px] transition-colors ${!activeCategory ? "font-medium" : "hover:bg-[#1C1C24]"}`}
                   style={!activeCategory ? { color: "#FF6D00" } : { color: "#86868B" }}
                 >
-                  <span>Toutes</span>
+                  <span>{t("cat.all")}</span>
                   <span className="text-[10px]" style={{ color: "#48484A" }}>{channels.length}</span>
                 </button>
                 {categories.map(cat => {
@@ -197,7 +200,7 @@ export function AppSidebar({
             className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
             style={{ color: "#48484A" }}
           >
-            <span>Mes Listes</span>
+            <span>{t("cat.my_lists")}</span>
             {listsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
           {listsOpen && (
