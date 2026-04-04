@@ -253,7 +253,7 @@ export default function Index() {
     { color: "#007AFF", glow: "rgba(0,122,255,0.4)", label: "Options", action: () => {} },
   ];
 
-  // Determine which content view to render
+  // Determine which content view to render (content mode only, not dashboard)
   const renderContent = () => {
     if (showEpgGrid) {
       return <EpgGrid channels={allChannels} onPlay={handlePlay} />;
@@ -272,20 +272,6 @@ export default function Index() {
     }
     return (
       <>
-        {activeTab === "live" && playlists.length > 0 && !activeCategory && (
-          <DashboardCards
-            playlists={playlists}
-            allChannels={allChannels}
-            allVod={allVod}
-            allSeries={allSeries}
-            onTabSelect={handleTabSelect}
-            onPlay={handlePlay}
-            activePlaylistId={activePlaylistId}
-            onPlaylistSelect={setActivePlaylistId}
-            onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); }}
-            onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); }}
-          />
-        )}
         {activeTab === "live" && (
           <div className="flex items-center gap-2 px-5 py-3">
             {[
