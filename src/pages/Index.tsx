@@ -312,8 +312,8 @@ export default function Index() {
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
-          {/* Sidebar: only in content view */}
-          {hasContent && view === "content" && (
+          {/* Sidebar: only in dashboard view */}
+          {hasContent && view === "dashboard" && (
             <>
               <div className="hidden md:flex">{sidebarContent}</div>
               <AnimatePresence>
