@@ -149,8 +149,7 @@ export default function Index() {
     setActiveChannel(channel);
     addRecent(channel.id);
     setShowEpg(false);
-    if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile, radioPlaying, stopRadio]);
+  }, [radioPlaying, stopRadio]);
 
   const handleRadioSelect = useCallback((station: Channel) => {
     // Stop video when playing radio
