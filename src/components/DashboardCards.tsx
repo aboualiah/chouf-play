@@ -13,6 +13,8 @@ interface DashboardCardsProps {
   onPlay: (channel: Channel) => void;
   activePlaylistId: string | null;
   onPlaylistSelect: (id: string | null) => void;
+  onShowEpg?: () => void;
+  onShowRecordings?: () => void;
 }
 
 const STAT_CARDS = [
