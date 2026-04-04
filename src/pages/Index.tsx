@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Radio, Star, Clock, Play, Filter } from "lucide-react";
+import { Radio, Star, Clock, Play, Filter, ArrowLeft } from "lucide-react";
 import { getRecent } from "@/lib/storage";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
-import { AppSidebar } from "@/components/AppSidebar";
 import { HeaderBar } from "@/components/HeaderBar";
 import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
@@ -27,7 +26,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useI18n } from "@/lib/i18n";
 import { getParentalSettings, isCategoryHidden, isChannelLocked, verifyPin } from "@/lib/parental";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Index() {
@@ -36,8 +34,6 @@ export default function Index() {
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
   const SPLASH_DURATION = 3000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("chouf_sidebar_collapsed") === "true");
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [view, setView] = useState<"dashboard" | "content">("dashboard");
@@ -88,7 +84,6 @@ export default function Index() {
     setActiveTab(tab);
     setActiveCategory(null);
     setView("content");
-    if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile, activeTab, radioPlaying, stopRadio]);
 
   const handleBackToDashboard = useCallback(() => {
@@ -104,8 +99,7 @@ export default function Index() {
 
   const handleCategorySelect = useCallback((cat: string | null) => {
     setActiveCategory(cat);
-    if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile]);
+  }, []);
 
   const parentalFilter = useCallback((ch: Channel) => {
     const ps = getParentalSettings();
@@ -154,8 +148,7 @@ export default function Index() {
     setActiveChannel(channel);
     addRecent(channel.id);
     setShowEpg(false);
-    if (isMobile) setMobileDrawerOpen(false);
-  }, [isMobile, radioPlaying, stopRadio]);
+  }, [radioPlaying, stopRadio]);
 
   const handleRadioSelect = useCallback((station: Channel) => {
     // Stop video when playing radio
@@ -232,32 +225,8 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
-  const sidebarContent = (
-    <AppSidebar
-      channels={activeTab === "films" ? allVod : activeTab === "series" ? allSeries : allChannels}
-      favorites={favorites}
-      activeCategory={activeCategory}
-      activeTab={activeTab}
-      onCategorySelect={handleCategorySelect}
-      onTabSelect={handleTabSelect}
-      onAddPlaylist={() => setPlaylistModalOpen(true)}
-      onDeletePlaylist={handleDeletePlaylist}
-      onRefreshPlaylist={() => {}}
-      playlists={playlists}
-      collapsed={!isMobile && sidebarCollapsed}
-      onToggleCollapse={() => {
-        if (isMobile) {
-          setMobileDrawerOpen(false);
-        } else {
-          const next = !sidebarCollapsed;
-          setSidebarCollapsed(next);
-          localStorage.setItem("chouf_sidebar_collapsed", String(next));
-        }
-      }}
-      activePlaylistId={activePlaylistId}
-      onPlaylistSelect={setActivePlaylistId}
-    />
-  );
+
+
 
   const COLOR_PASTILLES = [
     { color: "#FF3B30", glow: "rgba(255,59,48,0.4)", label: "Favoris", action: () => activeChannel && handleToggleFavorite(activeChannel.id) },
@@ -382,55 +351,22 @@ export default function Index() {
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
-          {/* Sidebar: only in dashboard view */}
-          {hasContent && view === "dashboard" && (
-            <>
-              <div className="hidden md:flex">{sidebarContent}</div>
-              <AnimatePresence>
-                {isMobile && mobileDrawerOpen && (
-                  <>
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }}
-                      onClick={() => setMobileDrawerOpen(false)} />
-                    <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
-                      transition={{ type: "spring", damping: 25, stiffness: 250 }}
-                      className="fixed left-0 top-0 z-50 h-full">
-                      {sidebarContent}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </>
-          )}
-
           <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Header: always show when not in player, but adapt for dashboard vs content */}
-            {!activeChannel && (
+            {/* Header */}
+            {!activeChannel && hasContent && (
               <>
-              {/* Mobile header - dashboard */}
-                {isMobile && view === "dashboard" && hasContent && (
+                {isMobile ? (
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
-                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#C9A84C" }}>
-                      <Menu size={18} />
-                    </button>
+                    {view === "content" && (
+                      <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
+                        <ArrowLeft size={18} />
+                      </button>
+                    )}
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
                       allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
                   </div>
-                )}
-                {/* Mobile header - content */}
-                {isMobile && view === "content" && (
-                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
-                    <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
-                      <ArrowLeft size={18} />
-                    </button>
-                    <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
-                      activeTab={activeTab} onTabSelect={handleTabSelect} compact
-                      allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
-                  </div>
-                )}
-                {/* Desktop header */}
-                {!isMobile && hasContent && (
+                ) : (
                   <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
@@ -546,6 +482,7 @@ export default function Index() {
                       onPlaylistSelect={setActivePlaylistId}
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
+                      onAddPlaylist={() => setPlaylistModalOpen(true)}
                     />
                   </motion.div>
                 ) : (
