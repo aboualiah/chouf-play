@@ -86,14 +86,22 @@ export default function Index() {
     if (isMobile) setMobileDrawerOpen(false);
   }, [isMobile]);
 
+  const parentalFilter = useCallback((ch: Channel) => {
+    const ps = getParentalSettings();
+    if (!ps.enabled) return true;
+    if (isChannelLocked(ch.id)) return false;
+    if (ch.category && isCategoryHidden(ch.category)) return false;
+    return true;
+  }, []);
+
   const allChannels = useMemo(() => {
     const base = demoLoaded ? DEMO_CHANNELS : [];
     const extra = playlists.flatMap(p => p.channels);
-    return [...base, ...extra];
-  }, [playlists, demoLoaded]);
+    return [...base, ...extra].filter(parentalFilter);
+  }, [playlists, demoLoaded, parentalFilter]);
 
-  const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []), [playlists]);
-  const allSeries = useMemo(() => playlists.flatMap(p => p.series || []), [playlists]);
+  const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []).filter(parentalFilter), [playlists, parentalFilter]);
+  const allSeries = useMemo(() => playlists.flatMap(p => p.series || []).filter(parentalFilter), [playlists, parentalFilter]);
 
   const contentForTab = useMemo(() => {
     switch (activeTab) {
