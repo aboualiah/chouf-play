@@ -260,7 +260,7 @@ function PremiumBanner() {
             <p className="text-[11px] mt-0.5" style={{ color: "#86868B" }}>
               Multi-playlists, EPG, Xtream, PiP, thèmes personnalisés
             </p>
-            <p className="text-[12px] font-bold mt-1" style={{ color: "#C9A84C" }}>9,99 EUR/an</p>
+            <p className="text-[12px] font-bold mt-1" style={{ color: "#C9A84C" }}>8,99 €/an · 24,99 € à vie</p>
           </div>
           <ArrowRight size={18} style={{ color: "#C9A84C40" }} />
         </div>

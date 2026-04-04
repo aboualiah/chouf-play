@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { X, Crown, Users, MonitorOff, Headphones, Check } from "lucide-react";
 
 const PLANS = [
-  { id: "monthly", price: "2,99 €", period: "/mois", badge: null },
   { id: "lifetime", price: "24,99 €", period: "À vie", badge: "Meilleure offre" },
   { id: "yearly", price: "8,99 €", period: "/an", badge: null },
 ];
@@ -68,7 +67,7 @@ export default function Premium() {
         </div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
           {PLANS.map((plan, i) => {
             const isActive = selected === plan.id;
             const isLifetime = plan.id === "lifetime";
