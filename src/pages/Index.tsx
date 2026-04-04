@@ -16,7 +16,7 @@ import { RecordingsPanel } from "@/components/RecordingsPanel";
 import { FilmsGrid } from "@/components/FilmsGrid";
 import { SeriesGrid } from "@/components/SeriesGrid";
 import { RadioList, RadioMiniPlayer, useRadioPlayer } from "@/components/RadioPlayer";
-import { DEMO_CHANNELS, Channel } from "@/lib/channels";
+import { DEMO_CHANNELS, RADIO_STATIONS, Channel } from "@/lib/channels";
 import { getFavorites, toggleFavorite, getPlaylists, savePlaylists, loadPlaylistsAsync, addRecent, Playlist } from "@/lib/storage";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -105,10 +105,10 @@ export default function Index() {
   }, []);
 
   const allChannels = useMemo(() => {
-    const base = demoLoaded ? DEMO_CHANNELS : [];
+    // Demo channels are separate - they have their own page. Only playlist channels here.
     const extra = playlists.flatMap(p => p.channels);
-    return [...base, ...extra].filter(parentalFilter);
-  }, [playlists, demoLoaded, parentalFilter]);
+    return extra.filter(parentalFilter);
+  }, [playlists, parentalFilter]);
 
   const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []).filter(parentalFilter), [playlists, parentalFilter]);
   const allSeries = useMemo(() => playlists.flatMap(p => p.series || []).filter(parentalFilter), [playlists, parentalFilter]);
@@ -118,7 +118,7 @@ export default function Index() {
       case "films": return allVod;
       case "series": return allSeries;
       case "favorites": return [...allChannels, ...allVod, ...allSeries].filter(c => favorites.includes(c.id));
-      case "radio": return allChannels.filter(c => c.category?.toLowerCase().includes("radio"));
+      case "radio": return [...allChannels.filter(c => c.category?.toLowerCase().includes("radio")), ...RADIO_STATIONS];
       default: return allChannels;
     }
   }, [activeTab, allChannels, allVod, allSeries, favorites]);
@@ -219,7 +219,7 @@ export default function Index() {
     } : undefined,
   });
 
-  const hasContent = allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
+  const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
   const sidebarContent = (
     <AppSidebar
@@ -312,8 +312,8 @@ export default function Index() {
 
       {!splash && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
-          {/* Sidebar: only in content view */}
-          {hasContent && view === "content" && (
+          {/* Sidebar: only in dashboard view */}
+          {hasContent && view === "dashboard" && (
             <>
               <div className="hidden md:flex">{sidebarContent}</div>
               <AnimatePresence>
@@ -340,6 +340,9 @@ export default function Index() {
               {/* Mobile header - dashboard */}
                 {isMobile && view === "dashboard" && hasContent && (
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#C9A84C" }}>
+                      <Menu size={18} />
+                    </button>
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
                       allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
@@ -350,9 +353,6 @@ export default function Index() {
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
                     <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
                       <ArrowLeft size={18} />
-                    </button>
-                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#86868B" }}>
-                      <Menu size={18} />
                     </button>
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
@@ -460,10 +460,17 @@ export default function Index() {
                     className="flex-1 overflow-y-auto scrollbar-thin">
                     <DashboardCards
                       playlists={playlists}
-                      allChannels={allChannels}
+                      allChannels={demoLoaded && allChannels.length === 0 ? DEMO_CHANNELS : allChannels}
                       allVod={allVod}
                       allSeries={allSeries}
-                      onTabSelect={handleTabSelect}
+                      onTabSelect={(tab) => {
+                        if (demoLoaded && allChannels.length === 0 && tab === "live") {
+                          // Demo mode: go to demo channels page
+                          window.location.href = "/demo";
+                          return;
+                        }
+                        handleTabSelect(tab);
+                      }}
                       onPlay={handlePlay}
                       activePlaylistId={activePlaylistId}
                       onPlaylistSelect={setActivePlaylistId}
