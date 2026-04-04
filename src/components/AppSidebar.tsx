@@ -24,6 +24,8 @@ interface AppSidebarProps {
   playlists: Playlist[];
   collapsed: boolean;
   onToggleCollapse: () => void;
+  activePlaylistId?: string | null;
+  onPlaylistSelect?: (id: string | null) => void;
 }
 
 const NAV_KEYS = [
