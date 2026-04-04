@@ -1,12 +1,13 @@
-import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu } from "lucide-react";
+import { Tv, Film, Clapperboard, Heart, LayoutDashboard, Settings, Plus, ChevronDown, ChevronUp, Layers, RefreshCw, Trash2, QrCode, Radio, Menu, Clock, CalendarDays } from "lucide-react";
 import { Channel, getCategories } from "@/lib/channels";
 import { Playlist } from "@/lib/storage";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import { Badge } from "@/components/ui/badge";
 import { XtreamAccountBadge } from "./XtreamAccountBadge";
 import { QRCodePortal } from "./QRCodePortal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n";
 
