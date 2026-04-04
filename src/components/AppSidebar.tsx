@@ -38,6 +38,8 @@ export function AppSidebar({
   onCategorySelect, onTabSelect, onAddPlaylist,
   onDeletePlaylist, onRefreshPlaylist, playlists, collapsed, onToggleCollapse
 }: AppSidebarProps) {
+  const { t } = useI18n();
+  const NAV_ITEMS = NAV_KEYS.map(n => ({ ...n, label: t(n.key) }));
   const [catOpen, setCatOpen] = useState(true);
   const [listsOpen, setListsOpen] = useState(true);
   const [hoverPlaylist, setHoverPlaylist] = useState<string | null>(null);
