@@ -25,12 +25,12 @@ interface AppSidebarProps {
   onToggleCollapse: () => void;
 }
 
-const NAV_ITEMS = [
-  { id: "live", label: "TV en direct", icon: Tv },
-  { id: "films", label: "Films", icon: Film },
-  { id: "series", label: "Séries", icon: Clapperboard },
-  { id: "favorites", label: "Favoris", icon: Heart },
-  { id: "radio", label: "Radio", icon: Radio },
+const NAV_KEYS = [
+  { id: "live", key: "nav.live", icon: Tv },
+  { id: "films", key: "nav.films", icon: Film },
+  { id: "series", key: "nav.series", icon: Clapperboard },
+  { id: "favorites", key: "nav.favorites", icon: Heart },
+  { id: "radio", key: "nav.radio", icon: Radio },
 ];
 
 export function AppSidebar({
