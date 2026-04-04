@@ -340,6 +340,9 @@ export default function Index() {
               {/* Mobile header - dashboard */}
                 {isMobile && view === "dashboard" && hasContent && (
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#C9A84C" }}>
+                      <Menu size={18} />
+                    </button>
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
                       allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay} />
@@ -350,9 +353,6 @@ export default function Index() {
                   <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
                     <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
                       <ArrowLeft size={18} />
-                    </button>
-                    <button onClick={() => setMobileDrawerOpen(true)} className="rounded-lg p-2" style={{ background: "#131318", color: "#86868B" }}>
-                      <Menu size={18} />
                     </button>
                     <HeaderBar searchQuery={searchQuery} onSearchChange={setSearchQuery} viewMode={viewMode} onViewModeChange={setViewMode}
                       activeTab={activeTab} onTabSelect={handleTabSelect} compact
