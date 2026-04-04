@@ -51,6 +51,7 @@ export default function Index() {
   const [showCatchup, setShowCatchup] = useState(false);
   const [showEpgGrid, setShowEpgGrid] = useState(false);
   const [showRecordings, setShowRecordings] = useState(false);
+  const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
