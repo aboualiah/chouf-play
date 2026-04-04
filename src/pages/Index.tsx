@@ -105,10 +105,10 @@ export default function Index() {
   }, []);
 
   const allChannels = useMemo(() => {
-    const base = demoLoaded ? DEMO_CHANNELS : [];
+    // Demo channels are separate - they have their own page. Only playlist channels here.
     const extra = playlists.flatMap(p => p.channels);
-    return [...base, ...extra].filter(parentalFilter);
-  }, [playlists, demoLoaded, parentalFilter]);
+    return extra.filter(parentalFilter);
+  }, [playlists, parentalFilter]);
 
   const allVod = useMemo(() => playlists.flatMap(p => p.vodStreams || []).filter(parentalFilter), [playlists, parentalFilter]);
   const allSeries = useMemo(() => playlists.flatMap(p => p.series || []).filter(parentalFilter), [playlists, parentalFilter]);
