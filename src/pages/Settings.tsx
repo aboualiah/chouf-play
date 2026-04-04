@@ -333,7 +333,7 @@ export default function Settings() {
   const sections = [
     // ── General ──
     {
-      id: "general", icon: Globe, label: t("settings.general"), subtitle: t("s.language") + ", " + t("s.weather_city"),
+      id: "general", icon: Globe, label: t("settings.general"), subtitle: t("s.language"),
       color: "#34C759",
       content: (
         <div className="space-y-0">
@@ -344,16 +344,6 @@ export default function Settings() {
               {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
             </select>
           </SettingRow><Divider />
-          <SettingRow label={t("s.weather_city")} subtitle={t("s.weather_city_sub")}>
-            <SelectField value={weatherCity} onChange={setWeatherCity}
-              options={[
-                { value: "Brussels", label: "Bruxelles" }, { value: "Paris", label: "Paris" },
-                { value: "Casablanca", label: "Casablanca" }, { value: "London", label: "London" },
-                { value: "Amsterdam", label: "Amsterdam" }, { value: "Berlin", label: "Berlin" },
-                { value: "Madrid", label: "Madrid" }, { value: "Istanbul", label: "Istanbul" },
-                { value: "Dubai", label: "Dubaï" }, { value: "Riyadh", label: "Riyad" },
-              ]} />
-          </SettingRow><Divider />
           <SettingRow label={t("s.start_page")} subtitle={t("s.start_page_sub")}>
             <SelectField value={startPage} onChange={setStartPage}
               options={[{ value: "home", label: t("misc.home") }, { value: "live", label: t("nav.live") }, { value: "last", label: t("misc.last_channel") }]} />
@@ -361,6 +351,15 @@ export default function Settings() {
           <SettingRow label={t("s.auto_update")} subtitle={t("s.auto_update_sub")}>
             <SelectField value={autoUpdate} onChange={setAutoUpdate}
               options={[{ value: "never", label: t("misc.never") }, { value: "1", label: "1h" }, { value: "6", label: "6h" }, { value: "12", label: "12h" }, { value: "24", label: "24h" }]} />
+          </SettingRow><Divider />
+          <SettingRow label="Mise à jour playlists" subtitle="Fréquence de rafraîchissement automatique">
+            <SelectField value={refreshInterval} onChange={setRefreshInterval}
+              options={[
+                { value: "1", label: "1 jour" },
+                { value: "3", label: "3 jours" },
+                { value: "7", label: "7 jours" },
+                { value: "30", label: "1 mois" },
+              ]} />
           </SettingRow>
         </div>
       ),

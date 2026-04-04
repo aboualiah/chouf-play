@@ -127,39 +127,7 @@ export function DashboardCards({
         ))}
       </div>
 
-      {/* Continue Watching */}
-      {recentChannels.length > 0 && (
-        <div>
-          <p className="text-[13px] font-semibold mb-3 flex items-center gap-2" style={{ color: "#F5F5F7" }}>
-            <span>🔥</span> Continuer à regarder
-          </p>
-          <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-            {recentChannels.map(ch => (
-              <button
-                key={ch.id}
-                onClick={() => onPlay(ch)}
-                className="group shrink-0 rounded-xl overflow-hidden transition-all hover:scale-105 backdrop-blur-sm"
-                style={{ width: 120, background: "rgba(19,19,24,0.7)", border: "1px solid rgba(28,28,36,0.6)" }}
-              >
-                <div className="relative h-[72px] flex items-center justify-center" style={{ background: "rgba(28,28,36,0.5)" }}>
-                  {ch.logo ? (
-                    <img src={ch.logo} className="h-10 w-10 object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  ) : (
-                    <span className="text-[14px] font-bold" style={{ color: "#48484A" }}>
-                      {ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
-                    </span>
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: "rgba(0,0,0,0.5)" }}>
-                    <Play size={20} className="text-white" fill="white" />
-                  </div>
-                </div>
-                <p className="px-2 py-1.5 text-[10px] font-medium truncate" style={{ color: "#B0B0B5" }}>{ch.name}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Continue Watching removed from dashboard - now in Live TV */}
 
       {/* Quick buttons */}
       <div className="grid grid-cols-4 gap-2">
