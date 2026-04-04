@@ -467,7 +467,37 @@ export default function Index() {
     <>
       <SplashScreen show={splash} />
 
-      {!splash && (
+      {/* Onboarding: Terms */}
+      {!splash && onboardingStep === "terms" && (
+        <TermsScreen onAccept={() => setOnboardingStep("permissions")} />
+      )}
+
+      {/* Onboarding: Permissions */}
+      {!splash && onboardingStep === "permissions" && (
+        <PermissionsScreen onContinue={() => {
+          if (hasCompletedSetup() && getPlaylists().length > 0) {
+            setOnboardingStep("app");
+          } else {
+            setOnboardingStep("welcome");
+          }
+        }} />
+      )}
+
+      {/* Welcome / Setup screen */}
+      {!splash && onboardingStep === "welcome" && (
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
+          <WelcomeScreen
+            onAddPlaylist={() => setPlaylistModalOpen(true)}
+            onSkipTrial={() => {
+              handleLoadDemo();
+              setOnboardingStep("app");
+            }}
+          />
+        </div>
+      )}
+
+      {/* Main App */}
+      {!splash && onboardingStep === "app" && (
         <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Header */}
@@ -576,10 +606,6 @@ export default function Index() {
                       </div>
                     </div>
                   </motion.div>
-                ) : !hasContent ? (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
-                    <WelcomeScreen onAddPlaylist={() => setPlaylistModalOpen(true)} onSkipTrial={handleLoadDemo} />
-                  </motion.div>
                 ) : view === "dashboard" ? (
                   <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="flex-1 overflow-y-auto scrollbar-thin">
@@ -590,7 +616,6 @@ export default function Index() {
                       allSeries={allSeries}
                       onTabSelect={(tab) => {
                         if (demoLoaded && allChannels.length === 0 && tab === "live") {
-                          // Demo mode: go to demo channels page
                           window.location.href = "/demo";
                           return;
                         }
@@ -601,8 +626,8 @@ export default function Index() {
                       onPlaylistSelect={setActivePlaylistId}
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
-                      onAddPlaylist={() => { window.location.href = "/playlists"; }}
-                      onOpenSettings={() => { window.location.href = "/settings"; }}
+                      onAddPlaylist={() => { navigate("/playlists"); }}
+                      onOpenSettings={() => { navigate("/settings"); }}
                     />
                   </motion.div>
                 ) : (
@@ -628,8 +653,21 @@ export default function Index() {
 
       <PlaylistModal
         open={playlistModalOpen}
-        onClose={() => setPlaylistModalOpen(false)}
-        onPlaylistLoaded={handlePlaylistLoaded}
+        onClose={() => {
+          setPlaylistModalOpen(false);
+          // After adding a playlist from welcome screen, go to app
+          if (onboardingStep === "welcome" && getPlaylists().length > 0) {
+            setPlaylists(getPlaylists());
+            setOnboardingStep("app");
+          }
+        }}
+        onPlaylistLoaded={(name, channels, xtreamData) => {
+          handlePlaylistLoaded(name, channels, xtreamData);
+          // Transition to app after playlist added
+          setTimeout(() => {
+            setOnboardingStep("app");
+          }, 500);
+        }}
         onLoadDemo={handleLoadDemo}
       />
 
