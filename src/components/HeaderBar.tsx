@@ -2,6 +2,7 @@ import { LayoutGrid, List, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SearchOverlay } from "./SearchOverlay";
 import { Channel } from "@/lib/channels";
+import ChoufPlayLogo from "./ChoufPlayLogo";
 
 interface HeaderBarProps {
   searchQuery: string;
