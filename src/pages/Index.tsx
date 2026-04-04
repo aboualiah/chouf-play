@@ -22,6 +22,8 @@ import { XtreamPlaylistData } from "@/lib/xtream";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useI18n } from "@/lib/i18n";
+import { getParentalSettings, isCategoryHidden, isChannelLocked, verifyPin } from "@/lib/parental";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu } from "lucide-react";
 import { toast } from "sonner";
