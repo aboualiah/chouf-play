@@ -8,7 +8,7 @@ import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
 import { DashboardCards } from "@/components/DashboardCards";
-import { EmptyState } from "@/components/EmptyState";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { EpgPanel } from "@/components/EpgPanel";
 import { EpgGrid } from "@/components/EpgGrid";
 import { CatchupPanel } from "@/components/CatchupPanel";
@@ -433,8 +433,8 @@ export default function Index() {
                     </div>
                   </motion.div>
                 ) : !hasContent ? (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1">
-                    <EmptyState onAddPlaylist={() => setPlaylistModalOpen(true)} onLoadDemo={handleLoadDemo} />
+                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
+                    <WelcomeScreen onAddPlaylist={() => setPlaylistModalOpen(true)} onSkipTrial={handleLoadDemo} />
                   </motion.div>
                 ) : (
                   <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
