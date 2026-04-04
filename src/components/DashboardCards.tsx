@@ -185,9 +185,10 @@ function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?
         <div className="flex items-center gap-2">
           <Fingerprint size={14} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
           <span className="text-[11px]" style={{ color: "#48484A" }}>MAC</span>
-          <span className="text-[12px] tracking-wider" style={{ 
+           <span className="text-[12px] tracking-wider" style={{ 
             color: "#C9A84C", 
-            fontFamily: "'Share Tech Mono', 'SF Mono', 'Fira Code', monospace",
+            fontFamily: "'Roboto Mono', 'SF Mono', monospace",
+            fontWeight: 400,
             letterSpacing: "0.08em"
           }}>{macAddress}</span>
         </div>
