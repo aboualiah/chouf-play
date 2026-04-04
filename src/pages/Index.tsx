@@ -473,7 +473,7 @@ export default function Index() {
                       onPlaylistSelect={setActivePlaylistId}
                       onShowEpg={() => { setShowEpgGrid(true); setShowRecordings(false); setView("content"); }}
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
-                      onAddPlaylist={() => setPlaylistModalOpen(true)}
+                      onAddPlaylist={() => { window.location.href = "/playlists"; }}
                       onOpenSettings={() => { window.location.href = "/settings"; }}
                     />
                   </motion.div>
