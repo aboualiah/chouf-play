@@ -219,7 +219,7 @@ export default function Index() {
     } : undefined,
   });
 
-  const hasContent = allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
+  const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
   const sidebarContent = (
     <AppSidebar
