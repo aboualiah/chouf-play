@@ -49,7 +49,6 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         <SearchOverlay query={searchQuery} onQueryChange={onSearchChange}
           allChannels={allChannels} allVod={allVod} allSeries={allSeries}
           onPlay={handlePlay} onTabSelect={onTabSelect} compact />
-        <WeatherWidget />
       </div>
     );
   }
