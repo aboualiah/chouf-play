@@ -62,8 +62,6 @@ export function DashboardCards({
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
   onShowEpg, onShowRecordings,
 }: DashboardCardsProps) {
-  const [playlistDropdown, setPlaylistDropdown] = useState(false);
-
   const activePlaylist = playlists.find(p => p.id === activePlaylistId) || (playlists.length > 0 ? playlists[0] : null);
 
   const counts = useMemo(() => ({
