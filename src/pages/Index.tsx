@@ -8,7 +8,7 @@ import { ChannelGrid } from "@/components/ChannelGrid";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { PlaylistModal } from "@/components/PlaylistModal";
 import { DashboardCards } from "@/components/DashboardCards";
-import { EmptyState } from "@/components/EmptyState";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { EpgPanel } from "@/components/EpgPanel";
 import { EpgGrid } from "@/components/EpgGrid";
 import { CatchupPanel } from "@/components/CatchupPanel";
