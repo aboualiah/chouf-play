@@ -286,36 +286,37 @@ export default function Index() {
       <>
         {activeTab === "live" && (() => {
           const categories = getCategories(allChannels);
-          // Selected channel for preview (not playing yet)
           return (
             <div className="flex flex-1 overflow-hidden">
               {/* Panel 1: Categories */}
               {categories.length > 0 && (
-                <div className="w-[180px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0D0D12", borderColor: "#1C1C24" }}>
-                  <div className="px-3 py-2.5" style={{ borderBottom: "1px solid #1C1C24" }}>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Catégories</p>
+                <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin flex flex-col" style={{ background: "#0C0C11", borderRight: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div className="px-4 py-3.5 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#FF6D00" }} />
+                    <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>Catégories</p>
                   </div>
                   {[
                     { id: null, label: t("cat.all"), icon: Radio, count: allChannels.length },
                     { id: "__fav", label: t("nav.favorites"), icon: Star, count: allChannels.filter(c => favorites.includes(c.id)).length },
-                  ].map(item => (
-                    <button
-                      key={item.id || "all"}
-                      onClick={() => { setActiveCategory(item.id === "__fav" ? "__fav" as any : null); setActiveSubTab(item.id === "__fav" ? "favorites" : "all"); }}
-                      className="flex items-center gap-2 px-3 py-2 text-left transition-all hover:bg-[#131318]"
-                      style={
-                        (item.id === null && !activeCategory && activeSubTab === "all") ||
-                        (item.id === "__fav" && activeSubTab === "favorites")
-                          ? { background: "rgba(255,109,0,0.08)", borderLeft: "2px solid #FF6D00" }
-                          : { borderLeft: "2px solid transparent" }
-                      }
-                    >
-                      <item.icon size={13} style={{ color: (item.id === null && !activeCategory) || (item.id === "__fav" && activeSubTab === "favorites") ? "#FF6D00" : "#48484A" }} />
-                      <span className="text-[11px] font-medium flex-1 truncate" style={{ color: (item.id === null && !activeCategory) || (item.id === "__fav" && activeSubTab === "favorites") ? "#F5F5F7" : "#86868B" }}>{item.label}</span>
-                      <span className="text-[9px] tabular-nums" style={{ color: "#48484A" }}>{item.count}</span>
-                    </button>
-                  ))}
-                  <div className="h-px mx-3 my-1" style={{ background: "#1C1C24" }} />
+                  ].map(item => {
+                    const isItemActive = (item.id === null && !activeCategory && activeSubTab === "all") || (item.id === "__fav" && activeSubTab === "favorites");
+                    return (
+                      <button
+                        key={item.id || "all"}
+                        onClick={() => { setActiveCategory(item.id === "__fav" ? "__fav" as any : null); setActiveSubTab(item.id === "__fav" ? "favorites" : "all"); }}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-left transition-all"
+                        style={isItemActive
+                          ? { background: "linear-gradient(90deg, rgba(255,109,0,0.12) 0%, transparent 100%)", borderLeft: "3px solid #FF6D00" }
+                          : { borderLeft: "3px solid transparent" }
+                        }
+                      >
+                        <item.icon size={14} style={{ color: isItemActive ? "#FF6D00" : "#48484A" }} />
+                        <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: isItemActive ? "#F5F5F7" : "#86868B" }}>{item.label}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: isItemActive ? "rgba(255,109,0,0.15)" : "rgba(255,255,255,0.03)", color: isItemActive ? "#FF6D00" : "#48484A" }}>{item.count}</span>
+                      </button>
+                    );
+                  })}
+                  <div className="h-px mx-4 my-1.5" style={{ background: "rgba(255,255,255,0.04)" }} />
                   {categories.map(cat => {
                     const count = allChannels.filter(c => c.category === cat).length;
                     const isActive = activeCategory === cat;
@@ -323,14 +324,14 @@ export default function Index() {
                       <button
                         key={cat}
                         onClick={() => { setActiveCategory(isActive ? null : cat); setActiveSubTab("all"); }}
-                        className="flex items-center gap-2 px-3 py-1.5 text-left transition-all hover:bg-[#131318]"
+                        className="flex items-center gap-2.5 px-4 py-2 text-left transition-all"
                         style={isActive
-                          ? { background: "rgba(201,168,76,0.08)", borderLeft: "2px solid #C9A84C" }
-                          : { borderLeft: "2px solid transparent" }
+                          ? { background: "linear-gradient(90deg, rgba(201,168,76,0.10) 0%, transparent 100%)", borderLeft: "3px solid #C9A84C" }
+                          : { borderLeft: "3px solid transparent" }
                         }
                       >
-                        <span className="text-[11px] font-medium flex-1 truncate" style={{ color: isActive ? "#F5F5F7" : "#86868B" }}>{cat}</span>
-                        <span className="text-[9px] tabular-nums" style={{ color: "#48484A" }}>{count}</span>
+                        <span className="text-[12px] font-medium flex-1 truncate" style={{ color: isActive ? "#F5F5F7" : "#86868B" }}>{cat}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: isActive ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.03)", color: isActive ? "#C9A84C" : "#48484A" }}>{count}</span>
                       </button>
                     );
                   })}
@@ -338,11 +339,17 @@ export default function Index() {
               )}
 
               {/* Panel 2: Channels list */}
-              <div className="w-[300px] shrink-0 overflow-y-auto scrollbar-thin border-r flex flex-col" style={{ background: "#0F0F14", borderColor: "#1C1C24" }}>
-                <div className="px-3 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>
-                    Chaînes ({filteredChannels.length})
-                  </p>
+              <div className="w-[320px] shrink-0 overflow-hidden flex flex-col" style={{ background: "#0E0E14", borderRight: "1px solid rgba(255,255,255,0.04)" }}>
+                <div className="px-4 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+                    <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>
+                      Chaînes
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md" style={{ background: "rgba(255,109,0,0.08)", color: "#FF6D00" }}>
+                    {filteredChannels.length}
+                  </span>
                 </div>
                 <div className="flex-1 overflow-y-auto scrollbar-thin">
                   {filteredChannels.map((ch, i) => {
@@ -353,85 +360,96 @@ export default function Index() {
                         key={ch.id}
                         onClick={() => setPreviewChannel(ch)}
                         onDoubleClick={() => handlePlay(ch)}
-                        className="flex items-center gap-3 w-full px-3 py-2 text-left transition-all hover:bg-[#131318] group"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left transition-all group"
                         style={isSelected
-                          ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" }
+                          ? { background: "linear-gradient(90deg, rgba(255,109,0,0.08) 0%, rgba(255,109,0,0.02) 100%)", borderLeft: "3px solid #FF6D00" }
                           : { borderLeft: "3px solid transparent" }
                         }
                       >
-                        <span className="text-[9px] font-mono w-4 text-right tabular-nums" style={{ color: "#48484A" }}>{i + 1}</span>
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
+                        <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: isSelected ? "#FF6D00" : "#3A3A42" }}>{i + 1}</span>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden" style={{ background: isSelected ? "rgba(255,109,0,0.08)" : "#161620", border: isSelected ? "1px solid rgba(255,109,0,0.2)" : "1px solid rgba(255,255,255,0.03)" }}>
                           {ch.logo ? (
-                            <img src={ch.logo} loading="lazy" className="h-5 w-5 rounded object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            <img src={ch.logo} loading="lazy" className="h-7 w-7 rounded-lg object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           ) : (
-                            <span className="text-[9px] font-bold" style={{ color: "#86868B" }}>{ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                            <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>{ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-medium truncate" style={{ color: isSelected ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
-                          <p className="text-[9px]" style={{ color: "#48484A" }}>{ch.category}</p>
+                          <p className="text-[12px] font-semibold truncate" style={{ color: isSelected ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
+                          <p className="text-[10px] mt-0.5" style={{ color: "#48484A" }}>{ch.category}</p>
                         </div>
-                        {isFav && <Heart size={10} className="fill-[#FF3B30] text-[#FF3B30] shrink-0" />}
+                        {isFav && <Heart size={11} className="fill-[#FF3B30] text-[#FF3B30] shrink-0" />}
+                        {isSelected && <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#FF6D00", boxShadow: "0 0 6px rgba(255,109,0,0.5)" }} />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Panel 3: Channel Preview */}
-              <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#0A0A0F" }}>
+              {/* Panel 3: Channel Preview — Premium TV Style */}
+              <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0A0A10 0%, #0D0D14 100%)" }}>
                 {previewChannel ? (
                   <div className="flex flex-col h-full">
-                    {/* Preview area */}
-                    <div className="flex-1 flex items-center justify-center relative" style={{ background: "#000" }}>
-                      {previewChannel.logo ? (
-                        <div className="text-center">
-                          <img src={previewChannel.logo} className="h-24 w-24 mx-auto rounded-2xl object-contain mb-4" alt="" />
-                          <p className="text-[18px] font-bold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
-                          <p className="text-[12px] mt-1" style={{ color: "#48484A" }}>{previewChannel.category}</p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <div className="h-24 w-24 mx-auto rounded-2xl flex items-center justify-center mb-4" style={{ background: "#1C1C24" }}>
-                            <span className="text-2xl font-bold" style={{ color: "#86868B" }}>{previewChannel.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                    {/* Main preview area */}
+                    <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+                      {/* Ambient background glow */}
+                      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(255,109,0,0.04) 0%, transparent 70%)" }} />
+
+                      <div className="relative z-10 text-center">
+                        {previewChannel.logo ? (
+                          <div className="mx-auto mb-5 h-28 w-28 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
+                            <img src={previewChannel.logo} className="h-20 w-20 object-contain" alt="" />
                           </div>
-                          <p className="text-[18px] font-bold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
-                          <p className="text-[12px] mt-1" style={{ color: "#48484A" }}>{previewChannel.category}</p>
-                        </div>
-                      )}
-                      {/* Play button overlay */}
+                        ) : (
+                          <div className="mx-auto mb-5 h-28 w-28 rounded-2xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <span className="text-3xl font-bold" style={{ color: "#86868B" }}>{previewChannel.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
+                          </div>
+                        )}
+                        <h3 className="text-xl font-bold mb-1" style={{ color: "#F5F5F7" }}>{previewChannel.name}</h3>
+                        <p className="text-[12px] mb-1" style={{ color: "#86868B" }}>{previewChannel.category}</p>
+                        {favorites.includes(previewChannel.id) && (
+                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,59,48,0.1)", color: "#FF6D6D" }}>
+                            <Heart size={9} className="fill-current" /> Favori
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Big play button */}
                       <button
                         onClick={() => handlePlay(previewChannel)}
-                        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-xl px-6 py-3 transition-all hover:scale-105"
-                        style={{ background: "rgba(255,109,0,0.9)", color: "#fff" }}
+                        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-2xl px-8 py-3.5 transition-all hover:scale-105 active:scale-95"
+                        style={{ background: "linear-gradient(135deg, #FF6D00 0%, #FF8C33 100%)", color: "#fff", boxShadow: "0 4px 20px rgba(255,109,0,0.35)" }}
                       >
-                        <Play size={18} fill="currentColor" />
-                        <span className="text-[13px] font-bold">Regarder</span>
+                        <Play size={20} fill="currentColor" />
+                        <span className="text-[14px] font-bold tracking-wide">Regarder</span>
                       </button>
                     </div>
 
-                    {/* Program info bar */}
-                    <div className="px-5 py-3" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
-                      <p className="text-[13px] font-semibold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: "#86868B" }}>Programme en cours</p>
+                    {/* Program info */}
+                    <div className="px-6 py-4" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+                        <p className="text-[13px] font-bold" style={{ color: "#F5F5F7" }}>{previewChannel.name}</p>
+                      </div>
+                      <p className="text-[11px]" style={{ color: "#86868B" }}>Programme en cours</p>
                     </div>
 
-                    {/* 4 Colored buttons: Red, Blue, Green, Yellow */}
-                    <div className="flex items-center justify-center gap-4 px-5 py-3" style={{ background: "#0D0D12", borderTop: "1px solid #1C1C24" }}>
+                    {/* 4 Colored action buttons */}
+                    <div className="flex items-center justify-center gap-3 px-6 py-3.5" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
                       {[
-                        { color: "#FF3B30", glow: "rgba(255,59,48,0.3)", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
-                        { color: "#007AFF", glow: "rgba(0,122,255,0.3)", label: "Options", action: () => {} },
-                        { color: "#34C759", glow: "rgba(52,199,89,0.3)", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
-                        { color: "#FFD60A", glow: "rgba(255,214,10,0.3)", label: "Listes", action: () => {} },
+                        { color: "#FF3B30", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
+                        { color: "#007AFF", label: "Options", action: () => {} },
+                        { color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
+                        { color: "#FFD60A", label: "Listes", action: () => {} },
                       ].map((btn, i) => (
                         <button
                           key={i}
                           onClick={btn.action}
-                          className="flex items-center gap-2 rounded-xl px-4 py-2 transition-all hover:scale-105"
-                          style={{ background: `${btn.color}15`, border: `1px solid ${btn.color}30` }}
+                          className="flex items-center gap-2 rounded-xl px-5 py-2.5 transition-all hover:scale-105 active:scale-95"
+                          style={{ background: `${btn.color}10`, border: `1px solid ${btn.color}25` }}
                         >
-                          <div className="h-3 w-3 rounded-full" style={{ background: btn.color, boxShadow: `0 0 8px ${btn.glow}` }} />
-                          <span className="text-[11px] font-medium" style={{ color: btn.color }}>{btn.label}</span>
+                          <div className="h-3.5 w-3.5 rounded-full" style={{ background: btn.color, boxShadow: `0 0 10px ${btn.color}40` }} />
+                          <span className="text-[11px] font-semibold" style={{ color: btn.color }}>{btn.label}</span>
                         </button>
                       ))}
                     </div>
@@ -439,9 +457,11 @@ export default function Index() {
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
-                      <Filter size={32} className="mx-auto mb-3" style={{ color: "#1C1C24" }} />
-                      <p className="text-[13px] font-medium" style={{ color: "#48484A" }}>Sélectionnez une chaîne</p>
-                      <p className="text-[10px] mt-1" style={{ color: "#2C2C34" }}>Double-cliquez pour lancer la lecture</p>
+                      <div className="mx-auto mb-4 h-16 w-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                        <Filter size={24} style={{ color: "#2C2C34" }} />
+                      </div>
+                      <p className="text-[14px] font-semibold" style={{ color: "#48484A" }}>Sélectionnez une chaîne</p>
+                      <p className="text-[11px] mt-1.5" style={{ color: "#2C2C34" }}>Double-cliquez pour regarder</p>
                     </div>
                   </div>
                 )}
