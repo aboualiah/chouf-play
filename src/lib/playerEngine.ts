@@ -1,12 +1,13 @@
 /**
- * CHOUF Play — Player Engine
+ * CHOUF Play — Player Engine v3
  * Architecture claire et testable pour la lecture vidéo.
  * 
- * Logique :
+ * Logique stricte :
  *   - MP4 → natif
- *   - HLS (.m3u8) → Safari natif / Chrome via hls.js
- *   - TS → tentative native avec warning
+ *   - HLS (.m3u8) → Safari natif / Chrome+Edge+Firefox via hls.js UNIQUEMENT
+ *   - TS → tentative native avec warning clair
  *   - Unknown → erreur claire
+ *   - Mixed content (HTTP dans HTTPS) → warning explicite
  */
 
 // ──────────────────────────────────────────────
@@ -14,7 +15,7 @@
 // ──────────────────────────────────────────────
 
 export type StreamType = "hls" | "mp4" | "ts" | "unknown";
-export type PlayMode = "native" | "hlsjs" | "none";
+export type PlayMode = "native" | "hlsjs" | "native-ts-test" | "unsupported" | "none";
 
 export interface PlayerLogEntry {
   time: string;
@@ -32,6 +33,7 @@ export interface BrowserInfo {
   protocol: string;
   hostname: string;
   nativeHls: boolean;
+  canPlayTypeResult: string;
   hasMSE: boolean;
   hasHlsJs: boolean;
 }
@@ -56,6 +58,13 @@ export const ERROR_CODES: Record<number, string> = {
   2: "MEDIA_ERR_NETWORK",
   3: "MEDIA_ERR_DECODE",
   4: "MEDIA_ERR_SRC_NOT_SUPPORTED",
+};
+
+export const ERROR_MESSAGES: Record<number, string> = {
+  1: "Lecture annulée",
+  2: "Erreur réseau — vérifiez votre connexion",
+  3: "Erreur de décodage — format non supporté",
+  4: "Source média non supportée par le navigateur",
 };
 
 export const TRACKED_EVENTS = [
@@ -84,10 +93,9 @@ export function detectBrowser(): BrowserInfo {
   else if (isChrome) name = "Chrome";
 
   const testVideo = document.createElement("video");
-  const nativeHls = !!(
-    testVideo.canPlayType("application/vnd.apple.mpegurl") ||
-    testVideo.canPlayType("application/x-mpegURL")
-  );
+  const canPlayResult = testVideo.canPlayType("application/vnd.apple.mpegurl") || 
+                        testVideo.canPlayType("application/x-mpegURL");
+  const nativeHls = !!canPlayResult;
 
   return {
     name,
@@ -99,6 +107,7 @@ export function detectBrowser(): BrowserInfo {
     protocol: window.location.protocol,
     hostname: window.location.hostname,
     nativeHls,
+    canPlayTypeResult: canPlayResult || "empty",
     hasMSE: typeof MediaSource !== "undefined",
     hasHlsJs: !!(window as any).Hls && (window as any).Hls.isSupported(),
   };
@@ -115,20 +124,87 @@ export function detectStreamType(url: string): StreamType {
   return "unknown";
 }
 
+// ──────────────────────────────────────────────
+// Mixed content detection
+// ──────────────────────────────────────────────
+
+export function isMixedContentBlocked(url: string): boolean {
+  return window.location.protocol === "https:" && url.startsWith("http://");
+}
+
+export function getStreamProtocol(url: string): string {
+  try {
+    return new URL(url).protocol;
+  } catch {
+    return "unknown:";
+  }
+}
+
+// ──────────────────────────────────────────────
+// Play mode selection — STRICT LOGIC
+// ──────────────────────────────────────────────
+
 export function choosePlayMode(streamType: StreamType, browser: BrowserInfo): PlayMode {
   switch (streamType) {
     case "mp4":
       return "native";
+
     case "hls":
-      if (browser.nativeHls && browser.isSafari) return "native";
+      // Safari (desktop + iOS) → native HLS
+      if (browser.isSafari) return "native";
+      // Chrome iOS also uses Safari engine → native
+      if (browser.name === "Chrome iOS" || browser.name === "Firefox iOS") return "native";
+      // All other browsers (Chrome, Edge, Firefox) → hls.js ONLY
       if (browser.hasHlsJs) return "hlsjs";
-      if (browser.nativeHls) return "native"; // fallback for other browsers with native
-      return "none";
+      // No hls.js available → unsupported
+      return "unsupported";
+
     case "ts":
-      return "native"; // tentative
+      return "native-ts-test";
+
     case "unknown":
-      return "none";
+      return "unsupported";
   }
+}
+
+// ──────────────────────────────────────────────
+// Error message builder
+// ──────────────────────────────────────────────
+
+export function buildErrorMessage(
+  errorCode: number | undefined,
+  url: string,
+  streamType: StreamType,
+  browser: BrowserInfo,
+  mode: PlayMode
+): string {
+  const isMixed = isMixedContentBlocked(url);
+
+  // MediaError code 4 — source not supported
+  if (errorCode === 4) {
+    if (isMixed) {
+      return "Flux HTTP non compatible avec cette app web HTTPS — le navigateur bloque le contenu mixte";
+    }
+    if (browser.isSafari && streamType === "hls") {
+      return "Safari ne supporte pas cette source HLS dans ce contexte";
+    }
+    return "Source média non supportée par le navigateur";
+  }
+
+  if (errorCode === 2) {
+    if (isMixed) return "Erreur réseau — flux HTTP bloqué dans un contexte HTTPS";
+    return "Erreur réseau — vérifiez que le flux est accessible";
+  }
+
+  if (errorCode === 3) return "Erreur de décodage — le format n'est pas compatible";
+  if (errorCode === 1) return "Lecture annulée";
+
+  if (mode === "unsupported") {
+    if (streamType === "hls") return "HLS non supporté — hls.js non disponible sur ce navigateur";
+    return "Type de flux non supporté par ce navigateur";
+  }
+
+  return "Erreur de lecture inconnue";
 }
 
 // ──────────────────────────────────────────────
@@ -207,6 +283,8 @@ export function playWithNative(
   onError: (msg: string) => void,
   timeoutMs = 8000
 ): PlayResult {
+  const browser = detectBrowser();
+  const streamType = detectStreamType(url);
   onLog("info", `▶️ Lecture native: ${url}`);
 
   const eventsCleanup = attachVideoDebugEvents(video, onLog);
@@ -222,8 +300,9 @@ export function playWithNative(
   const errorHandler = () => {
     if (started || timedOut) return;
     const code = video.error?.code;
-    const detail = ERROR_CODES[code || 0] || "unknown";
-    onError(`Erreur native: ${detail} (code ${code})`);
+    const msg = buildErrorMessage(code, url, streamType, browser, "native");
+    onLog("error", `❌ ${msg}`);
+    onError(msg);
   };
   video.addEventListener("error", errorHandler);
 
@@ -233,15 +312,26 @@ export function playWithNative(
   }).catch((err) => {
     if (!started) {
       onLog("error", `❌ play() rejected: ${err.message}`);
-      onError(`Lecture impossible: ${err.message}`);
+      // Don't duplicate error if errorHandler already fired
+      if (!video.error) {
+        const isMixed = isMixedContentBlocked(url);
+        const msg = isMixed
+          ? "Flux HTTP non compatible avec cette app web HTTPS"
+          : `Lecture impossible: ${err.message}`;
+        onError(msg);
+      }
     }
   });
 
   const timeout = setTimeout(() => {
     if (!started) {
       timedOut = true;
-      onLog("warn", "⏱️ Timeout 8s — le flux ne démarre pas");
-      onError("Le flux ne démarre pas dans ce navigateur (timeout 8s)");
+      const isMixed = isMixedContentBlocked(url);
+      const msg = isMixed
+        ? "Flux HTTP bloqué — contenu mixte non autorisé par le navigateur"
+        : "Le flux ne démarre pas dans le délai imparti (timeout 8s)";
+      onLog("warn", `⏱️ ${msg}`);
+      onError(msg);
     }
   }, timeoutMs);
 
@@ -266,11 +356,16 @@ export function playWithHlsJs(
   const Hls = (window as any).Hls;
   if (!Hls || !Hls.isSupported()) {
     onLog("error", "❌ HLS.js non disponible ou non supporté");
-    onError("HLS non supporté sur ce navigateur");
-    return { mode: "none", cleanup: () => {} };
+    onError("HLS non supporté — hls.js non disponible sur ce navigateur");
+    return { mode: "unsupported", cleanup: () => {} };
   }
 
   onLog("info", `▶️ Lecture HLS.js: ${url}`);
+
+  // Check mixed content
+  if (isMixedContentBlocked(url)) {
+    onLog("warn", "⚠️ Flux HTTP dans un contexte HTTPS — lecture potentiellement bloquée par le navigateur");
+  }
 
   const eventsCleanup = attachVideoDebugEvents(video, onLog);
   let started = false;
@@ -301,7 +396,11 @@ export function playWithHlsJs(
     if (data.fatal) {
       onLog("error", `💀 FATAL ${msg}`);
       if (!started && !destroyed) {
-        onError(`Erreur HLS fatale: ${data.details}`);
+        const isMixed = isMixedContentBlocked(url);
+        const errMsg = isMixed
+          ? `Erreur HLS fatale — flux HTTP dans un contexte HTTPS: ${data.details}`
+          : `Erreur HLS fatale: ${data.details}`;
+        onError(errMsg);
         destroyed = true;
         try { hls.destroy(); } catch {}
       }
@@ -331,8 +430,12 @@ export function playWithHlsJs(
 
   const timeout = setTimeout(() => {
     if (!started && !destroyed) {
-      onLog("warn", "⏱️ Timeout 8s — le flux HLS ne démarre pas");
-      onError("Le flux ne démarre pas (HLS.js timeout 8s)");
+      const isMixed = isMixedContentBlocked(url);
+      const msg = isMixed
+        ? "Flux HTTP bloqué dans un contexte HTTPS — le navigateur refuse le contenu mixte"
+        : "Le flux ne démarre pas dans le délai imparti (HLS.js timeout 8s)";
+      onLog("warn", `⏱️ ${msg}`);
+      onError(msg);
     }
   }, timeoutMs);
 
@@ -367,28 +470,50 @@ export function startPlayback(
   const browser = detectBrowser();
   const streamType = detectStreamType(url);
   const mode = choosePlayMode(streamType, browser);
+  const isMixed = isMixedContentBlocked(url);
+  const streamProto = getStreamProtocol(url);
 
-  onLog("info", `🔍 Browser: ${browser.name} | Stream: ${streamType} | Mode: ${mode}`);
+  onLog("info", `🔍 Browser: ${browser.name} | Stream: ${streamType} | Mode choisi: ${mode}`);
   onLog("info", `🔗 URL: ${url}`);
+  onLog("info", `🔒 Page: ${browser.protocol} | Flux: ${streamProto} | Mixed: ${isMixed ? "OUI ⚠️" : "non"}`);
+
+  if (isMixed) {
+    onLog("warn", "⚠️ ATTENTION: Flux HTTP chargé depuis une app HTTPS — lecture web potentiellement bloquée par le navigateur");
+  }
 
   if (streamType === "ts") {
     onLog("warn", "⚠️ Flux TS direct — lecture non garantie sur navigateur web");
   }
 
   if (streamType === "unknown") {
-    onLog("error", "❌ Type de flux non détecté");
-    onError("Type de flux non détecté — vérifiez l'URL");
-    return { mode: "none", cleanup: () => {} };
+    const msg = "Type de flux non détecté — vérifiez l'URL";
+    onLog("error", `❌ ${msg}`);
+    onError(msg);
+    return { mode: "unsupported", cleanup: () => {} };
   }
 
-  if (mode === "none") {
-    onLog("error", "❌ Aucun mode de lecture disponible pour ce flux");
-    onError("HLS non supporté sur ce navigateur — installez un navigateur compatible");
-    return { mode: "none", cleanup: () => {} };
+  if (mode === "unsupported") {
+    const msg = streamType === "hls"
+      ? "Chrome doit utiliser HLS.js pour ce flux HLS — hls.js non disponible"
+      : "Type de flux non supporté par ce navigateur";
+    onLog("error", `❌ ${msg}`);
+    onError(msg);
+    return { mode: "unsupported", cleanup: () => {} };
   }
 
+  // STRICT: Chrome/Edge/Firefox + HLS → ONLY hls.js, never native
   if (mode === "hlsjs") {
+    onLog("info", "🎯 Mode sélectionné: hlsjs (Chrome/Edge/Firefox → HLS.js exclusif)");
     return playWithHlsJs(video, url, onLog, onPlaying, onError);
+  }
+
+  // Safari + HLS or MP4 or TS → native
+  if (streamType === "hls") {
+    onLog("info", "🎯 Mode sélectionné: native (Safari → HLS natif)");
+  } else if (streamType === "ts") {
+    onLog("info", "🎯 Mode sélectionné: native-ts-test (tentative lecture TS)");
+  } else {
+    onLog("info", "🎯 Mode sélectionné: native (MP4)");
   }
 
   return playWithNative(video, url, onLog, onPlaying, onError);

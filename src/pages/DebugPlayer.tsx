@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   detectBrowser, detectStreamType, choosePlayMode, timestamp,
   cleanupPlayer, playWithNative, playWithHlsJs, startPlayback,
+  isMixedContentBlocked, getStreamProtocol,
   NETWORK_STATES, READY_STATES, ERROR_CODES, TRACKED_EVENTS,
   attachVideoDebugEvents,
   type PlayerLogEntry, type BrowserInfo, type StreamType, type PlayMode,
@@ -244,9 +245,12 @@ export default function DebugPlayer() {
                 <Row label="Native HLS" value={browser.nativeHls ? "✅" : "❌"} ok={browser.nativeHls} />
                 <Row label="MSE" value={browser.hasMSE ? "✅" : "❌"} ok={browser.hasMSE} />
                 <Row label="HLS.js" value={browser.hasHlsJs ? "✅" : "❌"} ok={browser.hasHlsJs} />
+                <Row label="canPlayType" value={browser.canPlayTypeResult} />
                 <Row label="Is Safari" value={browser.isSafari ? "Yes" : "No"} />
                 <Row label="Is Chrome" value={browser.isChrome ? "Yes" : "No"} />
-                <Row label="Active Mode" value={activeMode} ok={activeMode !== "none"} />
+                <Row label="Active Mode" value={activeMode} ok={activeMode !== "none" && activeMode !== "unsupported"} />
+                {url && <Row label="Stream Proto" value={getStreamProtocol(url)} />}
+                {url && <Row label="Mixed Content" value={isMixedContentBlocked(url) ? "⚠️ OUI" : "Non"} ok={!isMixedContentBlocked(url)} />}
               </div>
             </div>
             <div className="rounded-xl p-3" style={{ background: "#12121A", border: "1px solid #1C1C24" }}>
