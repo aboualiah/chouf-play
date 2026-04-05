@@ -64,33 +64,30 @@ export default function Index() {
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
 
+  const isCguAccepted = () => localStorage.getItem("chouf_cgu_accepted") === "true";
+  const isPermissionsDone = () => localStorage.getItem("chouf_permissions_done") === "true";
+
+  const determineStep = useCallback(() => {
+    if (!isCguAccepted()) return "terms";
+    if (!isPermissionsDone()) return "permissions";
+    if (hasCompletedSetup() && getPlaylists().length > 0) return "app";
+    return "welcome";
+  }, []);
+
   useEffect(() => {
     if (!splash) return;
     const t = setTimeout(() => {
       setSplash(false);
       sessionStorage.setItem("chouf_splash_done", "1");
-      // Determine next step after splash
-      if (!isOnboardingDone()) {
-        setOnboardingStep("terms");
-      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
-        setOnboardingStep("app");
-      } else {
-        setOnboardingStep("welcome");
-      }
+      setOnboardingStep(determineStep());
     }, SPLASH_DURATION);
     return () => clearTimeout(t);
-  }, [splash]);
+  }, [splash, determineStep]);
 
   // If splash already done on mount, set correct step
   useEffect(() => {
     if (!splash) {
-      if (!isOnboardingDone()) {
-        setOnboardingStep("terms");
-      } else if (hasCompletedSetup() && getPlaylists().length > 0) {
-        setOnboardingStep("app");
-      } else {
-        setOnboardingStep("welcome");
-      }
+      setOnboardingStep(determineStep());
     }
   }, []);
 
