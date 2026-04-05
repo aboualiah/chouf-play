@@ -3,6 +3,8 @@
  * Logique de lecture : MP4 natif, HLS Safari natif / autres hls.js, TS natif avec warning
  */
 
+import Hls from "hls.js";
+
 export type StreamType = "hls" | "mp4" | "ts" | "unknown";
 export type PlayMode = "native" | "hlsjs" | "native-ts" | "unsupported" | "none";
 
