@@ -4,6 +4,7 @@ import { Channel } from "@/lib/channels";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
+import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
 
 interface VideoPlayerProps {
   channel: Channel;
@@ -14,6 +15,7 @@ interface VideoPlayerProps {
   onNext?: () => void;
   onShowCatchup?: () => void;
   onShowEpg?: () => void;
+  colorFlash?: ColorFlash;
 }
 
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg }: VideoPlayerProps) {
