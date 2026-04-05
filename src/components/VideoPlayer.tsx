@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, Heart, BookOpen, MoreHorizontal, PictureInPicture2, Loader2, Circle, Rewind } from "lucide-react";
 import { Channel } from "@/lib/channels";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
 import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
+import { getCurrentProgram } from "@/components/MiniEpg";
 
 interface VideoPlayerProps {
   channel: Channel;
