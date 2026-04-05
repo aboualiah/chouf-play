@@ -271,36 +271,28 @@ export default function Index() {
   // ── Android TV: Back button / history management ──
   useEffect(() => {
     if (onboardingStep !== "app") return;
-    // Push initial state
-    const currentState = activeChannel ? "player" : view === "content" ? "content" : "dashboard";
-    window.history.replaceState({ screen: currentState }, "");
+
+    // Always keep at least 2 history entries to prevent exiting
+    window.history.pushState({ screen: "root" }, "");
+    window.history.pushState({ screen: "current" }, "");
 
     const handlePopState = (e: PopStateEvent) => {
-      e.preventDefault();
+      // Always re-push to prevent app exit
+      window.history.pushState({ screen: "current" }, "");
+
       if (activeChannel) {
         setActiveChannel(null);
-      } else if (view === "content") {
+      } else if (view === "content" || showEpgGrid || showRecordings) {
         setView("dashboard");
+        setShowEpgGrid(false);
+        setShowRecordings(false);
       }
       // At dashboard: do nothing (don't quit)
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [onboardingStep, activeChannel, view]);
-
-  // Push history state when navigating deeper
-  useEffect(() => {
-    if (onboardingStep !== "app") return;
-    if (view === "content") {
-      window.history.pushState({ screen: "content" }, "");
-    }
-  }, [view, onboardingStep]);
-
-  useEffect(() => {
-    if (onboardingStep !== "app" || !activeChannel) return;
-    window.history.pushState({ screen: "player" }, "");
-  }, [activeChannel, onboardingStep]);
+  }, [onboardingStep, activeChannel, view, showEpgGrid, showRecordings]);
 
   // ── Auto-scroll focused elements into view (D-PAD navigation) ──
   useEffect(() => {
