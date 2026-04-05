@@ -73,14 +73,58 @@ function SettingRow({ label, subtitle, children }: { label: string; subtitle?: s
   );
 }
 
-// ── Select Dropdown ──
+// ── Custom Select Dropdown (Android TV compatible) ──
 function SelectField({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      className="rounded-xl px-3 py-2 text-[12px] font-medium border-0 outline-none cursor-pointer"
-      style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        tabIndex={0}
+        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[12px] font-medium cursor-pointer min-w-[100px] text-left transition-colors"
+        style={{ background: "#1C1C24", color: "#F5F5F7", border: open ? "1px solid #FF6D00" : "1px solid transparent" }}
+      >
+        <span className="flex-1 truncate">{selected?.label || value}</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={`transition-transform ${open ? "rotate-180" : ""}`}>
+          <path d="M1 1L5 5L9 1" stroke="#86868B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 z-50 min-w-full rounded-xl py-1 shadow-xl"
+          style={{ background: "#131318", border: "1px solid #1C1C24" }}
+        >
+          {options.map(o => (
+            <button
+              key={o.value}
+              tabIndex={0}
+              onClick={() => { onChange(o.value); setOpen(false); }}
+              className="w-full px-3 py-2 text-left text-[12px] font-medium transition-colors"
+              style={{
+                color: o.value === value ? "#FF6D00" : "#F5F5F7",
+                background: o.value === value ? "rgba(255,109,0,0.1)" : "transparent",
+              }}
+              onMouseEnter={e => { if (o.value !== value) (e.target as HTMLElement).style.background = "rgba(255,109,0,0.06)"; }}
+              onMouseLeave={e => { if (o.value !== value) (e.target as HTMLElement).style.background = "transparent"; }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -291,11 +335,8 @@ export default function Settings() {
         <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
           <div className="px-5">
             <SettingRow label={t("s.language")}>
-              <select value={lang} onChange={e => setLang(e.target.value as Lang)}
-                className="rounded-xl px-3 py-2 text-[12px] font-medium border-0 outline-none cursor-pointer"
-                style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
-              </select>
+              <SelectField value={lang} onChange={v => setLang(v as Lang)}
+                options={LANGUAGES.map(l => ({ value: l.code, label: `${l.flag} ${l.label}` }))} />
             </SettingRow><Divider />
             <SettingRow label="Démarrage auto dernière chaîne">
               <Toggle checked={startPage === "last"} onChange={v => setStartPage(v ? "last" : "home")} />
