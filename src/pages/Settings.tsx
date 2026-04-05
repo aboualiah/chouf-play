@@ -714,6 +714,19 @@ export default function Settings() {
           {sectionContent[activeSection] || sectionContent.general}
         </div>
       </main>
+      {/* Reset confirm modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
+          <div className="rounded-2xl p-6 w-[90vw] max-w-sm" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            <h3 className="text-lg font-bold mb-2" style={{ color: "#F5F5F7" }}>{t("msg.reset_confirm")}</h3>
+            <p className="text-sm mb-6" style={{ color: "#86868B" }}>Cette action est irréversible.</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowResetConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium" style={{ background: "#1C1C24", color: "#86868B" }}>Annuler</button>
+              <button onClick={confirmReset} className="px-5 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: "#FF6D00" }}>Confirmer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
