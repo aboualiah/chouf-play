@@ -654,6 +654,7 @@ export default function Index() {
                             onShowCatchup={() => setShowCatchup(true)}
                             onShowEpg={() => setShowEpg(!showEpg)}
                             colorFlash={colorFlash}
+                            channelIndex={filteredChannels.findIndex(c => c.id === activeChannel.id)}
                           />
                         </div>
                         <AnimatePresence>
