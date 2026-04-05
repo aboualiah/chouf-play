@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, Heart, BookOpen, MoreHorizontal, PictureInPicture2, Loader2, Circle, Rewind } from "lucide-react";
 import { Channel } from "@/lib/channels";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
 import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
@@ -20,6 +20,10 @@ interface VideoPlayerProps {
   channelIndex?: number;
 }
 
+const txtShadow = "0 1px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.5)";
+const txtShadowSm = "0 1px 3px rgba(0,0,0,0.8)";
+const iconFilter = "drop-shadow(0 1px 3px rgba(0,0,0,0.8))";
+
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash, channelIndex }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,21 +38,8 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState(1);
 
-  // Zapping overlay (center, brief)
-  const [zapInfo, setZapInfo] = useState<{ name: string; category: string; logo?: string } | null>(null);
-  const zapTimer = useRef<ReturnType<typeof setTimeout>>();
-
   const epgInfo = useMemo(() => getCurrentProgram(channel.name), [channel.name]);
 
-  // Show zapping overlay on channel change
-  useEffect(() => {
-    setZapInfo({ name: channel.name, category: channel.category, logo: channel.logo });
-    clearTimeout(zapTimer.current);
-    zapTimer.current = setTimeout(() => setZapInfo(null), 2500);
-    return () => clearTimeout(zapTimer.current);
-  }, [channel.id]);
-
-  // Keyboard: zapping + INFO to re-show controls
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onNext?.(); }
@@ -68,7 +59,6 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     hideTimer.current = setTimeout(() => setShowControls(false), 3000);
   }, []);
 
-  // Main playback
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !channel?.url) return;
@@ -99,6 +89,8 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     { color: "#007AFF", colorKey: "blue", icon: MoreHorizontal, label: "Options", shortcut: "B", action: () => {} },
   ];
 
+  const volPercent = Math.round((muted ? 0 : volume) * 100);
+
   return (
     <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: "#0A0A0F" }}
       onMouseMove={hideControlsAfterDelay} onClick={hideControlsAfterDelay}>
@@ -116,7 +108,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       {/* Error */}
       {error && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3">
-          <p className="rounded-xl px-5 py-3 text-sm max-w-md text-center font-medium" style={{ background: "rgba(255,59,48,0.12)", color: "#FF6D6D" }}>{error}</p>
+          <p className="rounded-xl px-5 py-3 text-sm max-w-md text-center font-medium" style={{ background: "rgba(255,59,48,0.12)", color: "#FF6D6D", textShadow: txtShadowSm }}>{error}</p>
           <button onClick={() => {
             setError(null); setLoading(true);
             const video = videoRef.current;
@@ -132,78 +124,58 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         </div>
       )}
 
-      {/* Zapping overlay — center, temporary */}
-      <AnimatePresence>
-        {zapInfo && (
-          <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center gap-2 rounded-2xl px-10 py-5"
-              style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)" }}>
-              {channelIndex !== undefined && (
-                <p className="text-[36px] font-black tabular-nums" style={{ color: "#FF6D00" }}>{channelIndex + 1}</p>
-              )}
-              <p className="text-xl font-bold" style={{ color: "#F5F5F7" }}>{zapInfo.name}</p>
-              <p className="text-[12px]" style={{ color: "#86868B" }}>{zapInfo.category}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* === TOP BAR: Back + Channel name + LIVE badge === */}
-      <div className={`absolute top-0 left-0 right-0 z-20 transition-opacity duration-300 ${showControls ? "opacity-70" : "opacity-0 pointer-events-none"}`}>
+      {/* === TOP BAR with gradient === */}
+      <div className={`absolute top-0 left-0 right-0 z-20 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)", height: 100 }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={onBack} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium"
-            style={{ background: "rgba(10,10,15,0.6)", backdropFilter: "blur(8px)", color: "#F5F5F7" }}>
-            <ArrowLeft size={14} /> Retour
+            style={{ background: "rgba(10,10,15,0.6)", backdropFilter: "blur(8px)", color: "#F5F5F7", textShadow: txtShadow }}>
+            <ArrowLeft size={14} style={{ filter: iconFilter }} /> Retour
           </button>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[14px] font-bold truncate" style={{ color: "#F5F5F7" }}>{channel.name}</span>
-            <span className="text-[10px]" style={{ color: "#86868B" }}>{channel.category}</span>
-            <div className="flex items-center gap-1 shrink-0">
-              <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
-              <span className="text-[9px] font-semibold" style={{ color: "#34C759" }}>LIVE</span>
+            <span className="text-[14px] font-bold truncate" style={{ color: "#F5F5F7", textShadow: txtShadow }}>{channel.name}</span>
+            <span className="text-[10px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{channel.category}</span>
+            <div className="flex items-center gap-1 shrink-0 rounded px-2 py-0.5" style={{ background: "#E53935" }}>
+              <div className="h-1.5 w-1.5 rounded-full animate-pulse bg-white" />
+              <span className="text-[9px] font-semibold text-white">LIVE</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* === BOTTOM OVERLAY: Info bar + Controls === */}
+      {/* === BOTTOM OVERLAY === */}
       <div className={`absolute inset-x-0 bottom-0 z-20 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        style={{ background: "linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.6) 70%, transparent 100%)" }}>
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 70%, rgba(0,0,0,0) 100%)", minHeight: 160 }}>
         <div className="px-5 pb-4 pt-12">
 
-          {/* Info bar: channel info + EPG + color buttons — single line */}
+          {/* Info bar */}
           <div className="flex items-center gap-4 mb-3">
-            {/* Channel number + logo + name */}
             <div className="flex items-center gap-3 shrink-0">
               {channelIndex !== undefined && (
-                <span className="text-[20px] font-black tabular-nums" style={{ color: "#FF6D00" }}>{channelIndex + 1}</span>
+                <span className="text-[20px] font-black tabular-nums" style={{ color: "#FF6D00", textShadow: txtShadow }}>{channelIndex + 1}</span>
               )}
               {channel.logo && (
                 <img src={channel.logo} className="h-8 w-8 rounded-lg object-contain" alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               )}
               <div className="min-w-0">
-                <p className="text-[14px] font-bold leading-tight" style={{ color: "#F5F5F7" }}>{channel.name}</p>
-                <p className="text-[11px]" style={{ color: "#86868B" }}>{channel.category}</p>
+                <p className="text-[14px] font-bold leading-tight" style={{ color: "#F5F5F7", textShadow: txtShadow }}>{channel.name}</p>
+                <p className="text-[11px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{channel.category}</p>
               </div>
             </div>
 
-            {/* EPG info */}
             {epgInfo && (
               <div className="flex items-center gap-2 min-w-0">
                 <div className="h-4 w-px" style={{ background: "#48484A" }} />
-                <span className="text-[11px] font-medium truncate" style={{ color: "#FF6D00" }}>{epgInfo.title}</span>
+                <span className="text-[11px] font-medium truncate" style={{ color: "#FF6D00", textShadow: txtShadowSm }}>{epgInfo.title}</span>
                 {epgInfo.nextTitle && (
-                  <span className="text-[10px] truncate" style={{ color: "#48484A" }}>→ {epgInfo.nextStart} {epgInfo.nextTitle}</span>
+                  <span className="text-[10px] truncate" style={{ color: "#AAAAAA", textShadow: txtShadowSm }}>→ {epgInfo.nextStart} {epgInfo.nextTitle}</span>
                 )}
               </div>
             )}
 
-            {/* Spacer */}
             <div className="flex-1" />
 
-            {/* 4 color buttons */}
             <div className="flex items-center gap-4 shrink-0">
               {REMOTE_BUTTONS.map(btn => {
                 const isFlashing = colorFlash === btn.colorKey;
@@ -211,41 +183,44 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
                   <button key={btn.label} onClick={btn.action} className="flex flex-col items-center gap-0.5 group">
                     <div className={`flex h-8 w-8 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${isFlashing ? "animate-pulse scale-125" : ""}`}
                       style={{ background: btn.color, boxShadow: `0 0 ${isFlashing ? "20px" : "8px"} ${btn.color}${isFlashing ? "80" : "30"}` }}>
-                      <btn.icon size={14} className="text-white" fill={btn.active ? "currentColor" : "none"} />
+                      <btn.icon size={14} className="text-white" fill={btn.active ? "currentColor" : "none"} style={{ filter: iconFilter }} />
                     </div>
-                    <span className="text-[8px]" style={{ color: "#636366" }}>{btn.label}({btn.shortcut})</span>
+                    <span className="text-[8px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{btn.label}({btn.shortcut})</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Transport controls — single line, centered */}
+          {/* Transport controls */}
           <div className="flex items-center justify-center gap-2">
             <button onClick={onPrev} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <SkipBack size={16} style={{ color: "#F5F5F7" }} />
+              <SkipBack size={16} style={{ color: "#F5F5F7", filter: iconFilter }} />
             </button>
             <button onClick={togglePlay} className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-orange">
-              {playing ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white" fill="currentColor" />}
+              {playing ? <Pause size={18} className="text-white" style={{ filter: iconFilter }} /> : <Play size={18} className="text-white" fill="currentColor" style={{ filter: iconFilter }} />}
             </button>
             <button onClick={onNext} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <SkipForward size={16} style={{ color: "#F5F5F7" }} />
+              <SkipForward size={16} style={{ color: "#F5F5F7", filter: iconFilter }} />
             </button>
             <div className="mx-1 h-5 w-px" style={{ background: "#48484A" }} />
             <button onClick={handleRecord} className="rounded-full p-1.5 transition-colors hover:bg-white/10" title="Enregistrer">
-              <Circle size={14} className="fill-[#FF3B30]" style={{ color: "#FF3B30" }} />
+              <Circle size={14} className="fill-[#FF3B30]" style={{ color: "#FF3B30", filter: iconFilter }} />
             </button>
             <div className="mx-1 h-5 w-px" style={{ background: "#48484A" }} />
             <button onClick={toggleMute} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              {muted ? <VolumeX size={14} style={{ color: "#F5F5F7" }} /> : <Volume2 size={14} style={{ color: "#F5F5F7" }} />}
+              {muted ? <VolumeX size={14} style={{ color: "#F5F5F7", filter: iconFilter }} /> : <Volume2 size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />}
             </button>
             <input type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume}
-              onChange={e => handleVolume(parseFloat(e.target.value))} className="w-16 accent-[#FF6D00]" />
+              onChange={e => handleVolume(parseFloat(e.target.value))}
+              className="w-20 h-1 rounded-full appearance-none cursor-pointer"
+              style={{ background: `linear-gradient(to right, #FF6D00 ${volPercent}%, #242430 ${volPercent}%)` }} />
+            <span className="text-[10px] w-7 text-right" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{volPercent}%</span>
             <button onClick={togglePiP} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <PictureInPicture2 size={14} style={{ color: "#F5F5F7" }} />
+              <PictureInPicture2 size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />
             </button>
             <button onClick={toggleFullscreen} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              {fullscreen ? <Minimize size={14} style={{ color: "#F5F5F7" }} /> : <Maximize size={14} style={{ color: "#F5F5F7" }} />}
+              {fullscreen ? <Minimize size={14} style={{ color: "#F5F5F7", filter: iconFilter }} /> : <Maximize size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />}
             </button>
           </div>
         </div>
