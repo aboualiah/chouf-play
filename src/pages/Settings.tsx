@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowLeft, Trophy, Monitor, Shield, Info, Globe, Mail, Code,
   PlayCircle, Tv, RefreshCw, Lock, Languages,
@@ -299,8 +299,12 @@ export default function Settings() {
     reader.readAsText(file);
   };
 
-  const handleReset = () => {
-    if (!confirm(t("msg.reset_confirm"))) return;
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const handleReset = () => setShowResetConfirm(true);
+
+  const confirmReset = () => {
+    setShowResetConfirm(false);
     const keys = [PLAYER_SETTINGS_KEY, DISPLAY_SETTINGS_KEY, EPG_SETTINGS_KEY, CATCHUP_SETTINGS_KEY, SETTINGS_KEY, STREAM_SETTINGS_KEY, INTERFACE_SETTINGS_KEY, REFRESH_SETTINGS_KEY, RECORDING_SETTINGS_KEY, "chouf_parental_settings", DASHBOARD_SETTINGS_KEY];
     keys.forEach(k => localStorage.removeItem(k));
     toast.success(t("msg.settings_reset")); window.location.reload();
