@@ -18,7 +18,7 @@ interface VideoPlayerProps {
   colorFlash?: ColorFlash;
 }
 
-export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg }: VideoPlayerProps) {
+export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const playResultRef = useRef<PlayResult | null>(null);
@@ -133,11 +133,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     toast.info("📱 L'enregistrement sera disponible dans la version Android");
   };
 
-  const REMOTE_BUTTONS = [
-    { color: "#FF3B30", icon: Heart, label: "Favoris", action: onToggleFavorite, active: isFavorite },
-    { color: "#34C759", icon: BookOpen, label: "EPG", action: onShowEpg || (() => {}) },
-    { color: "#FFD60A", icon: Rewind, label: "Catch-up", action: onShowCatchup || (() => {}) },
-    { color: "#007AFF", icon: MoreHorizontal, label: "Options", action: () => {} },
+  const REMOTE_BUTTONS: { color: string; colorKey: string; icon: any; label: string; shortcut: string; action: () => void; active?: boolean }[] = [
+    { color: "#FF3B30", colorKey: "red", icon: Heart, label: "Favoris", shortcut: "R", action: onToggleFavorite, active: isFavorite },
+    { color: "#34C759", colorKey: "green", icon: BookOpen, label: "EPG", shortcut: "G", action: onShowEpg || (() => {}) },
+    { color: "#FFD60A", colorKey: "yellow", icon: Rewind, label: "Catch-up", shortcut: "Y", action: onShowCatchup || (() => {}) },
+    { color: "#007AFF", colorKey: "blue", icon: MoreHorizontal, label: "Options", shortcut: "B", action: () => {} },
   ];
 
   return (
