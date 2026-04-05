@@ -44,6 +44,16 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onPrev?.(); }
       else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onNext?.(); }
+      else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const v = videoRef.current;
+        if (v && v.duration && isFinite(v.duration)) v.currentTime = Math.max(0, v.currentTime - 10);
+      }
+      else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const v = videoRef.current;
+        if (v && v.duration && isFinite(v.duration)) v.currentTime = Math.min(v.duration, v.currentTime + 10);
+      }
       else if (e.key === "Enter" || e.key === "i" || e.key === "I" || e.keyCode === 165) {
         e.preventDefault();
         hideControlsAfterDelay();
@@ -57,6 +67,20 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     clearTimeout(hideTimer.current);
     setShowControls(true);
     hideTimer.current = setTimeout(() => setShowControls(false), 3000);
+  }, []);
+
+  // Clear error/loading when video actually plays
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onCanPlay = () => { setError(null); setLoading(false); };
+    const onPlaying = () => { setError(null); setLoading(false); setPlaying(true); };
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("playing", onPlaying);
+    return () => {
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("playing", onPlaying);
+    };
   }, []);
 
   useEffect(() => {

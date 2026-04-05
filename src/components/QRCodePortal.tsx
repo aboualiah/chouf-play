@@ -56,8 +56,8 @@ export function QRCodePortal({ open, onClose }: QRCodePortalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 24 }}
             transition={{ type: "spring", damping: 24, stiffness: 280 }}
-            className="fixed z-[9999] w-[360px] overflow-hidden rounded-2xl"
-            style={{ background: "#131318", border: "1px solid #1C1C24", position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxWidth: "85vw", maxHeight: "80vh", overflowY: "auto" as const }}
+            className="overflow-hidden rounded-2xl"
+            style={{ background: "#131318", border: "1px solid #1C1C24", position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90vw", maxWidth: 400, maxHeight: "75vh", overflowY: "auto" as const, zIndex: 99999 }}
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid #1C1C24" }}>
               <div className="flex items-center gap-2">
