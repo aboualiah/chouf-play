@@ -335,11 +335,8 @@ export default function Settings() {
         <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
           <div className="px-5">
             <SettingRow label={t("s.language")}>
-              <select value={lang} onChange={e => setLang(e.target.value as Lang)}
-                className="rounded-xl px-3 py-2 text-[12px] font-medium border-0 outline-none cursor-pointer"
-                style={{ background: "#1C1C24", color: "#F5F5F7" }}>
-                {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
-              </select>
+              <SelectField value={lang} onChange={v => setLang(v as Lang)}
+                options={LANGUAGES.map(l => ({ value: l.code, label: `${l.flag} ${l.label}` }))} />
             </SettingRow><Divider />
             <SettingRow label="Démarrage auto dernière chaîne">
               <Toggle checked={startPage === "last"} onChange={v => setStartPage(v ? "last" : "home")} />
