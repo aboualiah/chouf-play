@@ -50,28 +50,47 @@ function I18nProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+function GlobalTVHandlers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.keyCode === 13 || e.keyCode === 23) { // Enter or DPAD_CENTER
+        const focused = document.activeElement as HTMLElement;
+        if (focused && focused !== document.body && focused.tagName !== "INPUT" && focused.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          focused.click();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+  return <>{children}</>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <I18nProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/demo" element={<DemoChannels />} />
-              <Route path="/playlists" element={<PlaylistManager />} />
-              <Route path="/premium" element={<Premium />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
+        <GlobalTVHandlers>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/demo" element={<DemoChannels />} />
+                <Route path="/playlists" element={<PlaylistManager />} />
+                <Route path="/premium" element={<Premium />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </GlobalTVHandlers>
       </TooltipProvider>
     </I18nProvider>
   </QueryClientProvider>
