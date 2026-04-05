@@ -17,9 +17,10 @@ interface VideoPlayerProps {
   onShowCatchup?: () => void;
   onShowEpg?: () => void;
   colorFlash?: ColorFlash;
+  channelIndex?: number;
 }
 
-export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash }: VideoPlayerProps) {
+export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash, channelIndex }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const playResultRef = useRef<PlayResult | null>(null);
