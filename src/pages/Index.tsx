@@ -652,6 +652,7 @@ export default function Index() {
                             onNext={handleNextChannel}
                             onShowCatchup={() => setShowCatchup(true)}
                             onShowEpg={() => setShowEpg(!showEpg)}
+                            colorFlash={colorFlash}
                           />
                         </div>
                         <AnimatePresence>
