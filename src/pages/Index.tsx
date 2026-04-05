@@ -264,7 +264,51 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
+  // ── Android TV: Back button / history management ──
+  useEffect(() => {
+    if (onboardingStep !== "app") return;
+    // Push initial state
+    const currentState = activeChannel ? "player" : view === "content" ? "content" : "dashboard";
+    window.history.replaceState({ screen: currentState }, "");
 
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      if (activeChannel) {
+        setActiveChannel(null);
+      } else if (view === "content") {
+        setView("dashboard");
+      }
+      // At dashboard: do nothing (don't quit)
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [onboardingStep, activeChannel, view]);
+
+  // Push history state when navigating deeper
+  useEffect(() => {
+    if (onboardingStep !== "app") return;
+    if (view === "content") {
+      window.history.pushState({ screen: "content" }, "");
+    }
+  }, [view, onboardingStep]);
+
+  useEffect(() => {
+    if (onboardingStep !== "app" || !activeChannel) return;
+    window.history.pushState({ screen: "player" }, "");
+  }, [activeChannel, onboardingStep]);
+
+  // ── Auto-scroll focused elements into view (D-PAD navigation) ──
+  useEffect(() => {
+    const handler = (e: FocusEvent) => {
+      const el = e.target as HTMLElement;
+      if (el?.scrollIntoView) {
+        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    };
+    document.addEventListener("focusin", handler);
+    return () => document.removeEventListener("focusin", handler);
+  }, []);
 
 
   const COLOR_PASTILLES = [
