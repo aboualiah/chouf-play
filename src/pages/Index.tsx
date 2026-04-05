@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
+import { MiniEpg } from "@/components/MiniEpg";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TermsScreen } from "@/components/TermsScreen";
@@ -627,7 +628,7 @@ export default function Index() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-[12px] font-medium truncate" style={{ color: activeChannel?.id === ch.id ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
-                            <p className="text-[10px]" style={{ color: "#48484A" }}>{ch.category}</p>
+                            <MiniEpg channelName={ch.name} />
                           </div>
                           {activeChannel?.id === ch.id && (
                             <div className="flex items-center gap-1.5">
@@ -653,6 +654,7 @@ export default function Index() {
                             onShowCatchup={() => setShowCatchup(true)}
                             onShowEpg={() => setShowEpg(!showEpg)}
                             colorFlash={colorFlash}
+                            channelIndex={filteredChannels.findIndex(c => c.id === activeChannel.id)}
                           />
                         </div>
                         <AnimatePresence>

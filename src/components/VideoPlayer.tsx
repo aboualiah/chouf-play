@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, Heart, BookOpen, MoreHorizontal, PictureInPicture2, Loader2, Circle, Rewind } from "lucide-react";
 import { Channel } from "@/lib/channels";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
 import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
+import { getCurrentProgram } from "@/components/MiniEpg";
 
 interface VideoPlayerProps {
   channel: Channel;
@@ -16,9 +17,10 @@ interface VideoPlayerProps {
   onShowCatchup?: () => void;
   onShowEpg?: () => void;
   colorFlash?: ColorFlash;
+  channelIndex?: number;
 }
 
-export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash }: VideoPlayerProps) {
+export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash, channelIndex }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const playResultRef = useRef<PlayResult | null>(null);
@@ -51,10 +53,20 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onNext?.(); }
       else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onPrev?.(); }
+      else if (e.key === "Enter" || e.key === "i" || e.key === "I" || e.keyCode === 165 /* INFO */) {
+        // INFO / OK key: re-show info banner
+        e.preventDefault();
+        setShowBanner(true);
+        clearTimeout(bannerTimer.current);
+        bannerTimer.current = setTimeout(() => setShowBanner(false), 5000);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onPrev, onNext]);
+
+  // EPG data for current channel
+  const epgInfo = useMemo(() => getCurrentProgram(channel.name), [channel.name]);
 
   useEffect(() => {
     setZapInfo({ name: channel.name, category: channel.category, logo: channel.logo });
@@ -159,8 +171,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         {zapInfo && (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
             className="absolute inset-0 z-25 flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center gap-3 rounded-2xl px-8 py-6"
+            <div className="flex flex-col items-center gap-3 rounded-2xl px-10 py-6"
               style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)" }}>
+              {channelIndex !== undefined && (
+                <p className="text-[36px] font-black tabular-nums" style={{ color: "#FF6D00" }}>{channelIndex + 1}</p>
+              )}
               {zapInfo.logo && (
                 <img src={zapInfo.logo} className="h-12 w-12 rounded-xl object-contain" alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -206,17 +221,33 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       <AnimatePresence>
         {showBanner && !loading && (
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
-            className="absolute bottom-20 left-4 right-4 z-20 flex items-center gap-3 rounded-2xl px-4 py-3"
+            className="absolute bottom-20 left-4 right-4 z-20 flex items-center gap-4 rounded-2xl px-5 py-3"
             style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)", border: "1px solid #1C1C24" }}>
+            {channelIndex !== undefined && (
+              <span className="text-[24px] font-black tabular-nums shrink-0" style={{ color: "#FF6D00" }}>{channelIndex + 1}</span>
+            )}
             {channel.logo && (
-              <img src={channel.logo} className="h-10 w-10 rounded-xl object-contain" alt=""
+              <img src={channel.logo} className="h-10 w-10 rounded-xl object-contain shrink-0" alt=""
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-bold" style={{ color: "#F5F5F7" }}>{channel.name}</p>
-              <p className="text-[11px]" style={{ color: "#86868B" }}>{channel.category}</p>
+              <p className="text-[16px] font-bold" style={{ color: "#F5F5F7" }}>{channel.name}</p>
+              <p className="text-[12px]" style={{ color: "#86868B" }}>{channel.category}</p>
+              {epgInfo && (
+                <div className="mt-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-medium" style={{ color: "#FF6D00" }}>{epgInfo.title}</span>
+                    {epgInfo.nextTitle && (
+                      <span className="text-[10px]" style={{ color: "#48484A" }}>→ {epgInfo.nextStart} {epgInfo.nextTitle}</span>
+                    )}
+                  </div>
+                  <div className="mt-1 h-[2px] rounded-full overflow-hidden" style={{ background: "#242430" }}>
+                    <div className="h-full rounded-full" style={{ width: `${epgInfo.progress}%`, background: "#FF6D00" }} />
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+            <div className="h-2 w-2 rounded-full animate-pulse shrink-0" style={{ background: "#34C759" }} />
           </motion.div>
         )}
       </AnimatePresence>

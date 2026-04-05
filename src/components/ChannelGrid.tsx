@@ -1,5 +1,6 @@
 import { Channel, CATEGORY_GRADIENTS } from "@/lib/channels";
 import { Heart, Play, Loader2 } from "lucide-react";
+import { MiniEpg } from "@/components/MiniEpg";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 interface ChannelGridProps {
@@ -130,7 +131,7 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
-              <p className="text-[10px]" style={{ color: "#48484A" }}>{ch.category}</p>
+              <MiniEpg channelName={ch.name} />
             </div>
             <button onClick={e => { e.stopPropagation(); onToggleFavorite(ch.id); }}
               className={`transition-opacity ${favorites.includes(ch.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
