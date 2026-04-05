@@ -47,12 +47,17 @@ export const RADIO_STATIONS: Channel[] = [
   { id: "r11", name: "Skyrock", category: "Radio FR", url: "https://icecast.skyrock.net/s/natio_mp3_128k", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/4/4f/Skyrock_logo_2011.svg/200px-Skyrock_logo_2011.svg.png", type: "live" },
   { id: "r17", name: "France Musique", category: "Radio FR", url: "https://icecast.radiofrance.fr/francemusique-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/9/95/France_Musique_-_2008.svg/200px-France_Musique_-_2008.svg.png", type: "live" },
   { id: "r18", name: "Mouv'", category: "Radio FR", url: "https://icecast.radiofrance.fr/mouv-hifi.aac", logo: "https://upload.wikimedia.org/wikipedia/fr/thumb/1/1f/Mouv%27_logo_2020.svg/200px-Mouv%27_logo_2020.svg.png", type: "live" },
-  // Radio Chill / Jazz / Classique (all HTTPS)
-  { id: "r12", name: "Lounge Radio", category: "Radio Chill", url: "https://fr1.streamhosting.ch/lounge128.mp3", logo: "", type: "live" },
+  { id: "r20", name: "Radio Classique", category: "Radio FR", url: "https://radioclassique.ice.infomaniak.ch/radioclassique-high.mp3", logo: "", type: "live" },
+  // Radio International
+  { id: "r21", name: "BBC World Service", category: "Radio EN", url: "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f6/BBC_World_Service_red.svg/200px-BBC_World_Service_red.svg.png", type: "live" },
+  { id: "r22", name: "Europa Plus", category: "Radio Pop", url: "https://ep128.hostingradio.ru:8030/ep128", logo: "", type: "live" },
+  // Radio Jazz / Classique / Chill
   { id: "r13", name: "Jazz Radio", category: "Radio Jazz", url: "https://jazzradio.ice.infomaniak.ch/jazzradio-high.mp3", logo: "", type: "live" },
   { id: "r14", name: "Radio Swiss Jazz", category: "Radio Jazz", url: "https://stream.srg-ssr.ch/m/rsj/mp3_128", logo: "", type: "live" },
+  { id: "r23", name: "TSF Jazz", category: "Radio Jazz", url: "https://tsfjazz.ice.infomaniak.ch/tsfjazz-high.mp3", logo: "", type: "live" },
   { id: "r15", name: "Radio Swiss Classic", category: "Radio Classique", url: "https://stream.srg-ssr.ch/m/rsc_fr/mp3_128", logo: "", type: "live" },
   { id: "r16", name: "Classical KING FM", category: "Radio Classique", url: "https://classicalking.streamguys1.com/king-fm-aac-128k", logo: "", type: "live" },
+  { id: "r12", name: "Lounge Radio", category: "Radio Chill", url: "https://fr1.streamhosting.ch/lounge128.mp3", logo: "", type: "live" },
   { id: "r19", name: "Radio Swiss Pop", category: "Radio Pop", url: "https://stream.srg-ssr.ch/m/rsp/mp3_128", logo: "", type: "live" },
 ];
 

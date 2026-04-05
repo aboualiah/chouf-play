@@ -23,7 +23,7 @@ export default function Premium() {
     <div className="min-h-screen flex flex-col items-center justify-center relative px-4 py-10" style={{ background: "#0A0A0F" }}>
       {/* Close */}
       <button
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/", { replace: true })}
         className="absolute top-5 right-5 rounded-full p-2 transition-colors hover:bg-white/5 z-20"
         style={{ background: "#131318", border: "1px solid #1C1C24" }}
       >
