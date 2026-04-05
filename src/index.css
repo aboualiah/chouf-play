@@ -58,11 +58,35 @@
   * {
     @apply border-border;
   }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* D-PAD / TV focus styles */
+  *:focus {
+    outline: 2px solid hsl(24 100% 50%) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 12px hsl(24 100% 50% / 0.4);
+  }
+  *:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none;
+  }
+
+  /* Modals: never overflow screen */
+  [role="dialog"], .modal-container {
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto;
   }
 }
 

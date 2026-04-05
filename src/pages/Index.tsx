@@ -203,6 +203,19 @@ export default function Index() {
       const updated = [...prev, newPlaylist];
       savePlaylists(updated);
       localStorage.setItem("chouf_has_setup", "true");
+      // Detailed success toast
+      const chCount = channels.length;
+      const vodCount = xtreamData?.vodStreams?.length || 0;
+      const serCount = xtreamData?.series?.length || 0;
+      const parts = [`${chCount} chaînes`];
+      if (vodCount > 0) parts.push(`${vodCount} films`);
+      if (serCount > 0) parts.push(`${serCount} séries`);
+      toast.success(`✅ ${parts.join(", ")} chargés !`, { duration: 5000 });
+      // Auto-navigate to dashboard after 2s
+      setTimeout(() => {
+        setOnboardingStep("app");
+        setView("dashboard");
+      }, 2000);
       return updated;
     });
   }, []);
