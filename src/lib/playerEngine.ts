@@ -116,24 +116,23 @@ function playWithNative(
   onPlaying: () => void, onError: (msg: string) => void,
 ): PlayResult {
   let started = false;
-  let timedOut = false;
 
   const onPlayingHandler = () => { started = true; onPlaying(); };
   const errorHandler = () => {
-    if (started || timedOut) return;
-    onError(userErrorMessage(video.error?.code));
+    if (started) return;
+    // Don't show error immediately — wait for timeout
   };
 
   video.addEventListener("playing", onPlayingHandler);
   video.addEventListener("error", errorHandler);
   video.src = url;
   video.play().catch(() => {
-    if (!started && !video.error) onError("Lecture impossible pour cette chaîne");
+    // Don't show error immediately on play() rejection
   });
 
   const timeout = setTimeout(() => {
-    if (!started) { timedOut = true; onError("Le flux ne démarre pas"); }
-  }, 8000);
+    if (!started) onError("Lecture impossible pour cette chaîne");
+  }, 10000);
 
   return {
     mode: "native",
@@ -177,8 +176,8 @@ function playWithHlsJs(
   });
 
   const timeout = setTimeout(() => {
-    if (!started && !destroyed) onError("Le flux ne démarre pas");
-  }, 8000);
+    if (!started && !destroyed) onError("Lecture impossible pour cette chaîne");
+  }, 10000);
 
   return {
     mode: "hlsjs",
