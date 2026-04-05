@@ -197,6 +197,13 @@ export default function PlaylistManager() {
                 <p className="text-[12px]" style={{ color: "#2C2C34" }}>Ajoutez une playlist pour commencer</p>
               </div>
             )}
+            {/* Floating add button */}
+            <button onClick={() => { setModalOpen(true); setActiveTab("add"); }}
+              className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 mt-4 text-[14px] font-bold transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: "linear-gradient(135deg, #FF6D00, #FF8C38)", color: "#fff", boxShadow: "0 4px 20px rgba(255,109,0,0.3)" }}>
+              <Plus size={18} />
+              Ajouter une playlist
+            </button>
           </motion.div>
         )}
       </div>

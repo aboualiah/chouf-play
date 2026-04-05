@@ -42,8 +42,8 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onNext?.(); }
-      else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onPrev?.(); }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onPrev?.(); }
+      else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onNext?.(); }
       else if (e.key === "Enter" || e.key === "i" || e.key === "I" || e.keyCode === 165) {
         e.preventDefault();
         hideControlsAfterDelay();
