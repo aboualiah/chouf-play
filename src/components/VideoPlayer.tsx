@@ -171,8 +171,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         {zapInfo && (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
             className="absolute inset-0 z-25 flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center gap-3 rounded-2xl px-8 py-6"
+            <div className="flex flex-col items-center gap-3 rounded-2xl px-10 py-6"
               style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(16px)" }}>
+              {channelIndex !== undefined && (
+                <p className="text-[36px] font-black tabular-nums" style={{ color: "#FF6D00" }}>{channelIndex + 1}</p>
+              )}
               {zapInfo.logo && (
                 <img src={zapInfo.logo} className="h-12 w-12 rounded-xl object-contain" alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
