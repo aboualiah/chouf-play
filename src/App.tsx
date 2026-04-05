@@ -15,7 +15,7 @@ const Premium = lazy(() => import("./pages/Premium"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const DebugPlayer = lazy(() => import("./pages/DebugPlayer"));
+
 
 const queryClient = new QueryClient();
 
