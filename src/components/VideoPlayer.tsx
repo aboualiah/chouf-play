@@ -4,6 +4,7 @@ import { Channel } from "@/lib/channels";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
+import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
 
 interface VideoPlayerProps {
   channel: Channel;
@@ -14,9 +15,10 @@ interface VideoPlayerProps {
   onNext?: () => void;
   onShowCatchup?: () => void;
   onShowEpg?: () => void;
+  colorFlash?: ColorFlash;
 }
 
-export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg }: VideoPlayerProps) {
+export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg, colorFlash }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const playResultRef = useRef<PlayResult | null>(null);
@@ -131,11 +133,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     toast.info("📱 L'enregistrement sera disponible dans la version Android");
   };
 
-  const REMOTE_BUTTONS = [
-    { color: "#FF3B30", icon: Heart, label: "Favoris", action: onToggleFavorite, active: isFavorite },
-    { color: "#34C759", icon: BookOpen, label: "EPG", action: onShowEpg || (() => {}) },
-    { color: "#FFD60A", icon: Rewind, label: "Catch-up", action: onShowCatchup || (() => {}) },
-    { color: "#007AFF", icon: MoreHorizontal, label: "Options", action: () => {} },
+  const REMOTE_BUTTONS: { color: string; colorKey: string; icon: any; label: string; shortcut: string; action: () => void; active?: boolean }[] = [
+    { color: "#FF3B30", colorKey: "red", icon: Heart, label: "Favoris", shortcut: "R", action: onToggleFavorite, active: isFavorite },
+    { color: "#34C759", colorKey: "green", icon: BookOpen, label: "EPG", shortcut: "G", action: onShowEpg || (() => {}) },
+    { color: "#FFD60A", colorKey: "yellow", icon: Rewind, label: "Catch-up", shortcut: "Y", action: onShowCatchup || (() => {}) },
+    { color: "#007AFF", colorKey: "blue", icon: MoreHorizontal, label: "Options", shortcut: "B", action: () => {} },
   ];
 
   return (
@@ -225,15 +227,18 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         <div className="px-6 pb-5 pt-20">
           {/* Remote buttons */}
           <div className="mb-5 flex justify-center gap-6">
-            {REMOTE_BUTTONS.map(btn => (
-              <button key={btn.label} onClick={btn.action} className="flex flex-col items-center gap-1.5 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full transition-transform group-hover:scale-110"
-                  style={{ background: btn.color, boxShadow: `0 0 12px ${btn.color}40` }}>
-                  <btn.icon size={17} className="text-white" fill={btn.active ? "currentColor" : "none"} />
-                </div>
-                <span className="text-[9px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
-              </button>
-            ))}
+            {REMOTE_BUTTONS.map(btn => {
+              const isFlashing = colorFlash === btn.colorKey;
+              return (
+                <button key={btn.label} onClick={btn.action} className="flex flex-col items-center gap-1.5 group">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${isFlashing ? "animate-pulse scale-125" : ""}`}
+                    style={{ background: btn.color, boxShadow: `0 0 ${isFlashing ? "24px" : "12px"} ${btn.color}${isFlashing ? "80" : "40"}` }}>
+                    <btn.icon size={17} className="text-white" fill={btn.active ? "currentColor" : "none"} />
+                  </div>
+                  <span className="text-[9px] font-medium" style={{ color: "#86868B" }}>{btn.label} ({btn.shortcut})</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Transport */}

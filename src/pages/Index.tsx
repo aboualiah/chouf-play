@@ -244,7 +244,7 @@ export default function Index() {
     if (idx < filteredChannels.length - 1) handlePlay(filteredChannels[idx + 1]);
   }, [activeChannel, filteredChannels, handlePlay]);
 
-  useKeyboardShortcuts({
+  const { colorFlash } = useKeyboardShortcuts({
     onToggleFavorite: activeChannel ? () => handleToggleFavorite(activeChannel.id) : undefined,
     onBack: activeChannel ? () => setActiveChannel(null) : undefined,
     onTogglePlay: activeChannel ? () => {
@@ -260,6 +260,9 @@ export default function Index() {
         else (c as HTMLElement).requestFullscreen();
       }
     } : undefined,
+    onShowEpg: activeChannel ? () => setShowEpg(true) : undefined,
+    onShowPlaylists: () => navigate("/playlists"),
+    onShowSettings: () => navigate("/settings"),
   });
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
@@ -649,6 +652,7 @@ export default function Index() {
                             onNext={handleNextChannel}
                             onShowCatchup={() => setShowCatchup(true)}
                             onShowEpg={() => setShowEpg(!showEpg)}
+                            colorFlash={colorFlash}
                           />
                         </div>
                         <AnimatePresence>
