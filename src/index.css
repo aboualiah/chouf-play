@@ -71,11 +71,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* D-PAD / TV focus styles */
+  /* D-PAD / TV focus styles — subtle, no orange outline */
   *:focus {
-    outline: 2px solid hsl(24 100% 50%) !important;
-    outline-offset: 2px;
-    box-shadow: 0 0 12px hsl(24 100% 50% / 0.4);
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: rgba(255,109,0,0.1);
   }
   *:focus:not(:focus-visible) {
     outline: none !important;
