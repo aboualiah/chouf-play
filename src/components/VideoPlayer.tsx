@@ -227,15 +227,18 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         <div className="px-6 pb-5 pt-20">
           {/* Remote buttons */}
           <div className="mb-5 flex justify-center gap-6">
-            {REMOTE_BUTTONS.map(btn => (
-              <button key={btn.label} onClick={btn.action} className="flex flex-col items-center gap-1.5 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full transition-transform group-hover:scale-110"
-                  style={{ background: btn.color, boxShadow: `0 0 12px ${btn.color}40` }}>
-                  <btn.icon size={17} className="text-white" fill={btn.active ? "currentColor" : "none"} />
-                </div>
-                <span className="text-[9px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
-              </button>
-            ))}
+            {REMOTE_BUTTONS.map(btn => {
+              const isFlashing = colorFlash === btn.colorKey;
+              return (
+                <button key={btn.label} onClick={btn.action} className="flex flex-col items-center gap-1.5 group">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${isFlashing ? "animate-pulse scale-125" : ""}`}
+                    style={{ background: btn.color, boxShadow: `0 0 ${isFlashing ? "24px" : "12px"} ${btn.color}${isFlashing ? "80" : "40"}` }}>
+                    <btn.icon size={17} className="text-white" fill={btn.active ? "currentColor" : "none"} />
+                  </div>
+                  <span className="text-[9px] font-medium" style={{ color: "#86868B" }}>{btn.label} ({btn.shortcut})</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Transport */}
