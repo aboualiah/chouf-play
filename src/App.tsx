@@ -67,7 +67,7 @@ const App = () => (
               <Route path="/premium" element={<Premium />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
-              <Route path="/debug-player" element={<DebugPlayer />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
