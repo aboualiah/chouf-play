@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, Heart, BookOpen, ListMusic, MoreHorizontal, PictureInPicture2, Loader2, Circle, Rewind } from "lucide-react";
+import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, SkipBack, SkipForward, Heart, BookOpen, MoreHorizontal, PictureInPicture2, Loader2, Circle, Rewind, Bug, X } from "lucide-react";
 import { Channel } from "@/lib/channels";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-
-declare global {
-  interface Window { mpegts: any; }
-}
+import {
+  detectBrowser, detectStreamType, choosePlayMode, timestamp,
+  cleanupPlayer, startPlayback,
+  NETWORK_STATES, READY_STATES, ERROR_CODES,
+  type PlayerLogEntry, type PlayMode,
+} from "@/lib/playerEngine";
 
 interface VideoPlayerProps {
   channel: Channel;
@@ -19,15 +21,12 @@ interface VideoPlayerProps {
   onShowEpg?: () => void;
 }
 
-function isXtreamLikeStream(url: string) {
-  return /\/live\/[^/]+\/[^/]+\/\d+(?:\.(?:m3u8|ts))?(?:\?.*)?$/.test(url) || url.endsWith(".ts");
-}
-
 export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onPrev, onNext, onShowCatchup, onShowEpg }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const mpegtsRef = useRef<any>(null);
+  const playResultRef = useRef<{ cleanup: () => void } | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
+
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
@@ -36,15 +35,24 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState(1);
 
+  // Debug panel
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<PlayerLogEntry[]>([]);
+  const [activeMode, setActiveMode] = useState<PlayMode>("none");
+
   // Zapping overlay
   const [zapInfo, setZapInfo] = useState<{ name: string; category: string; logo?: string } | null>(null);
   const zapTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Info banner on channel change
+  // Info banner
   const [showBanner, setShowBanner] = useState(false);
   const bannerTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Show info banner on channel change
+  const debugLog = useCallback((level: PlayerLogEntry["level"], msg: string) => {
+    setDebugLogs(prev => [...prev.slice(-100), { time: timestamp(), level, msg }]);
+  }, []);
+
+  // Banner on channel change
   useEffect(() => {
     setShowBanner(true);
     clearTimeout(bannerTimer.current);
@@ -55,19 +63,14 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   // Zapping keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp" || e.key === "PageUp") {
-        e.preventDefault();
-        onNext?.();
-      } else if (e.key === "ArrowDown" || e.key === "PageDown") {
-        e.preventDefault();
-        onPrev?.();
-      }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onNext?.(); }
+      else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onPrev?.(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onPrev, onNext]);
 
-  // Show zapping overlay
+  // Zapping overlay
   useEffect(() => {
     setZapInfo({ name: channel.name, category: channel.category, logo: channel.logo });
     clearTimeout(zapTimer.current);
@@ -81,87 +84,51 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     hideTimer.current = setTimeout(() => setShowControls(false), 3000);
   }, []);
 
-  const cleanup = useCallback(() => {
-    if (mpegtsRef.current) {
-      try {
-        mpegtsRef.current.pause();
-        mpegtsRef.current.unload();
-        mpegtsRef.current.detachMediaElement();
-        mpegtsRef.current.destroy();
-      } catch {}
-      mpegtsRef.current = null;
-    }
-    const video = videoRef.current;
-    if (video) {
-      video.removeAttribute("src");
-      video.load();
-    }
-  }, []);
-
+  // ── Main playback logic ──
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !channel?.url) return;
-    let cancelled = false;
 
-    cleanup();
+    // Cleanup previous
+    if (playResultRef.current) {
+      playResultRef.current.cleanup();
+      playResultRef.current = null;
+    }
+    cleanupPlayer(video, null);
+
     setError(null);
     setLoading(true);
+    setActiveMode("none");
+    setDebugLogs([]);
 
-    const url = channel.url;
-    const tsUrl = url.replace(".m3u8", ".ts");
-    const shouldTryMpegts = isXtreamLikeStream(url) || tsUrl !== url;
-
-    const startPlay = () => { if (!cancelled) { setLoading(false); setPlaying(true); } };
-    const onStreamError = () => { if (!cancelled) { setLoading(false); setError('Impossible de lire ce flux'); } };
-
-    const tryNative = (nativeUrl: string, fallbackUrl?: string) => {
-      if (cancelled) return;
-      cleanup();
-      setError(null);
-      video.onplaying = () => startPlay();
-      video.onerror = () => {
-        if (cancelled) return;
-        if (fallbackUrl && fallbackUrl !== nativeUrl) { tryNative(fallbackUrl); return; }
-        onStreamError();
-      };
-      video.src = nativeUrl;
-      video.play().then(() => startPlay()).catch(() => {
-        if (cancelled) return;
-        if (fallbackUrl && fallbackUrl !== nativeUrl) { tryNative(fallbackUrl); return; }
-        onStreamError();
-      });
-    };
-
-    const tryMpegtsFirst = () => {
-      if (!window.mpegts || !window.mpegts.isSupported()) {
-        tryNative(url, tsUrl !== url ? tsUrl : undefined);
-        return;
+    const result = startPlayback(
+      video,
+      channel.url,
+      debugLog,
+      () => {
+        setLoading(false);
+        setPlaying(true);
+        setActiveMode(result.mode);
+      },
+      (msg) => {
+        setLoading(false);
+        setError(msg);
+        debugLog("error", `PLAYER ERROR: ${msg}`);
       }
-      let started = false;
-      try {
-        const player = window.mpegts.createPlayer({ type: 'mpegts', url: tsUrl, isLive: true }, { enableWorker: true, enableStashBuffer: false, stashInitialSize: 128 });
-        mpegtsRef.current = player;
-        video.onplaying = () => { started = true; startPlay(); };
-        video.onerror = () => { if (!cancelled && !started) { cleanup(); tryNative(url, tsUrl !== url ? tsUrl : undefined); } };
-        player.on(window.mpegts.Events.ERROR, () => { if (!cancelled && !started) { cleanup(); tryNative(url, tsUrl !== url ? tsUrl : undefined); } });
-        player.attachMediaElement(video);
-        player.load();
-        player.play();
-        const t = setTimeout(() => { if (!cancelled && !started) { cleanup(); tryNative(url, tsUrl !== url ? tsUrl : undefined); } }, 8000);
-        const prev = video.onplaying;
-        video.onplaying = (ev) => { clearTimeout(t); prev?.call(video, ev as Event); };
-        return () => clearTimeout(t);
-      } catch {
-        tryNative(url, tsUrl !== url ? tsUrl : undefined);
-      }
-    };
+    );
 
-    const stop = shouldTryMpegts ? tryMpegtsFirst() : undefined;
-    if (!shouldTryMpegts) tryNative(url, tsUrl !== url ? tsUrl : undefined);
+    playResultRef.current = result;
+    setActiveMode(result.mode);
     hideControlsAfterDelay();
 
-    return () => { cancelled = true; stop?.(); cleanup(); };
-  }, [channel.url, hideControlsAfterDelay, cleanup]);
+    return () => {
+      if (playResultRef.current) {
+        playResultRef.current.cleanup();
+        playResultRef.current = null;
+      }
+      cleanupPlayer(video, null);
+    };
+  }, [channel.url, channel.id, hideControlsAfterDelay, debugLog]);
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -207,6 +174,8 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     { color: "#007AFF", icon: MoreHorizontal, label: "Options", action: () => {} },
   ];
 
+  const browser = detectBrowser();
+
   return (
     <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: "#0A0A0F" }} onMouseMove={hideControlsAfterDelay}>
       {/* Back button */}
@@ -215,13 +184,22 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         <ArrowLeft size={16} /> Retour
       </button>
 
-      {/* Channel info (shown with controls) */}
+      {/* Debug toggle */}
+      <button onClick={() => setShowDebug(!showDebug)}
+        className="absolute right-4 top-4 z-30 flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-medium transition-all"
+        style={{ background: showDebug ? "#FF6D0040" : "rgba(10,10,15,0.6)", backdropFilter: "blur(8px)", color: showDebug ? "#FF6D00" : "#86868B" }}>
+        <Bug size={13} /> Debug
+      </button>
+
+      {/* Channel info */}
       <div className={`absolute left-4 top-14 z-20 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}>
         <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>{channel.name}</h2>
-        <p className="text-[11px]" style={{ color: "#86868B" }}>{channel.category}</p>
+        <p className="text-[11px]" style={{ color: "#86868B" }}>{channel.category}
+          {activeMode !== "none" && <span className="ml-2 px-1.5 py-0.5 rounded text-[9px]" style={{ background: "#1C1C24", color: "#FF6D00" }}>{activeMode}</span>}
+        </p>
       </div>
 
-      {/* Zapping overlay (center) */}
+      {/* Zapping overlay */}
       <AnimatePresence>
         {zapInfo && (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
@@ -249,13 +227,17 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         </div>
       )}
 
+      {/* Error */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="rounded-xl px-4 py-2 text-sm" style={{ background: "rgba(255,59,48,0.15)", color: "#FF3B30" }}>{error}</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <p className="rounded-xl px-4 py-2 text-sm max-w-md text-center" style={{ background: "rgba(255,59,48,0.15)", color: "#FF3B30" }}>{error}</p>
+          <p className="text-[10px]" style={{ color: "#48484A" }}>
+            {browser.name} | {detectStreamType(channel.url)} | {activeMode}
+          </p>
         </div>
       )}
 
-      {/* Info banner (bottom, on channel change) */}
+      {/* Info banner */}
       <AnimatePresence>
         {showBanner && !loading && (
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
@@ -270,6 +252,41 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
               <p className="text-[11px]" style={{ color: "#86868B" }}>{channel.category}</p>
             </div>
             <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Debug panel */}
+      <AnimatePresence>
+        {showDebug && (
+          <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            className="absolute right-0 top-0 bottom-0 z-30 w-80 flex flex-col overflow-hidden"
+            style={{ background: "rgba(10,10,15,0.95)", backdropFilter: "blur(16px)", borderLeft: "1px solid #1C1C24" }}>
+            <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: "#1C1C24" }}>
+              <span className="text-xs font-bold" style={{ color: "#FF6D00" }}>Debug Logs</span>
+              <button onClick={() => setShowDebug(false)} className="p-1 rounded hover:bg-white/5"><X size={14} /></button>
+            </div>
+            <div className="px-3 py-2 border-b space-y-1 text-[10px] font-mono" style={{ borderColor: "#1C1C24" }}>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>URL</span><span className="truncate ml-2 max-w-[180px]" style={{ color: "#E5E5EA" }}>{channel.url}</span></div>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>Browser</span><span style={{ color: "#E5E5EA" }}>{browser.name}</span></div>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>Stream</span><span style={{ color: "#30D158" }}>{detectStreamType(channel.url)}</span></div>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>Mode</span><span style={{ color: "#007AFF" }}>{activeMode}</span></div>
+              {videoRef.current && (
+                <>
+                  <div className="flex justify-between"><span style={{ color: "#86868B" }}>readyState</span><span style={{ color: "#E5E5EA" }}>{videoRef.current.readyState} ({READY_STATES[videoRef.current.readyState]})</span></div>
+                  <div className="flex justify-between"><span style={{ color: "#86868B" }}>networkState</span><span style={{ color: "#E5E5EA" }}>{videoRef.current.networkState} ({NETWORK_STATES[videoRef.current.networkState]})</span></div>
+                  <div className="flex justify-between"><span style={{ color: "#86868B" }}>dimensions</span><span style={{ color: "#E5E5EA" }}>{videoRef.current.videoWidth}×{videoRef.current.videoHeight}</span></div>
+                </>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 font-mono text-[10px] space-y-px">
+              {debugLogs.map((l, i) => (
+                <div key={i} className="px-1 py-0.5 rounded" style={{
+                  background: l.level === "error" ? "#FF3B3010" : "transparent",
+                  color: l.level === "error" ? "#FF3B30" : l.level === "warn" ? "#FFD60A" : l.level === "event" ? "#30D158" : "#E5E5EA",
+                }}>{l.time} {l.msg}</div>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
