@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, QrCode, Globe, Zap, Shield, Crown, Gift, ArrowRight, Fingerprint } from "lucide-react";
-import ChoufPlayLogo from "./ChoufPlayLogo";
+import { Plus, QrCode, Globe, ArrowRight, Fingerprint, Shield, Gift } from "lucide-react";
 import { QRCodePortal } from "./QRCodePortal";
 
 interface WelcomeScreenProps {
@@ -24,79 +23,15 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
   const [deviceId] = useState(getDeviceId);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto relative" style={{ background: "#0A0A0F" }}>
-      {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(255,109,0,0.06), transparent 70%)" }} />
-
-      <div className="relative z-10 flex flex-col items-center px-6 py-10 max-w-lg w-full">
-        {/* Logo */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <ChoufPlayLogo size={100} showCP animate />
-        </motion.div>
-
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-center mt-4"
-        >
-          <h1 className="text-3xl leading-none tracking-tight">
-            <span className="font-black" style={{ color: "#F5F5F7" }}>CHOUF</span>
-            <span className="font-light" style={{ color: "#FF6D00" }}> Play</span>
-          </h1>
-          <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[4px]" style={{ color: "#C9A84C" }}>
-            Léger · Rapide · 4K
-          </p>
-        </motion.div>
-
-        {/* Feature pills */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex gap-2.5 mt-6 flex-wrap justify-center"
-        >
-          {[
-            { icon: Zap, label: "Ultra-rapide", color: "#FF6D00" },
-            { icon: Shield, label: "Zéro pub", color: "#34C759" },
-            { icon: Crown, label: "Jusqu'à 4K", color: "#C9A84C" },
-          ].map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 + i * 0.1 }}
-              className="flex items-center gap-2 rounded-full px-3.5 py-2"
-              style={{ background: "rgba(19,19,24,0.8)", border: "1px solid rgba(28,28,36,0.6)" }}
-            >
-              <f.icon size={13} style={{ color: f.color }} />
-              <span className="text-[11px] font-semibold" style={{ color: "#F5F5F7" }}>{f.label}</span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Gold divider */}
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: 80 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="h-[1px] mt-7 mb-7 rounded-full"
-          style={{ background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }}
-        />
-
+    <div className="flex h-screen w-full items-center justify-center" style={{ background: "#0A0A0F" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center px-6 max-w-lg w-full"
+      >
         {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.5 }}
-          className="flex flex-col items-center gap-3 w-full"
-        >
+        <div className="flex flex-col items-center gap-3 w-full">
           {/* Primary: Add playlist */}
           <button
             onClick={onAddPlaylist}
@@ -144,13 +79,13 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
           <p className="text-[11px] mt-1" style={{ color: "#48484A" }}>
             M3U, URL ou Xtream Codes
           </p>
-        </motion.div>
+        </div>
 
         {/* Free trial banner */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.5 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
           className="mt-7 w-full max-w-xs"
         >
           <button
@@ -175,14 +110,13 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
           </button>
         </motion.div>
 
-        {/* Footer — Device ID + Version + Privacy */}
+        {/* Footer — Device ID + Key */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
+          transition={{ delay: 0.5 }}
           className="mt-10 flex flex-col items-center gap-2"
         >
-          {/* Device ID */}
           <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
             style={{ background: "rgba(19,19,24,0.6)", border: "1px solid rgba(28,28,36,0.4)" }}>
             <Fingerprint size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
@@ -198,8 +132,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
             </span>
           </div>
 
-          {/* Version + Privacy */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-1">
             <span className="text-[10px]" style={{ color: "#3A3A3C" }}>v2.0.0</span>
             <span style={{ color: "#3A3A3C" }}>·</span>
             <a href="/privacy" className="text-[10px] hover:underline" style={{ color: "#3A3A3C" }}>
@@ -211,7 +144,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
             par I-Success
           </p>
         </motion.div>
-      </div>
+      </motion.div>
 
       <QRCodePortal open={qrOpen} onClose={() => setQrOpen(false)} />
     </div>
