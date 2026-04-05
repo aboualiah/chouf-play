@@ -25,12 +25,9 @@ export default function DebugPlayer() {
   const browser = useMemo(() => detectBrowser(), []);
 
   // Load playlist channels
-  const [playlistChannels, setPlaylistChannels] = useState<Channel[]>([]);
-  useEffect(() => {
-    getPlaylists().then(pls => {
-      const all = pls.flatMap(p => p.channels || []).filter(c => c.url);
-      setPlaylistChannels(all);
-    });
+  const playlistChannels = useMemo(() => {
+    const pls = getPlaylists();
+    return pls.flatMap(p => p.channels || []).filter(c => c.url);
   }, []);
 
   const allTestChannels = useMemo(() => {
