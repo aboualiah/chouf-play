@@ -16,7 +16,7 @@ interface EpgProgram {
   description?: string;
 }
 
-const HOUR_WIDTH = 200; // px per hour
+const HOUR_WIDTH = 200;
 const CHANNEL_ROW_HEIGHT = 56;
 const CHANNEL_LABEL_WIDTH = 180;
 
@@ -33,10 +33,9 @@ function generateChannelEpg(channel: Channel, baseHour: number): EpgProgram[] {
   const cat = channel.category?.toLowerCase() || "";
   const templates = cat.includes("religion") ? PROGRAM_TITLES.Religion
     : cat.includes("sport") ? PROGRAM_TITLES.Sport
-    : cat.includes("info") ? PROGRAM_TITLES.Info
+    : cat.includes("info") || cat.includes("news") ? PROGRAM_TITLES.Info
     : PROGRAM_TITLES.default;
 
-  // Seed from channel name for consistency
   let seed = 0;
   for (let i = 0; i < channel.name.length; i++) seed = (seed * 31 + channel.name.charCodeAt(i)) | 0;
 
@@ -56,10 +55,7 @@ function generateChannelEpg(channel: Channel, baseHour: number): EpgProgram[] {
 
     programs.push({
       title: templates[idx % templates.length],
-      start: pStart,
-      end: pEnd,
-      isCurrent,
-      progress,
+      start: pStart, end: pEnd, isCurrent, progress,
       description: `${templates[idx % templates.length]} - ${channel.name}`,
     });
 
@@ -74,19 +70,19 @@ function formatTime(d: Date) {
   return d.toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" });
 }
 
+export { generateChannelEpg, type EpgProgram };
+
 export function EpgGrid({ channels, onPlay }: EpgGridProps) {
   const now = new Date();
   const [baseHour, setBaseHour] = useState(Math.max(0, now.getHours() - 1));
   const scrollRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; program: EpgProgram } | null>(null);
 
   const visibleChannels = useMemo(() => channels.slice(0, 80), [channels]);
 
   const epgData = useMemo(() =>
-    visibleChannels.map(ch => ({
-      channel: ch,
-      programs: generateChannelEpg(ch, baseHour),
-    })),
+    visibleChannels.map(ch => ({ channel: ch, programs: generateChannelEpg(ch, baseHour) })),
     [visibleChannels, baseHour]
   );
 
@@ -97,6 +93,25 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
       scrollRef.current.scrollLeft = Math.max(0, nowOffset - 200);
     }
   }, [baseHour]);
+
+  // Sync vertical scroll between labels and timeline
+  const syncingRef = useRef(false);
+  const handleLabelScroll = useCallback(() => {
+    if (syncingRef.current) return;
+    syncingRef.current = true;
+    if (scrollRef.current && labelRef.current) {
+      scrollRef.current.scrollTop = labelRef.current.scrollTop;
+    }
+    syncingRef.current = false;
+  }, []);
+  const handleTimelineScroll = useCallback(() => {
+    if (syncingRef.current) return;
+    syncingRef.current = true;
+    if (labelRef.current && scrollRef.current) {
+      labelRef.current.scrollTop = scrollRef.current.scrollTop;
+    }
+    syncingRef.current = false;
+  }, []);
 
   const nowLineOffset = useMemo(() => {
     return (now.getHours() - baseHour + now.getMinutes() / 60) * HOUR_WIDTH;
@@ -119,18 +134,18 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
         <Clock size={16} style={{ color: "#FF6D00" }} />
         <span className="text-[14px] font-bold" style={{ color: "#F5F5F7" }}>Guide des programmes</span>
         <div className="flex items-center gap-2 ml-auto">
-          <button onClick={() => setBaseHour(h => Math.max(0, h - 2))}
+          <button onClick={() => setBaseHour(h => Math.max(0, h - 2))} tabIndex={0}
             className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
             <ChevronLeft size={16} />
           </button>
           <span className="text-[12px] font-medium min-w-[90px] text-center" style={{ color: "#F5F5F7" }}>
             {timeSlots[0]} — {timeSlots[timeSlots.length - 1]}
           </span>
-          <button onClick={() => setBaseHour(h => Math.min(22, h + 2))}
+          <button onClick={() => setBaseHour(h => Math.min(22, h + 2))} tabIndex={0}
             className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
             <ChevronRight size={16} />
           </button>
-          <button onClick={() => { const n = new Date(); setBaseHour(Math.max(0, n.getHours() - 1)); }}
+          <button onClick={() => { const n = new Date(); setBaseHour(Math.max(0, n.getHours() - 1)); }} tabIndex={0}
             className="rounded-full px-3 py-1 text-[10px] font-medium ml-2"
             style={{ background: "rgba(255,109,0,0.15)", color: "#FF6D00" }}>
             Maintenant
@@ -141,11 +156,11 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
       {/* Grid */}
       <div className="flex flex-1 overflow-hidden">
         {/* Channel labels */}
-        <div className="shrink-0 overflow-y-auto scrollbar-thin" style={{ width: CHANNEL_LABEL_WIDTH, borderRight: "1px solid #1C1C24" }}>
-          {/* Time header spacer */}
+        <div ref={labelRef} onScroll={handleLabelScroll}
+          className="shrink-0 overflow-y-auto scrollbar-none" style={{ width: CHANNEL_LABEL_WIDTH, borderRight: "1px solid #1C1C24" }}>
           <div className="h-8 shrink-0" style={{ borderBottom: "1px solid #1C1C24" }} />
           {epgData.map(({ channel }) => (
-            <div key={channel.id}
+            <div key={channel.id} tabIndex={0}
               className="flex items-center gap-2 px-3 cursor-pointer hover:bg-[#1C1C24] transition-colors"
               style={{ height: CHANNEL_ROW_HEIGHT, borderBottom: "1px solid #0F0F14" }}
               onClick={() => onPlay(channel)}>
@@ -162,8 +177,7 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
         </div>
 
         {/* Timeline + programs */}
-        <div ref={scrollRef} className="flex-1 overflow-auto scrollbar-thin">
-          {/* Time header */}
+        <div ref={scrollRef} onScroll={handleTimelineScroll} className="flex-1 overflow-auto scrollbar-thin">
           <div className="sticky top-0 z-10 flex h-8 shrink-0" style={{ width: totalWidth, background: "#0A0A0F", borderBottom: "1px solid #1C1C24" }}>
             {timeSlots.map((slot, i) => (
               <div key={i} className="text-[10px] font-mono px-2 flex items-center"
@@ -173,9 +187,7 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
             ))}
           </div>
 
-          {/* Program rows */}
           <div style={{ position: "relative", width: totalWidth }}>
-            {/* Now line */}
             {nowLineOffset >= 0 && nowLineOffset <= totalWidth && (
               <div className="absolute top-0 bottom-0 z-20 pointer-events-none" style={{ left: nowLineOffset, width: 2, background: "#FF3B30" }}>
                 <div className="absolute -top-1 -left-1 w-[6px] h-[6px] rounded-full" style={{ background: "#FF3B30" }} />
@@ -188,10 +200,10 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
                   const startOffset = ((prog.start.getHours() - baseHour) + prog.start.getMinutes() / 60) * HOUR_WIDTH;
                   const durationHours = (prog.end.getTime() - prog.start.getTime()) / 3600000;
                   const width = durationHours * HOUR_WIDTH;
+                  const isPast = prog.end < new Date();
 
                   return (
-                    <div
-                      key={pi}
+                    <div key={pi} tabIndex={0}
                       className="absolute top-1 bottom-1 rounded-lg px-2 py-1 overflow-hidden cursor-pointer transition-all hover:brightness-125 group"
                       style={{
                         left: Math.max(0, startOffset),
@@ -199,10 +211,12 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
                         background: prog.isCurrent ? "rgba(255,109,0,0.15)" : "#131318",
                         border: `1px solid ${prog.isCurrent ? "rgba(255,109,0,0.4)" : "#1C1C24"}`,
                       }}
-                      onClick={() => prog.isCurrent && onPlay(channel)}
+                      onClick={() => {
+                        if (prog.isCurrent) onPlay(channel);
+                        else if (isPast) onPlay(channel); // catch-up
+                      }}
                       onMouseEnter={(e) => setTooltip({ x: e.clientX, y: e.clientY, program: prog })}
-                      onMouseLeave={() => setTooltip(null)}
-                    >
+                      onMouseLeave={() => setTooltip(null)}>
                       <p className="text-[10px] font-medium truncate" style={{ color: prog.isCurrent ? "#FF6D00" : "#86868B" }}>
                         {prog.title}
                       </p>
