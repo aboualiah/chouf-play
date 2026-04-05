@@ -36,7 +36,7 @@ export function detectBrowser(): BrowserInfo {
     name,
     isSafari: isSafari || isIOS,
     nativeHls,
-    hasHlsJs: !!(window as any).Hls && (window as any).Hls.isSupported(),
+    hasHlsJs: typeof Hls !== "undefined" && Hls.isSupported(),
   };
 }
 
@@ -53,7 +53,7 @@ export function detectStreamType(url: string): StreamType {
 export function choosePlayMode(streamType: StreamType, browser: BrowserInfo): PlayMode {
   if (streamType === "mp4") return "native";
   if (streamType === "hls") {
-    if (browser.isSafari) return "native";
+    if (browser.nativeHls) return "native";
     return browser.hasHlsJs ? "hlsjs" : "unsupported";
   }
   if (streamType === "ts") return "native-ts";
@@ -99,9 +99,12 @@ export function startPlayback(
   const streamType = detectStreamType(url);
   const mode = choosePlayMode(streamType, browser);
 
+  console.log("CHOUF: trying to play", url, "| stream:", streamType, "| mode:", mode, "| browser:", browser.name, "| nativeHls:", browser.nativeHls, "| hlsJs:", browser.hasHlsJs);
+
   if (mode === "unsupported") {
-    onError(streamType === "unknown" ? "Format non pris en charge" : "Cette chaîne n'est pas disponible pour le moment");
-    return { mode: "unsupported", cleanup: () => {} };
+    // Last resort: try native playback anyway (some browsers handle HLS natively)
+    console.log("CHOUF: mode unsupported, trying native fallback");
+    return playWithNative(video, url, onPlaying, onError);
   }
 
   if (mode === "hlsjs") return playWithHlsJs(video, url, onPlaying, onError);
@@ -146,10 +149,9 @@ function playWithHlsJs(
   video: HTMLVideoElement, url: string,
   onPlaying: () => void, onError: (msg: string) => void,
 ): PlayResult {
-  const Hls = (window as any).Hls;
   if (!Hls || !Hls.isSupported()) {
-    onError("Cette chaîne n'est pas disponible pour le moment");
-    return { mode: "unsupported", cleanup: () => {} };
+    console.log("CHOUF: Hls.js not supported, falling back to native");
+    return playWithNative(video, url, onPlaying, onError);
   }
 
   let started = false;
