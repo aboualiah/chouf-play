@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
   detectBrowser, detectStreamType, choosePlayMode, timestamp,
-  cleanupPlayer, startPlayback,
+  cleanupPlayer, startPlayback, isMixedContentBlocked, getStreamProtocol,
   NETWORK_STATES, READY_STATES, ERROR_CODES,
   type PlayerLogEntry, type PlayMode,
 } from "@/lib/playerEngine";
@@ -271,6 +271,12 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
               <div className="flex justify-between"><span style={{ color: "#86868B" }}>Browser</span><span style={{ color: "#E5E5EA" }}>{browser.name}</span></div>
               <div className="flex justify-between"><span style={{ color: "#86868B" }}>Stream</span><span style={{ color: "#30D158" }}>{detectStreamType(channel.url)}</span></div>
               <div className="flex justify-between"><span style={{ color: "#86868B" }}>Mode</span><span style={{ color: "#007AFF" }}>{activeMode}</span></div>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>Protocol</span><span style={{ color: "#E5E5EA" }}>{browser.protocol} → {getStreamProtocol(channel.url)}</span></div>
+              {isMixedContentBlocked(channel.url) && (
+                <div className="px-1 py-0.5 rounded text-[9px]" style={{ background: "#FF3B3020", color: "#FF3B30" }}>⚠️ Mixed content (HTTP→HTTPS)</div>
+              )}
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>canPlayType</span><span style={{ color: "#E5E5EA" }}>{browser.canPlayTypeResult}</span></div>
+              <div className="flex justify-between"><span style={{ color: "#86868B" }}>HLS.js</span><span style={{ color: browser.hasHlsJs ? "#30D158" : "#FF3B30" }}>{browser.hasHlsJs ? "✅" : "❌"}</span></div>
               {videoRef.current && (
                 <>
                   <div className="flex justify-between"><span style={{ color: "#86868B" }}>readyState</span><span style={{ color: "#E5E5EA" }}>{videoRef.current.readyState} ({READY_STATES[videoRef.current.readyState]})</span></div>
