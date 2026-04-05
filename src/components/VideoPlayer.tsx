@@ -52,10 +52,20 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onNext?.(); }
       else if (e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); onPrev?.(); }
+      else if (e.key === "Enter" || e.key === "i" || e.key === "I" || e.keyCode === 165 /* INFO */) {
+        // INFO / OK key: re-show info banner
+        e.preventDefault();
+        setShowBanner(true);
+        clearTimeout(bannerTimer.current);
+        bannerTimer.current = setTimeout(() => setShowBanner(false), 5000);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onPrev, onNext]);
+
+  // EPG data for current channel
+  const epgInfo = useMemo(() => getCurrentProgram(channel.name), [channel.name]);
 
   useEffect(() => {
     setZapInfo({ name: channel.name, category: channel.category, logo: channel.logo });
