@@ -771,7 +771,7 @@ export default function Index() {
               </>
             )}
 
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden relative">
               <AnimatePresence mode="popLayout">
                 {activeChannel ? (
                   <motion.div key="player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-1">
