@@ -567,28 +567,45 @@ export default function Index() {
                     </div>
 
                     <div className="flex items-center justify-center gap-3 px-6 py-3.5" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                      {[
-                        { id: "tv_play", color: "#FF6D00", label: "▶ Regarder", action: () => handlePlay(previewChannel) },
-                        { id: "tv_fav", color: "#FF3B30", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
-                        { id: "tv_epg", color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
-                        { id: "tv_options", color: "#FFD60A", label: "Options", action: () => {} },
-                      ].map((btn, btnIdx) => {
-                        const isTvFocused = isFocused("preview", btnIdx);
-                        return (
-                          <TvFocusable
-                            key={btn.id}
-                            section="preview"
-                            index={btnIdx}
-                            focused={isTvFocused}
-                            onClick={btn.action}
-                            className="flex items-center gap-2 rounded-xl px-5 py-2.5 hover:scale-105 active:scale-95"
-                            style={!isTvFocused ? { background: `${btn.color}10`, border: `1px solid ${btn.color}25` } : { border: `1px solid ${btn.color}` }}
-                          >
-                            <div className="h-3.5 w-3.5 rounded-full" style={{ background: btn.color, boxShadow: `0 0 10px ${btn.color}40` }} />
-                            <span className="text-[11px] font-semibold" style={{ color: isTvFocused ? "#F5F5F7" : btn.color }}>{btn.label}</span>
-                          </TvFocusable>
-                        );
-                      })}
+                      <TvFocusable section="preview" index={0} focused={isFocused("preview", 0)} as="div" className="rounded-2xl">
+                        <button
+                          onClick={() => previewChannel && handlePlay(previewChannel)}
+                          className="flex items-center gap-2 rounded-xl px-6 py-3 transition-all hover:scale-105 active:scale-95"
+                          style={{ background: "#FF6D00", color: "#fff" }}
+                        >
+                          <Play size={18} fill="currentColor" />
+                          <span className="text-[13px] font-bold">Regarder</span>
+                        </button>
+                      </TvFocusable>
+                      <TvFocusable section="preview" index={1} focused={isFocused("preview", 1)} as="div" className="rounded-2xl">
+                        <button
+                          onClick={() => previewChannel && handleToggleFavorite(previewChannel.id)}
+                          className="flex items-center gap-2 rounded-xl px-5 py-2.5 transition-all hover:scale-105 active:scale-95"
+                          style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.25)" }}
+                        >
+                          <div className="h-3.5 w-3.5 rounded-full" style={{ background: "#FF3B30", boxShadow: "0 0 10px rgba(255,59,48,0.4)" }} />
+                          <span className="text-[11px] font-semibold" style={{ color: "#FF3B30" }}>Favoris</span>
+                        </button>
+                      </TvFocusable>
+                      <TvFocusable section="preview" index={2} focused={isFocused("preview", 2)} as="div" className="rounded-2xl">
+                        <button
+                          onClick={() => { if (previewChannel) { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } }}
+                          className="flex items-center gap-2 rounded-xl px-5 py-2.5 transition-all hover:scale-105 active:scale-95"
+                          style={{ background: "rgba(52,199,89,0.1)", border: "1px solid rgba(52,199,89,0.25)" }}
+                        >
+                          <div className="h-3.5 w-3.5 rounded-full" style={{ background: "#34C759", boxShadow: "0 0 10px rgba(52,199,89,0.4)" }} />
+                          <span className="text-[11px] font-semibold" style={{ color: "#34C759" }}>EPG</span>
+                        </button>
+                      </TvFocusable>
+                      <TvFocusable section="preview" index={3} focused={isFocused("preview", 3)} as="div" className="rounded-2xl">
+                        <button
+                          className="flex items-center gap-2 rounded-xl px-5 py-2.5 transition-all hover:scale-105 active:scale-95"
+                          style={{ background: "rgba(255,214,10,0.1)", border: "1px solid rgba(255,214,10,0.25)" }}
+                        >
+                          <div className="h-3.5 w-3.5 rounded-full" style={{ background: "#FFD60A", boxShadow: "0 0 10px rgba(255,214,10,0.4)" }} />
+                          <span className="text-[11px] font-semibold" style={{ color: "#FFD60A" }}>Options</span>
+                        </button>
+                      </TvFocusable>
                     </div>
                   </div>
                 ) : (
