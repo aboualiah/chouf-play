@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Plus, QrCode, Globe, ArrowRight, Fingerprint, Shield, Gift } from "lucide-react";
 import { QRCodePortal } from "./QRCodePortal";
@@ -21,6 +21,41 @@ function getDeviceId(): string {
 export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps) {
   const [qrOpen, setQrOpen] = useState(false);
   const [deviceId] = useState(getDeviceId);
+  const [focusIndex, setFocusIndex] = useState(0);
+
+  const items = [
+    { label: "Ajouter une playlist", action: onAddPlaylist },
+    { label: "À distance", action: () => setQrOpen(true) },
+    { label: "Accès gratuit 10 jours", action: onSkipTrial },
+  ];
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (qrOpen) return;
+    const key = e.key;
+    if (key === "ArrowUp") {
+      e.preventDefault();
+      setFocusIndex(prev => Math.max(0, prev - 1));
+    } else if (key === "ArrowDown") {
+      e.preventDefault();
+      setFocusIndex(prev => Math.min(items.length - 1, prev + 1));
+    } else if (key === "Enter") {
+      e.preventDefault();
+      items[focusIndex]?.action();
+    }
+  }, [qrOpen, focusIndex, items]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  const focusStyle = (i: number) =>
+    focusIndex === i
+      ? {
+          boxShadow: "0 0 0 3px #FF6D00, 0 0 30px rgba(255,109,0,0.25), 0 0 60px rgba(255,109,0,0.1)",
+          transform: "scale(1.04)",
+        }
+      : {};
 
   return (
     <div className="flex h-screen w-full overflow-y-auto" style={{ background: "#12121A" }}>
@@ -40,6 +75,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
                 background: "linear-gradient(135deg, #FF6D00, #FF8C38)",
                 color: "#fff",
                 boxShadow: "0 8px 32px rgba(255,109,0,0.3)",
+                ...focusStyle(0),
               }}
             >
               <Plus size={18} />
@@ -54,6 +90,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
                   background: "linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.08))",
                   border: "1px solid rgba(201,168,76,0.25)",
                   color: "#C9A84C",
+                  ...focusStyle(1),
                 }}
               >
                 <QrCode size={16} />
@@ -93,6 +130,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
               style={{
                 background: "linear-gradient(135deg, rgba(52,199,89,0.1), rgba(52,199,89,0.03))",
                 border: "1px solid rgba(52,199,89,0.15)",
+                ...focusStyle(2),
               }}
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
