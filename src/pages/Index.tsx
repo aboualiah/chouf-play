@@ -359,7 +359,9 @@ export default function Index() {
 
   const tvEnabled = activeTab === "live" && view === "content" && !activeChannel;
 
-  const handleTvSelect = useCallback((section: TvSection, index: number) => {
+  const handleTvEnter = useCallback((state: TvFocusState) => {
+    const { section } = state;
+    const index = state.indices[section];
     if (section === "categories") {
       const item = categoryItems[index];
       if (!item) return;
@@ -384,10 +386,10 @@ export default function Index() {
     handleBackToDashboard();
   }, [showEpg, previewChannel, handleBackToDashboard]);
 
-  const { state: tvState } = useTvNavigation({
+  const { isFocused: tvFocused } = useTvNavigation({
     counts: tvCounts,
     enabled: tvEnabled,
-    onSelect: handleTvSelect,
+    onEnter: handleTvEnter,
     onBack: handleTvBack,
   });
 
