@@ -1,4 +1,4 @@
-import { LayoutGrid, List, ArrowLeft, RefreshCw, LogOut, Tv, Film, Clapperboard, Radio, Monitor, Settings, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, RefreshCw, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
@@ -23,14 +23,6 @@ interface HeaderBarProps {
   onOpenSettings?: () => void;
 }
 
-const TABS = [
-  { id: "live", label: "TV Live", icon: Tv },
-  { id: "films", label: "Films", icon: Film },
-  { id: "series", label: "Séries", icon: Clapperboard },
-  { id: "radio", label: "Radio", icon: Radio },
-  { id: "demo", label: "TV Démo", icon: Monitor },
-];
-
 const CLOCK_FONT = "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
 
 function useClock() {
@@ -50,20 +42,15 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 flex-1">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              if (tab.id === "demo") { window.location.href = "/demo"; return; }
-              onTabSelect(tab.id);
-            }}
-            className="px-2 py-1 text-[11px] font-medium transition-colors shrink-0"
-            style={{ color: activeTab === tab.id ? "#FF6D00" : "#86868B" }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 flex-1 justify-between">
+        <div className="flex items-center gap-2">
+          <ChoufPlayLogo size={22} showCP={false} />
+          <span className="text-[12px] font-bold" style={{ color: "#F5F5F7" }}>CHOUF</span>
+          <span className="text-[12px] font-light" style={{ color: "#FF6D00" }}>Play</span>
+        </div>
+        <div className="text-right">
+          <p className="text-[14px] font-light tabular-nums" style={{ color: "#F5F5F7", fontFamily: CLOCK_FONT }}>{time}</p>
+        </div>
       </div>
     );
   }
@@ -72,9 +59,9 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
     <header
       className="flex items-center gap-4 px-5 py-2.5"
       style={{
-        background: "rgba(10, 10, 15, 0.8)",
+        background: "rgba(18, 18, 30, 0.85)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #22223A",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       {/* Back button (content view) */}
@@ -95,26 +82,8 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-0.5 flex-1">
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              if (tab.id === "demo") { window.location.href = "/demo"; return; }
-              onTabSelect(tab.id);
-            }}
-            className="relative flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium transition-colors"
-            style={{ color: activeTab === tab.id ? "#FF6D00" : "#86868B" }}
-          >
-            <tab.icon size={15} style={activeTab === tab.id ? { filter: "drop-shadow(0 0 4px rgba(255,109,0,0.4))" } : {}} />
-            {tab.label}
-            {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full" style={{ background: "#FF6D00" }} />
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Clock + Date + Action icons */}
       <div className="flex items-center gap-3">
