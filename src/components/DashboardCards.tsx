@@ -210,7 +210,7 @@ export function DashboardCards({
         </div>
 
         {/* Premium Banner */}
-        <div style={tvFocusStyle(7)}>
+        <div style={tvFocusStyle(9)}>
           <PremiumBanner />
         </div>
       </div>
