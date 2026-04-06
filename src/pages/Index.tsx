@@ -930,6 +930,34 @@ export default function Index() {
           onPlay={(url) => { setShowCatchup(false); toast.info("Catch-up sera disponible dans une future version"); }}
         />
       )}
+
+      {/* Exit confirmation dialog */}
+      {showExitDialog && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}>
+          <div className="rounded-2xl p-8 text-center max-w-sm mx-4" style={{ background: "#1A1A2E", border: "1px solid rgba(255,109,0,0.2)", boxShadow: "0 0 60px rgba(255,109,0,0.1)" }}>
+            <LogOut size={36} style={{ color: "#FF6D00", margin: "0 auto 16px", filter: "drop-shadow(0 0 10px rgba(255,109,0,0.4))" }} />
+            <h3 className="text-xl font-bold mb-2" style={{ color: "#F5F5F7" }}>Quitter CHOUF Play ?</h3>
+            <p className="text-sm mb-6" style={{ color: "#86868B" }}>Voulez-vous vraiment quitter l'application ?</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowExitDialog(false)}
+                className="px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: "rgba(255,255,255,0.06)", color: "#B0B0B5", border: "1px solid rgba(255,255,255,0.1)" }}
+                autoFocus
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => { window.close(); window.location.href = "about:blank"; }}
+                className="px-6 py-3 rounded-xl text-sm font-bold transition-all"
+                style={{ background: "linear-gradient(135deg, #FF6D00, #FF8C38)", color: "#fff", boxShadow: "0 4px 20px rgba(255,109,0,0.3)" }}
+              >
+                Quitter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
