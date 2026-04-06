@@ -554,7 +554,7 @@ export default function Index() {
                         return (
                           <TvFocusable
                             key={btn.id}
-                            tvId={btn.id}
+                            tvId={`tv-preview-${btnIdx}`}
                             focused={isTvFocused}
                             onClick={btn.action}
                             className="flex items-center gap-2 rounded-xl px-5 py-2.5 hover:scale-105 active:scale-95"
