@@ -35,7 +35,7 @@ export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
-  const SPLASH_DURATION = 3000;
+  const SPLASH_DURATION = 2000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
   const isOnboardingDone = () => localStorage.getItem("chouf_onboarding_done") === "true";
 
@@ -268,18 +268,31 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
-  // ── Android TV: Back button / history management ──
+  // ── Android TV: Back button / history management — anti-exit ──
   useEffect(() => {
     if (onboardingStep !== "app") return;
 
-    // Always keep at least 2 history entries to prevent exiting
-    window.history.pushState({ screen: "root" }, "");
-    window.history.pushState({ screen: "current" }, "");
+    // Fill history to prevent exiting
+    for (let i = 0; i < 5; i++) {
+      window.history.pushState({ chouf: true }, '', window.location.href);
+    }
 
-    const handlePopState = (e: PopStateEvent) => {
-      // Always re-push to prevent app exit
-      window.history.pushState({ screen: "current" }, "");
+    const handlePopState = () => {
+      // Re-fill history to prevent exit
+      window.history.pushState({ chouf: true }, '', window.location.href);
+      // Dispatch internal event
+      window.dispatchEvent(new CustomEvent('chouf-back'));
+    };
 
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [onboardingStep]);
+
+  // Listen for internal back navigation
+  useEffect(() => {
+    if (onboardingStep !== "app") return;
+
+    const handleBack = () => {
       if (activeChannel) {
         setActiveChannel(null);
       } else if (view === "content" || showEpgGrid || showRecordings) {
@@ -290,8 +303,8 @@ export default function Index() {
       // At dashboard: do nothing (don't quit)
     };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    window.addEventListener("chouf-back", handleBack);
+    return () => window.removeEventListener("chouf-back", handleBack);
   }, [onboardingStep, activeChannel, view, showEpgGrid, showRecordings]);
 
   // ── Auto-scroll focused elements into view (D-PAD navigation) ──
@@ -340,7 +353,7 @@ export default function Index() {
             <div className="flex flex-1 overflow-hidden">
               {/* Panel 1: Categories */}
               {categories.length > 0 && (
-                <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin flex flex-col" style={{ background: "#0C0C11", borderRight: "1px solid rgba(255,255,255,0.04)" }}>
+                <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin flex flex-col" style={{ background: "#141420", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
                   <div className="px-4 py-3.5 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#FF6D00" }} />
                     <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>Catégories</p>
@@ -389,7 +402,7 @@ export default function Index() {
               )}
 
               {/* Panel 2: Channels list */}
-              <div className="w-[320px] shrink-0 overflow-hidden flex flex-col" style={{ background: "#0E0E14", borderRight: "1px solid rgba(255,255,255,0.04)" }}>
+              <div className="w-[320px] shrink-0 overflow-hidden flex flex-col" style={{ background: "#161622", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="px-4 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
@@ -437,7 +450,7 @@ export default function Index() {
               </div>
 
               {/* Panel 3: Channel Preview — Premium TV Style */}
-              <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0A0A10 0%, #0D0D14 100%)" }}>
+              <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #12121A 0%, #161622 100%)" }}>
                 {previewChannel ? (
                   <div className="flex flex-col h-full">
                     {/* Main preview area */}
@@ -555,7 +568,7 @@ export default function Index() {
 
       {/* Welcome / Setup screen */}
       {!splash && onboardingStep === "welcome" && (
-        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#12121A" }}>
           <WelcomeScreen
             onAddPlaylist={() => setPlaylistModalOpen(true)}
             onSkipTrial={() => {
@@ -568,7 +581,7 @@ export default function Index() {
 
       {/* Main App */}
       {!splash && onboardingStep === "app" && (
-        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#0A0A0F" }}>
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#12121A" }}>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Header */}
             {!activeChannel && hasContent && (
@@ -599,7 +612,7 @@ export default function Index() {
                 {activeChannel ? (
                   <motion.div key="player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-1">
                     {/* Split view channel list */}
-                    <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#131318", borderColor: "#1C1C24" }}>
+                    <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#1A1A24", borderColor: "#252530" }}>
                       <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
                         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Chaînes ({filteredChannels.length})</p>
                         <div className="flex items-center gap-1 rounded-lg px-2 py-1" style={{ background: "#1C1C24" }}>
