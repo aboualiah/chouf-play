@@ -4,7 +4,7 @@ import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
 import { MiniEpg } from "@/components/MiniEpg";
 import { useTvNavigation } from "@/hooks/useTvNavigation";
 import { TvFocusable } from "@/components/TvFocusable";
-import { TvZone } from "@/lib/tvNavigation";
+import { TvSection, TvCounts } from "@/lib/tvNavigation";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TermsScreen } from "@/components/TermsScreen";
