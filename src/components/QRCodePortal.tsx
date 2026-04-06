@@ -46,60 +46,62 @@ export function QRCodePortal({ open, onClose }: QRCodePortalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50"
-            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+            className="fixed inset-0"
+            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", zIndex: 99998 }}
             onClick={onClose}
           />
           <motion.div
             key="qr-dialog"
-            initial={{ opacity: 0, scale: 0.94, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: 24 }}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94 }}
             transition={{ type: "spring", damping: 24, stiffness: 280 }}
-            className="overflow-hidden rounded-2xl"
-            style={{ background: "#131318", border: "1px solid #1C1C24", position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "90vw", maxWidth: 400, maxHeight: "75vh", overflowY: "auto" as const, zIndex: 99999 }}
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '85vw',
+              maxWidth: '360px',
+              maxHeight: '70vh',
+              overflowY: 'auto' as const,
+              zIndex: 99999,
+              background: '#1A1A24',
+              borderRadius: '16px',
+              border: '1px solid #252530',
+            }}
           >
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid #1C1C24" }}>
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid #252530" }}>
               <div className="flex items-center gap-2">
                 <QrCode size={18} style={{ color: "#FF6D00" }} />
                 <span className="text-[14px] font-semibold" style={{ color: "#F5F5F7" }}>Ajouter à distance</span>
               </div>
-              <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-[#1C1C24]">
+              <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-[#252530]">
                 <X size={16} style={{ color: "#86868B" }} />
               </button>
             </div>
 
-            <div className="flex flex-col items-center gap-4 px-5 py-5">
-              <p className="text-center text-[12px] leading-relaxed" style={{ color: "#86868B" }}>
-                Scannez ce QR code depuis votre mobile pour saisir et gérer les playlists du client.
+            <div className="flex flex-col items-center gap-3 px-5 py-4">
+              <p className="text-center text-[11px] leading-relaxed" style={{ color: "#86868B" }}>
+                Scannez ce QR code depuis votre mobile pour gérer les playlists.
               </p>
 
-              <div
-                className="relative flex items-center justify-center overflow-hidden rounded-2xl p-3"
-                style={{ background: "#F5F5F7" }}
-              >
+              <div className="flex items-center justify-center overflow-hidden rounded-2xl p-3" style={{ background: "#F5F5F7" }}>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=${encodeURIComponent(portalUrl)}&bgcolor=F5F5F7&color=0A0A0F&margin=1`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(portalUrl)}&bgcolor=F5F5F7&color=0A0A0F&margin=1`}
                   alt="QR code portail CHOUF Play"
-                  width={176}
-                  height={176}
+                  style={{ display: "block", maxWidth: 160, width: "100%", height: "auto", imageRendering: "pixelated" }}
                   className="rounded-lg"
-                  style={{ imageRendering: "pixelated" }}
                 />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg font-black" style={{ background: "#FF6D00", color: "#F5F5F7" }}>
-                    CP
-                  </div>
-                </div>
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
-                <span className="text-[10px] uppercase tracking-wider" style={{ color: "#48484A" }}>Code appareil</span>
+              <div className="flex items-center gap-2 rounded-xl px-4 py-2" style={{ background: "#12121A", border: "1px solid #252530" }}>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: "#48484A" }}>Code</span>
                 <span className="text-[16px] font-mono font-bold tracking-[4px]" style={{ color: "#FF6D00" }}>{deviceCode}</span>
               </div>
 
               <div className="flex w-full items-center gap-2">
-                <div className="flex-1 truncate rounded-lg px-3 py-2 text-[10px] font-mono" style={{ background: "#0A0A0F", color: "#86868B", border: "1px solid #1C1C24" }}>
+                <div className="flex-1 truncate rounded-lg px-3 py-2 text-[10px] font-mono" style={{ background: "#12121A", color: "#86868B", border: "1px solid #252530" }}>
                   {portalUrl}
                 </div>
                 <button
@@ -122,12 +124,6 @@ export function QRCodePortal({ open, onClose }: QRCodePortalProps) {
                 <ExternalLink size={12} />
                 Ouvrir le portail
               </a>
-            </div>
-
-            <div className="px-5 py-3 text-center" style={{ borderTop: "1px solid #1C1C24" }}>
-              <p className="text-[9px]" style={{ color: "#48484A" }}>
-                Scan → saisie de playlist → synchronisation avec l'application TV.
-              </p>
             </div>
           </motion.div>
         </>
