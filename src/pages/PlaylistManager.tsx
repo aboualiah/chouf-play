@@ -26,6 +26,17 @@ export default function PlaylistManager() {
     setPlaylists(pls);
   }, []);
 
+  // Handle Android back on this page
+  useEffect(() => {
+    const handleBack = () => {
+      if (modalOpen) { setModalOpen(false); return; }
+      if (showQr) { setShowQr(false); return; }
+      navigate("/", { replace: true });
+    };
+    window.addEventListener("chouf-back", handleBack);
+    return () => window.removeEventListener("chouf-back", handleBack);
+  }, [modalOpen, showQr, navigate]);
+
   const handleDelete = (id: string) => {
     const updated = playlists.filter(p => p.id !== id);
     savePlaylists(updated);
