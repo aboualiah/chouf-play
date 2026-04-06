@@ -2,48 +2,52 @@
  * CHOUFPlay v2 — Design System Theme
  * Single source of truth for all visual tokens.
  * Import from here instead of hardcoding values in components.
+ *
+ * Extrait du code source v1 (AppSidebar, Dashboard, Settings...)
+ * Compatible React Native TV + Lovable (web preview)
  */
 
 export const colors = {
-  // Backgrounds
-  background:    "#07070F",   // fond principal — noir bleuté profond
-  surface:       "#FFFFFF08", // glass card — blanc 5% opacity
-  surface2:      "#FFFFFF0D", // glass card hover — blanc 8% opacity
-  surface3:      "#FFFFFF14", // glass card active — blanc 12% opacity
-  surfaceSolid:  "#181825",   // surface opaque (modales, sidebar)
-  surfaceSolid2: "#1E1E2E",   // surface opaque hover
+  // ─── Backgrounds ───────────────────────────────────────────────
+  background:    "#07070F",     // fond principal — noir bleuté profond
+  surface:       "#FFFFFF08",   // glass card — blanc 5% opacity
+  surface2:      "#FFFFFF0D",   // glass card hover — blanc 8%
+  surface3:      "#FFFFFF14",   // glass card active — blanc 12%
 
-  // Brand
+  // Surfaces opaques (modales, sidebar, bottom nav)
+  surfaceSolid:  "#131318",     // sidebar background opaque (v1: rgba(19,19,24,0.85))
+  surfaceSolid2: "#1C1C24",     // hover items sidebar (utilisé dans v1)
+  surfaceSolid3: "#242430",     // hover secondaire (v1: hover boutons refresh/delete)
+
+  // ─── Brand ─────────────────────────────────────────────────────
   orange:  "#FF6B00",
-  orange2: "#FF8C2A",       // orange clair pour dégradés
+  orange2: "#FF8C2A",           // orange clair pour dégradés
   gold:    "#C9963A",
   green:   "#22C55E",
   violet:  "#7C5CBF",
-  violetLight: "#A78BFA",
-
-  // Status / Semantic
-  red:     "#FF3B30",
+  red:     "#FF3B30",           // déconnexion, erreurs (v1: colors.red)
   redLight: "#FF6D6D",
   yellow:  "#FFD60A",
   blue:    "#007AFF",
   pink:    "#FF3B80",
   warning: "#FF9F0A",
   live:    "#E53935",
+  violetLight: "#A78BFA",
 
-  // Borders glass
-  borderGlass:  "rgba(255,255,255,0.08)",
-  borderGlass2: "rgba(255,255,255,0.14)",
+  // ─── Borders glass ─────────────────────────────────────────────
+  borderGlass:   "rgba(255,255,255,0.08)",
+  borderGlass2:  "rgba(255,255,255,0.14)",
 
-  // Glow overlays (pour radial-gradient)
+  // ─── Glow overlays ─────────────────────────────────────────────
   glowOrange: "rgba(255,107,0,0.18)",
   glowGold:   "rgba(201,150,58,0.15)",
   glowGreen:  "rgba(34,197,94,0.15)",
   glowViolet: "rgba(124,92,191,0.18)",
 
-  // Text
+  // ─── Text ──────────────────────────────────────────────────────
   text:      "#F0F0FA",
-  textMuted: "#A0A0B8",
-  textDim:   "#60607A",
+  textMuted: "#A0A0B8",         // texte secondaire (v1: colors.textMuted)
+  textDim:   "#60607A",         // labels section, metadata (v1: colors.textDim)
   white:     "#FFFFFF",
   black:     "#000000",
 } as const;
@@ -75,40 +79,42 @@ export const typography = {
 } as const;
 
 export const effects = {
-  // Glassmorphism
-  glassBg:     "rgba(255,255,255,0.05)",
-  glassBorder: "rgba(255,255,255,0.08)",
+  // ─── Glassmorphism sidebar (extrait v1) ─────────────────────────
+  sidebarBg:   "rgba(19,19,24,0.85)",
+  sidebarBlur: "blur(20px)",
 
-  // Glows
-  glowOrange: "0 0 30px rgba(255,107,0,0.18)",
-  glowGold:   "0 0 20px rgba(201,150,58,0.15)",
-
-  // Focus D-pad TV — bordure orange + halo
+  // ─── Focus D-pad TV ────────────────────────────────────────────
   focusRing: "0 0 0 2px #FF6B00, 0 0 25px rgba(255,107,0,0.35)",
 
-  // Card focus (inset glow)
+  // ─── Card glow focus (hero cards dashboard) ────────────────────
   cardFocusOrange: "0 0 0 1px rgba(255,107,0,0.5), inset 0 0 40px rgba(255,107,0,0.08)",
   cardFocusGold:   "0 0 0 1px rgba(201,150,58,0.4), inset 0 0 40px rgba(201,150,58,0.07)",
   cardFocusViolet: "0 0 0 1px rgba(124,92,191,0.4), inset 0 0 40px rgba(124,92,191,0.08)",
 
-  // Gradient bouton CTA
+  // ─── Nav items (extrait v1 AppSidebar) ──────────────────────────
+  navItemActive:      "rgba(255,109,0,0.10)",  // bg item actif
+  navItemActiveBadge: "rgba(255,109,0,0.15)",  // badge compteur
+  navIconGlow:        "drop-shadow(0 0 4px rgba(255,109,0,0.4))",
+  playlistActive:     "rgba(255,109,0,0.06)",  // bg playlist active
+
+  // ─── CTA ────────────────────────────────────────────────────────
   gradientOrange: "linear-gradient(90deg, #FF6B00, #FF8C2A)",
 
-  // Ambient background glows (positionnés en absolute)
+  // ─── Ambient (halos de fond) ────────────────────────────────────
   ambientTopRight:   "radial-gradient(circle at 80% 10%, rgba(255,107,0,0.06) 0%, transparent 60%)",
   ambientBottomLeft: "radial-gradient(circle at 10% 90%, rgba(124,92,191,0.05) 0%, transparent 60%)",
 } as const;
 
 /**
- * Helpers React Native (StyleSheet ne supporte pas les string gradients)
- * Utiliser ces valeurs avec react-native-linear-gradient
+ * Gradients pour React Native (react-native-linear-gradient)
+ * StyleSheet ne supporte pas les string CSS gradients.
  */
 export const gradients = {
   orange:     ["#FF6B00", "#FF8C2A"] as const,
   orangeCard: ["rgba(255,107,0,0.18)", "transparent"] as const,
   goldCard:   ["rgba(201,150,58,0.15)", "transparent"] as const,
   violetCard: ["rgba(124,92,191,0.18)", "transparent"] as const,
-  topbar:     ["rgba(255,255,255,0.03)", "rgba(255,255,255,0.00)"] as const,
+  sidebar:    ["rgba(19,19,24,0.95)", "rgba(13,13,20,0.98)"] as const,
 } as const;
 
 const theme = { colors, spacing, radius, typography, effects, gradients } as const;
