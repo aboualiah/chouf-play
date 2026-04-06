@@ -64,15 +64,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
       else if (e.key === "Enter" || e.keyCode === 13 || e.keyCode === 23) {
         e.preventDefault();
         e.stopPropagation();
-        const now = Date.now();
-        if (now - lastEnterRef.current < 500) {
-          // Double tap → fullscreen
-          toggleFullscreen();
-          lastEnterRef.current = 0;
-        } else {
-          lastEnterRef.current = now;
-          hideControlsAfterDelay();
-        }
+        toggleFullscreen();
       }
       else if (e.key === "i" || e.key === "I" || e.keyCode === 165) {
         e.preventDefault();

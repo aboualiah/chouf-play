@@ -204,8 +204,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-[460px] rounded-[20px] p-6"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}
+            className="w-full max-w-[414px] rounded-[20px] p-5"
+            style={{ background: "#1A1A24", border: "2px solid #353540", boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Ajouter une playlist</h2>

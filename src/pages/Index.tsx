@@ -35,7 +35,7 @@ export default function Index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [splash, setSplash] = useState(() => !sessionStorage.getItem("chouf_splash_done"));
-  const SPLASH_DURATION = 2000;
+  const SPLASH_DURATION = 5000;
   const hasCompletedSetup = () => localStorage.getItem("chouf_has_setup") === "true";
   const isOnboardingDone = () => localStorage.getItem("chouf_onboarding_done") === "true";
 
