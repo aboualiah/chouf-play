@@ -112,7 +112,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
               </a>
             </div>
 
-            <p className="text-[11px] mt-1" style={{ color: "#48484A" }}>
+            <p className="text-[11px] mt-1 text-slate-300">
               M3U, URL ou Xtream Codes
             </p>
           </div>
@@ -157,27 +157,27 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
               <Fingerprint size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
-              <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
+              <span className="text-[10px] text-muted-foreground" style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
                 MAC : {deviceId}
               </span>
             </div>
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
               <Shield size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
-              <span className="text-[10px]" style={{ color: "#48484A", fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
+              <span className="text-[10px] text-muted-foreground" style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
                 KEY : {deviceId.replace(/:/g, "").slice(0, 8)}
               </span>
             </div>
 
             <div className="flex items-center gap-3 mt-1">
-              <span className="text-[10px]" style={{ color: "#3A3A3C" }}>v2.0.0</span>
+              <span className="text-[10px] text-muted-foreground">v2.0.0</span>
               <span style={{ color: "#3A3A3C" }}>·</span>
-              <a href="/privacy" className="text-[10px] hover:underline" style={{ color: "#3A3A3C" }}>
+              <a href="/privacy" className="text-[10px] hover:underline text-secondary-foreground">
                 Politique de confidentialité
               </a>
             </div>
 
-            <p className="text-[9px] mt-1" style={{ color: "#2C2C2E" }}>
+            <p className="text-[9px] mt-1 text-gray-500">
               par I-Success
             </p>
           </motion.div>
