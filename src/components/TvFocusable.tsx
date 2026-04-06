@@ -29,7 +29,7 @@ export function TvFocusable({
 
   useEffect(() => {
     if (focused && ref.current) {
-      ref.current.focus({ preventScroll: false });
+      ref.current.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     }
   }, [focused]);
 
