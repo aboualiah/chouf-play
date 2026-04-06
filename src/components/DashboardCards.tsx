@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard } from "lucide-react";
 import { Playlist } from "@/lib/storage";
@@ -74,6 +74,60 @@ export function DashboardCards({
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
+  // TV D-pad navigation: 3 stat cards (row 0) + 4 quick buttons (row 1) + premium (row 2)
+  // Flatten: 0-2 = stat cards, 3-6 = quick buttons, 7 = premium
+  const totalItems = 8;
+  const [tvFocus, setTvFocus] = useState(0);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const key = e.key;
+    if (key === "ArrowUp") {
+      e.preventDefault();
+      if (tvFocus >= 7) setTvFocus(3); // premium → quick row
+      else if (tvFocus >= 3) setTvFocus(Math.min(tvFocus - 3, 2)); // quick → stat
+      // else stay at top
+    } else if (key === "ArrowDown") {
+      e.preventDefault();
+      if (tvFocus < 3) setTvFocus(Math.min(tvFocus + 3, 6)); // stat → quick
+      else if (tvFocus < 7) setTvFocus(7); // quick → premium
+      // else stay
+    } else if (key === "ArrowLeft") {
+      e.preventDefault();
+      if (tvFocus > 0 && tvFocus < 3) setTvFocus(tvFocus - 1);
+      else if (tvFocus > 3 && tvFocus < 7) setTvFocus(tvFocus - 1);
+    } else if (key === "ArrowRight") {
+      e.preventDefault();
+      if (tvFocus < 2) setTvFocus(tvFocus + 1);
+      else if (tvFocus >= 3 && tvFocus < 6) setTvFocus(tvFocus + 1);
+    } else if (key === "Enter") {
+      e.preventDefault();
+      if (tvFocus < 3) {
+        onTabSelect(STAT_CARDS[tvFocus].id);
+      } else if (tvFocus < 7) {
+        const btn = QUICK_BUTTONS[tvFocus - 3];
+        if (btn.action === "playlist") onAddPlaylist?.();
+        else if (btn.action === "epg") onShowEpg?.();
+        else if (btn.action === "recordings") onShowRecordings?.();
+      } else {
+        // premium
+      }
+    }
+  }, [tvFocus, onTabSelect, onAddPlaylist, onShowEpg, onShowRecordings]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  const tvFocusStyle = (i: number) =>
+    tvFocus === i
+      ? {
+          boxShadow: "0 0 0 3px #FF6D00, 0 0 30px rgba(255,109,0,0.25), 0 0 60px rgba(255,109,0,0.1)",
+          transform: "scale(1.04)",
+          transition: "all 150ms ease",
+        }
+      : {};
+
   // Get MAC and expiration from first xtream playlist
   const xtreamPlaylist = playlists.find(p => p.isXtream && p.xtreamAccountInfo);
   const macAddress = xtreamPlaylist?.xtreamMac || localStorage.getItem("chouf_device_mac") || generateMac();
@@ -81,10 +135,9 @@ export function DashboardCards({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Main content - centered vertically */}
       <div className="flex-1 flex flex-col justify-center px-8 py-6 max-w-[1400px] mx-auto w-full">
         
-        {/* 3 Stat cards - bigger for TV */}
+        {/* 3 Stat cards */}
         <div className="grid grid-cols-3 gap-6 mb-8">
           {STAT_CARDS.map((card, i) => (
             <motion.button
@@ -99,8 +152,8 @@ export function DashboardCards({
                 border: `1px solid ${card.border}`,
                 boxShadow: card.accentGlow,
                 minHeight: 200,
+                ...tvFocusStyle(i),
               }}
-              whileHover={{ scale: 1.03 }}
             >
               <div className="absolute inset-0 pointer-events-none" style={{ background: card.bgImage }} />
               <div className="absolute inset-0 pointer-events-none opacity-20"
@@ -125,9 +178,9 @@ export function DashboardCards({
           ))}
         </div>
 
-        {/* Quick buttons - more spacious */}
+        {/* Quick buttons */}
         <div className="grid grid-cols-4 gap-3 mb-6">
-          {QUICK_BUTTONS.map(btn => (
+          {QUICK_BUTTONS.map((btn, qi) => (
             <button
               key={btn.label}
               onClick={() => {
@@ -136,7 +189,11 @@ export function DashboardCards({
                 else if (btn.action === "recordings") onShowRecordings?.();
               }}
               className="flex flex-col items-center gap-2.5 rounded-xl py-4 px-3 transition-all hover:bg-white/5 backdrop-blur-sm"
-              style={{ background: "rgba(19,19,24,0.5)", border: "1px solid rgba(28,28,36,0.5)" }}
+              style={{
+                background: "rgba(19,19,24,0.5)",
+                border: "1px solid rgba(28,28,36,0.5)",
+                ...tvFocusStyle(qi + 3),
+              }}
             >
               <btn.icon size={20} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
               <span className="text-[11px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
@@ -145,10 +202,12 @@ export function DashboardCards({
         </div>
 
         {/* Premium Banner */}
-        <PremiumBanner />
+        <div style={tvFocusStyle(7)}>
+          <PremiumBanner />
+        </div>
       </div>
 
-      {/* Footer - MAC + Expiration */}
+      {/* Footer */}
       <DashboardFooter macAddress={macAddress} expDate={expDate} />
     </div>
   );
@@ -182,7 +241,6 @@ function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?
     <div className="shrink-0 px-8 py-3 flex items-center justify-between"
       style={{ borderTop: "1px solid rgba(28,28,36,0.5)", background: "rgba(10,10,15,0.6)" }}>
       <div className="flex items-center gap-6">
-        {/* MAC */}
         <div className="flex items-center gap-2">
           <Fingerprint size={14} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
           <span className="text-[11px]" style={{ color: "#48484A" }}>MAC</span>
@@ -196,7 +254,6 @@ function DashboardFooter({ macAddress, expDate }: { macAddress: string; expDate?
       </div>
 
       <div className="flex items-center gap-6">
-        {/* Expiration */}
         {exp && (
           <div className="flex items-center gap-2">
             <span className="text-[11px]" style={{ color: "#48484A" }}>Expire</span>

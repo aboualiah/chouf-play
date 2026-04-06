@@ -34,7 +34,7 @@ export function TvFocusable({
       onDoubleClick={onDoubleClick}
       className={clsx(
         "transition-all duration-150 outline-none",
-        focused && "ring-2 ring-primary scale-[1.02] shadow-[0_0_0_1px_rgba(255,109,0,0.35),0_0_24px_rgba(255,109,0,0.18)]",
+        focused && "ring-[3px] ring-[#FF6D00] scale-[1.04] shadow-[0_0_0_2px_rgba(255,109,0,0.5),0_0_30px_rgba(255,109,0,0.25),0_0_60px_rgba(255,109,0,0.1)]",
         className
       )}
       style={style}
