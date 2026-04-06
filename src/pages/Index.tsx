@@ -273,10 +273,8 @@ export default function Index() {
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
   // ── Android TV: Back button navigation ──
-  // Only use history guard at the root dashboard to prevent accidental app exit
+  // History guard active on ALL steps to prevent hardware back from exiting
   useEffect(() => {
-    if (onboardingStep !== "app") return;
-    // Push one guard state so a single back press doesn't exit
     window.history.pushState({ chouf: true }, '', window.location.href);
     const handlePopState = () => {
       window.history.pushState({ chouf: true }, '', window.location.href);
@@ -284,10 +282,11 @@ export default function Index() {
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [onboardingStep]);
+  }, []);
 
   // Listen for internal back navigation (from keydown or popstate)
   useEffect(() => {
+    // During onboarding, back is handled by individual screens (Welcome, etc.)
     if (onboardingStep !== "app") return;
     const handleBack = () => {
       if (showEpg) { setShowEpg(false); return; }
@@ -478,6 +477,7 @@ export default function Index() {
                   {filteredChannels.map((ch, i) => {
                     const focused = isFocused("channels", i);
                     const isSelected = previewChannel?.id === ch.id;
+                    const isPlaying = activeChannel?.id === ch.id;
                     const isFav = favorites.includes(ch.id);
                     return (
                       <TvFocusable
@@ -489,38 +489,61 @@ export default function Index() {
                         className="mx-2 my-1 rounded-xl"
                         onClick={() => setPreviewChannel(ch)}
                       >
-                        <button
-                          className="flex items-center gap-3 w-full px-3 py-3 text-left rounded-xl transition-all"
+                        <div
+                          className="flex items-center gap-3 w-full px-3 py-3 text-left rounded-xl transition-all cursor-pointer"
                           style={
                             focused
-                              ? { background: "linear-gradient(90deg, rgba(255,109,0,0.25) 0%, rgba(255,109,0,0.08) 100%)", borderLeft: "4px solid #FF6D00", boxShadow: "inset 0 0 30px rgba(255,109,0,0.12), 0 0 20px rgba(255,109,0,0.1)" }
-                              : isSelected
-                                ? { background: "rgba(255,109,0,0.10)", borderLeft: "4px solid #FF6D00" }
-                                : { background: "transparent", borderLeft: "4px solid transparent" }
+                              ? {
+                                  background: "linear-gradient(90deg, rgba(255,109,0,0.35) 0%, rgba(255,109,0,0.12) 100%)",
+                                  borderLeft: "5px solid #FF6D00",
+                                  boxShadow: "inset 0 0 40px rgba(255,109,0,0.18), 0 0 25px rgba(255,109,0,0.15), 0 4px 20px rgba(0,0,0,0.3)",
+                                }
+                              : isPlaying
+                                ? {
+                                    background: "linear-gradient(90deg, rgba(52,199,89,0.15) 0%, rgba(52,199,89,0.04) 100%)",
+                                    borderLeft: "5px solid #34C759",
+                                  }
+                                : isSelected
+                                  ? {
+                                      background: "rgba(255,109,0,0.12)",
+                                      borderLeft: "5px solid #FF6D00",
+                                    }
+                                  : { background: "transparent", borderLeft: "5px solid transparent" }
                           }
                         >
-                          <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>
+                          <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: focused ? "#FF6D00" : "#48484A" }}>
                             {i + 1}
                           </span>
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#22223A" }}>
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: focused ? "rgba(255,109,0,0.2)" : "#22223A", border: focused ? "1px solid rgba(255,109,0,0.4)" : "1px solid transparent" }}>
                             {ch.logo ? (
                               <img src={ch.logo} className="h-6 w-6 object-contain" alt="" />
                             ) : (
-                              <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>
+                              <span className="text-[10px] font-bold" style={{ color: focused ? "#FF6D00" : "#86868B" }}>
                                 {ch.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                               </span>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[13px] font-semibold truncate" style={{ color: focused ? "#FFFFFF" : isSelected ? "#F5F5F7" : "#B0B0B5", textShadow: focused ? "0 0 12px rgba(255,109,0,0.5)" : "none", fontSize: focused ? "14px" : "13px" }}>
+                            <p className="font-semibold truncate" style={{
+                              color: focused ? "#FFFFFF" : isPlaying ? "#34C759" : isSelected ? "#F5F5F7" : "#B0B0B5",
+                              textShadow: focused ? "0 0 15px rgba(255,109,0,0.6)" : "none",
+                              fontSize: focused ? "15px" : "13px",
+                              fontWeight: focused ? 700 : 600,
+                            }}>
                               {ch.name}
                             </p>
-                            <p className="text-[10px]" style={{ color: "#48484A" }}>
+                            <p className="text-[10px]" style={{ color: focused ? "#FF8C38" : "#48484A" }}>
                               {ch.category}
                             </p>
                           </div>
-                          {isFav && <span className="text-[10px]" style={{ color: "#FF3B30" }}>♥</span>}
-                        </button>
+                          {isPlaying && (
+                            <div className="flex items-center gap-1">
+                              <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
+                              <span className="text-[8px] font-bold" style={{ color: "#34C759" }}>LIVE</span>
+                            </div>
+                          )}
+                          {isFav && !isPlaying && <span className="text-[10px]" style={{ color: "#FF3B30" }}>♥</span>}
+                        </div>
                       </TvFocusable>
                     );
                   })}
