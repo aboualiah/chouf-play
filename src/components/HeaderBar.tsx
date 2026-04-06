@@ -74,7 +74,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
       style={{
         background: "rgba(10, 10, 15, 0.8)",
         backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #1C1C24",
+        borderBottom: "1px solid #22223A",
       }}
     >
       {/* Back button (content view) */}
@@ -166,7 +166,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
 
       {/* Quit confirmation dialog */}
       <AlertDialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
-        <AlertDialogContent style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <AlertDialogContent style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <AlertDialogHeader>
             <AlertDialogTitle style={{ color: "#F5F5F7" }}>Quitter CHOUF Play ?</AlertDialogTitle>
             <AlertDialogDescription style={{ color: "#86868B" }}>
@@ -175,7 +175,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
-              className="border-[#1C1C24] hover:bg-[#1C1C24]"
+              className="border-[#22223A] hover:bg-[#22223A]"
               style={{ background: "transparent", color: "#86868B" }}
             >
               Annuler

@@ -60,7 +60,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
   const [progress, setProgress] = useState("");
   const [xtream, setXtream] = useState({ server: "", user: "", pass: "" });
 
-  const inputStyle = { background: "#1C1C24", border: "1px solid #242430", color: "#F5F5F7" };
+  const inputStyle = { background: "#22223A", border: "1px solid #242430", color: "#F5F5F7" };
 
   const requirePlaylistName = () => {
     if (playlistName.trim()) return true;
@@ -205,16 +205,16 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-[414px] rounded-[20px] p-5"
-            style={{ background: "#1A1A24", border: "2px solid #353540", boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)" }}
+            style={{ background: "#1E1E34", border: "2px solid #353540", boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Ajouter une playlist</h2>
-              <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+              <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-[#22223A]" style={{ color: "#86868B" }}>
                 <X size={18} />
               </button>
             </div>
 
-            <div className="mb-5 flex rounded-xl p-1" style={{ background: "#1C1C24" }}>
+            <div className="mb-5 flex rounded-xl p-1" style={{ background: "#22223A" }}>
               {tabs.map((item) => (
                 <button
                   key={item.id}
@@ -267,7 +267,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
             )}
 
             {tab === "file" && (
-              <label className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl p-8 transition-colors hover:bg-[#1C1C24]" style={{ border: "2px dashed #242430" }}>
+              <label className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl p-8 transition-colors hover:bg-[#22223A]" style={{ border: "2px dashed #242430" }}>
                 <Upload size={28} style={{ color: "#48484A" }} />
                 <span className="text-[13px]" style={{ color: "#86868B" }}>Cliquez pour sélectionner un fichier .m3u</span>
                 <input type="file" accept=".m3u,.m3u8" onChange={loadFromFile} className="hidden" />
@@ -309,7 +309,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
               </div>
             )}
 
-            <div className="my-4 h-px" style={{ background: "#1C1C24" }} />
+            <div className="my-4 h-px" style={{ background: "#22223A" }} />
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -317,7 +317,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   onClose();
                 }}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]"
-                style={{ background: "#1C1C24", color: "#F5F5F7" }}
+                style={{ background: "#22223A", color: "#F5F5F7" }}
               >
                 <Tv size={14} /> Chaînes démo (24)
               </button>

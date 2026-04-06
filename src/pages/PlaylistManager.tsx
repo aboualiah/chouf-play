@@ -82,12 +82,12 @@ export default function PlaylistManager() {
   });
 
   return (
-    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: "#12121A" }}>
+    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: "#151524" }}>
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
-        style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #252530" }}>
+        style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #2A2A40" }}>
         <button onClick={() => navigate("/", { replace: true })} className="rounded-xl p-2 transition-all hover:scale-105 active:scale-95"
-          style={{ background: "linear-gradient(135deg, #1C1C24, #242430)", border: "1px solid #2A2A36" }}>
+          style={{ background: "linear-gradient(135deg, #22223A, #28283E)", border: "1px solid #303048" }}>
           <ArrowLeft size={18} style={{ color: "#FF6D00" }} />
         </button>
         <div className="flex-1">
@@ -105,7 +105,7 @@ export default function PlaylistManager() {
             { icon: Film, label: "Total films", count: totalVod, color: "#7C3AED", bg: "rgba(124,58,237,0.08)" },
             { icon: Clapperboard, label: "Total séries", count: totalSeries, color: "#34C759", bg: "rgba(52,199,89,0.08)" },
           ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
+            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #2A2A40" }}>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ background: s.bg }}>
                 <s.icon size={20} style={{ color: s.color }} />
               </div>
@@ -117,7 +117,7 @@ export default function PlaylistManager() {
 
         {/* Liaison TV / Remote add */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="rounded-2xl p-5" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
+          className="rounded-2xl p-5" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #2A2A40" }}>
           <div className="flex items-center gap-3 mb-4">
             <Smartphone size={18} style={{ color: "#48484A" }} />
             <div>
@@ -134,7 +134,7 @@ export default function PlaylistManager() {
         </motion.div>
 
         {/* Add + Manage tabs */}
-        <div className="flex gap-1 rounded-xl p-1" style={{ background: "#1A1A24" }}>
+        <div className="flex gap-1 rounded-xl p-1" style={{ background: "#1E1E34" }}>
           {[
             { id: "add" as const, icon: Plus, label: "Ajouter une playlist" },
             { id: "manage" as const, icon: Layers, label: "Gérer les playlists" },
@@ -161,7 +161,7 @@ export default function PlaylistManager() {
             ].map((item, i) => (
               <button key={i} onClick={item.action}
                 className="flex w-full items-center gap-4 rounded-2xl p-4 transition-all hover:bg-[#1A1A22]"
-                style={{ background: "#1A1A24", border: "1px solid #252530" }}>
+                style={{ background: "#1E1E34", border: "1px solid #2A2A40" }}>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: "rgba(255,109,0,0.08)" }}>
                   <item.icon size={18} style={{ color: "#FF6D00" }} />
                 </div>
@@ -190,7 +190,7 @@ export default function PlaylistManager() {
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
                     transition={{ delay: i * 0.06 }}
                     className="rounded-2xl p-4 transition-all"
-                    style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
+                    style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #2A2A40" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0"
                         style={{ background: pl.isXtream ? "rgba(124,58,237,0.12)" : "rgba(201,168,76,0.12)" }}>
@@ -229,8 +229,8 @@ export default function PlaylistManager() {
               })}
             </AnimatePresence>
             {playlists.length === 0 && (
-              <div className="text-center py-16 rounded-2xl" style={{ background: "#1A1A24", border: "1px solid #252530" }}>
-                <Layers size={48} className="mx-auto mb-4" style={{ color: "#1C1C24" }} />
+              <div className="text-center py-16 rounded-2xl" style={{ background: "#1E1E34", border: "1px solid #2A2A40" }}>
+                <Layers size={48} className="mx-auto mb-4" style={{ color: "#22223A" }} />
                 <p className="text-[14px] font-medium mb-1" style={{ color: "#48484A" }}>Aucune playlist chargée</p>
                 <p className="text-[12px]" style={{ color: "#2C2C34" }}>Ajoutez une playlist pour commencer</p>
               </div>

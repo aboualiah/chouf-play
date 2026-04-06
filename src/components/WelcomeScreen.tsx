@@ -58,7 +58,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
       : {};
 
   return (
-    <div className="flex h-screen w-full overflow-y-auto" style={{ background: "#12121A" }}>
+    <div className="flex h-screen w-full overflow-y-auto" style={{ background: "#151524" }}>
       <div className="flex flex-col items-center justify-center w-full min-h-screen px-5 py-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

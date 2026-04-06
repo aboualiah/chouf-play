@@ -54,8 +54,8 @@ export function QRCodePortal({ open, onClose }: QRCodePortalProps) {
             className="fixed inset-0 flex items-center justify-center"
             style={{ zIndex: 99999 }}
           >
-            <div className="flex flex-col items-center justify-center rounded-2xl p-6" style={{ background: "#131318", border: "1px solid #252530" }}>
-              <button onClick={onClose} className="absolute top-4 right-4 rounded-lg p-1 transition-colors hover:bg-[#252530]">
+            <div className="flex flex-col items-center justify-center rounded-2xl p-6" style={{ background: "#1A1A2E", border: "1px solid #2A2A40" }}>
+              <button onClick={onClose} className="absolute top-4 right-4 rounded-lg p-1 transition-colors hover:bg-[#2A2A40]">
                 <X size={16} style={{ color: "#86868B" }} />
               </button>
               <img
@@ -67,7 +67,7 @@ export function QRCodePortal({ open, onClose }: QRCodePortalProps) {
               <p className="mt-4 text-[14px] font-medium" style={{ color: "#F5F5F7" }}>
                 Scannez pour ajouter votre playlist
               </p>
-              <div className="flex items-center gap-2 mt-3 rounded-xl px-4 py-2" style={{ background: "#12121A", border: "1px solid #252530" }}>
+              <div className="flex items-center gap-2 mt-3 rounded-xl px-4 py-2" style={{ background: "#151524", border: "1px solid #2A2A40" }}>
                 <span className="text-[10px] uppercase tracking-wider" style={{ color: "#48484A" }}>Code</span>
                 <span className="text-[16px] font-mono font-bold tracking-[4px]" style={{ color: "#FF6D00" }}>{deviceCode}</span>
               </div>

@@ -329,7 +329,7 @@ function PremiumBanner() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             className="rounded-2xl p-6 text-center max-w-sm mx-4"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}
+            style={{ background: "#1A1A2E", border: "1px solid #22223A" }}
             onClick={e => e.stopPropagation()}
           >
             <Crown size={32} style={{ color: "#C9A84C", margin: "0 auto 12px", filter: "drop-shadow(0 0 10px rgba(201,168,76,0.5))" }} />

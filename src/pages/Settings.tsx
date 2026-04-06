@@ -53,7 +53,7 @@ const OTHER_COMPS = ["NBA", "Roland Garros", "UFC", "Six Nations"];
 function Toggle({ checked, onChange, color = "#FF6D00" }: { checked: boolean; onChange: (v: boolean) => void; color?: string }) {
   return (
     <button onClick={() => onChange(!checked)} className="relative h-7 w-12 rounded-full transition-colors shrink-0"
-      style={{ background: checked ? color : "#1C1C24" }}>
+      style={{ background: checked ? color : "#22223A" }}>
       <span className="absolute top-0.5 h-6 w-6 rounded-full transition-transform shadow-md"
         style={{ background: checked ? "#fff" : "#48484A", transform: checked ? "translateX(22px)" : "translateX(2px)" }} />
     </button>
@@ -94,7 +94,7 @@ function SelectField({ value, onChange, options }: { value: string; onChange: (v
         onClick={() => setOpen(!open)}
         tabIndex={0}
         className="flex items-center gap-2 rounded-xl px-3 py-2 text-[12px] font-medium cursor-pointer min-w-[100px] text-left transition-colors"
-        style={{ background: "#1C1C24", color: "#F5F5F7", border: open ? "1px solid #FF6D00" : "1px solid transparent" }}
+        style={{ background: "#22223A", color: "#F5F5F7", border: open ? "1px solid #FF6D00" : "1px solid transparent" }}
       >
         <span className="flex-1 truncate">{selected?.label || value}</span>
         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={`transition-transform ${open ? "rotate-180" : ""}`}>
@@ -104,7 +104,7 @@ function SelectField({ value, onChange, options }: { value: string; onChange: (v
       {open && (
         <div
           className="absolute right-0 top-full mt-1 z-50 min-w-full rounded-xl py-1 shadow-xl"
-          style={{ background: "#131318", border: "1px solid #1C1C24" }}
+          style={{ background: "#1A1A2E", border: "1px solid #22223A" }}
         >
           {options.map(o => (
             <button
@@ -148,13 +148,13 @@ function PinInput({ value, onChange }: { value: string; onChange: (v: string) =>
           value={digits[i]?.trim() || ""} onChange={e => handleChange(i, e.target.value)}
           onKeyDown={e => handleKeyDown(i, e)}
           className="h-12 w-12 rounded-xl text-center text-lg font-bold border outline-none transition-colors focus:border-[#FF3B30]"
-          style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+          style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#22223A" }} />
       ))}
     </div>
   );
 }
 
-const Divider = () => <div className="h-px mx-1" style={{ background: "#1C1C2440" }} />;
+const Divider = () => <div className="h-px mx-1" style={{ background: "#22223A40" }} />;
 const DEFAULT_HIDDEN_CATS = ["Adult", "XXX", "+18", "Pour adultes", "Adults"];
 
 export default function Settings() {
@@ -315,7 +315,7 @@ export default function Settings() {
       className="rounded-xl px-3.5 py-2 text-[12px] font-medium transition-all border"
       style={matchSettings.competitions[name]
         ? { background: "rgba(255,109,0,0.12)", color: "#FF6D00", borderColor: "rgba(255,109,0,0.3)" }
-        : { background: "#0A0A0F", color: "#48484A", borderColor: "#1C1C24" }}>
+        : { background: "#0A0A0F", color: "#48484A", borderColor: "#22223A" }}>
       {name}
     </button>
   );
@@ -336,7 +336,7 @@ export default function Settings() {
     general: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.general")}</h2>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.language")}>
               <SelectField value={lang} onChange={v => setLang(v as Lang)}
@@ -376,7 +376,7 @@ export default function Settings() {
     player: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.player")}</h2>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.format")} subtitle={t("s.format_sub")}>
               <SelectField value={streamFormat} onChange={setStreamFormat}
@@ -408,7 +408,7 @@ export default function Settings() {
         </div>
         {/* Stream sub-section */}
         <h3 className="text-[13px] font-bold mt-5 mb-3" style={{ color: "#86868B" }}>Flux & Connexion</h3>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label="Type de flux">
               <SelectField value={streamType} onChange={setStreamType}
@@ -431,7 +431,7 @@ export default function Settings() {
     display: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.display")}</h2>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.channel_style")} subtitle={t("s.channel_style_sub")}>
               <div className="flex gap-1.5">
@@ -440,7 +440,7 @@ export default function Settings() {
                     className="rounded-lg px-2.5 py-1.5 text-[11px] font-medium border transition-all"
                     style={channelStyle === o.v
                       ? { background: "rgba(0,122,255,0.12)", color: "#007AFF", borderColor: "rgba(0,122,255,0.3)" }
-                      : { background: "#0A0A0F", color: "#48484A", borderColor: "#1C1C24" }}>
+                      : { background: "#0A0A0F", color: "#48484A", borderColor: "#22223A" }}>
                     {o.l}
                   </button>
                 ))}
@@ -461,7 +461,7 @@ export default function Settings() {
     epg: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.epg")}</h2>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.epg_enable")} subtitle={t("s.epg_enable_sub")}><Toggle checked={epgEnabled} onChange={setEpgEnabled} color="#34C759" /></SettingRow>
             {epgEnabled && (
@@ -475,7 +475,7 @@ export default function Settings() {
                   <><Divider /><div className="py-3 px-1">
                     <input value={epgUrl} onChange={e => setEpgUrl(e.target.value)} placeholder="https://example.com/epg.xml.gz"
                       className="w-full rounded-xl px-3 py-2.5 text-[12px] border outline-none focus:border-[#34C759] transition-colors"
-                      style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+                      style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#22223A" }} />
                   </div></>
                 )}
                 <Divider />
@@ -490,7 +490,7 @@ export default function Settings() {
         </div>
         {/* Catch-up */}
         <h3 className="text-[13px] font-bold mt-5 mb-3" style={{ color: "#86868B" }}>{t("settings.catchup")}</h3>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.catchup_enable")}><Toggle checked={catchupEnabled} onChange={setCatchupEnabled} color="#FF9500" /></SettingRow>
             {catchupEnabled && (
@@ -503,15 +503,15 @@ export default function Settings() {
         </div>
         {/* Matchs */}
         <h3 className="text-[13px] font-bold mt-5 mb-3" style={{ color: "#86868B" }}>{t("settings.matchs")}</h3>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label="Bannière matchs"><Toggle checked={matchSettings.showBanner} onChange={v => setMatchSettings(p => ({ ...p, showBanner: v }))} color="#C9A84C" /></SettingRow>
           </div>
           <div className="px-5 pb-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#48484A" }}>Compétitions</p>
             <div className="flex gap-2 mb-3">
-              <button onClick={() => setAllComps(true)} className="rounded-xl px-3 py-1.5 text-[11px] font-medium" style={{ background: "#1C1C24", color: "#F5F5F7" }}>✓ Tout</button>
-              <button onClick={() => setAllComps(false)} className="rounded-xl px-3 py-1.5 text-[11px] font-medium" style={{ background: "#1C1C24", color: "#48484A" }}>✕ Rien</button>
+              <button onClick={() => setAllComps(true)} className="rounded-xl px-3 py-1.5 text-[11px] font-medium" style={{ background: "#22223A", color: "#F5F5F7" }}>✓ Tout</button>
+              <button onClick={() => setAllComps(false)} className="rounded-xl px-3 py-1.5 text-[11px] font-medium" style={{ background: "#22223A", color: "#48484A" }}>✕ Rien</button>
             </div>
             <div className="flex flex-wrap gap-2">{[...FOOTBALL_COMPS, ...OTHER_COMPS].map(c => <CompChip key={c} name={c} />)}</div>
           </div>
@@ -521,7 +521,7 @@ export default function Settings() {
     parental: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.parental")}</h2>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.parental_enable")}><Toggle checked={parental.enabled} onChange={v => setParental(p => ({ ...p, enabled: v }))} color="#FF3B30" /></SettingRow>
             {parental.enabled && (
@@ -541,7 +541,7 @@ export default function Settings() {
                         <button key={cat} onClick={() => setParental(p => ({ ...p, hiddenCategories: active ? p.hiddenCategories.filter(c => c !== cat) : [...p.hiddenCategories, cat] }))}
                           className="rounded-lg px-3 py-1.5 text-[11px] font-medium border transition-all"
                           style={active ? { background: "rgba(255,59,48,0.12)", color: "#FF3B30", borderColor: "rgba(255,59,48,0.3)" }
-                            : { background: "#0A0A0F", color: "#48484A", borderColor: "#1C1C24" }}>
+                            : { background: "#0A0A0F", color: "#48484A", borderColor: "#22223A" }}>
                           {active ? "🔒 " : ""}{cat}
                         </button>
                       );
@@ -561,7 +561,7 @@ export default function Settings() {
                     <input value={customCatInput} onChange={e => setCustomCatInput(e.target.value)}
                       placeholder={t("s.parental_custom")} onKeyDown={e => e.key === "Enter" && addCustomCategory()}
                       className="flex-1 rounded-xl px-3 py-2 text-[12px] border outline-none focus:border-[#FF3B30] transition-colors"
-                      style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#1C1C24" }} />
+                      style={{ background: "#0A0A0F", color: "#F5F5F7", borderColor: "#22223A" }} />
                     <button onClick={addCustomCategory} className="rounded-xl px-3 py-2 text-[12px] font-medium" style={{ background: "rgba(255,59,48,0.12)", color: "#FF3B30" }}>
                       <Plus size={16} />
                     </button>
@@ -573,14 +573,14 @@ export default function Settings() {
         </div>
         {/* Recording */}
         <h3 className="text-[13px] font-bold mt-5 mb-3" style={{ color: "#86868B" }}>{t("settings.recording")}</h3>
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="px-5">
             <SettingRow label={t("s.rec_quality")}>
               <SelectField value={recQuality} onChange={setRecQuality}
                 options={[{ value: "original", label: t("misc.original") }, { value: "high", label: t("misc.high") }, { value: "medium", label: t("misc.medium") }]} />
             </SettingRow><Divider />
             <div className="py-3 px-1">
-              <div className="flex items-center gap-2 rounded-xl px-3 py-3" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
+              <div className="flex items-center gap-2 rounded-xl px-3 py-3" style={{ background: "#0A0A0F", border: "1px solid #22223A" }}>
                 <Smartphone size={16} style={{ color: "#48484A" }} />
                 <p className="text-[11px]" style={{ color: "#86868B" }}>{t("msg.android_only")}</p>
               </div>
@@ -595,7 +595,7 @@ export default function Settings() {
         <div className="space-y-3">
           <button onClick={handleExport}
             className="flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-[13px] font-medium transition-colors"
-            style={{ background: "#131318", color: "#5856D6", border: "1px solid #1C1C24" }}>
+            style={{ background: "#1A1A2E", color: "#5856D6", border: "1px solid #22223A" }}>
             <FileDown size={18} />
             <div className="text-left">
               <p>{t("s.export")}</p>
@@ -604,7 +604,7 @@ export default function Settings() {
           </button>
           <button onClick={() => fileInputRef.current?.click()}
             className="flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-[13px] font-medium transition-colors"
-            style={{ background: "#131318", color: "#34C759", border: "1px solid #1C1C24" }}>
+            style={{ background: "#1A1A2E", color: "#34C759", border: "1px solid #22223A" }}>
             <FileUp size={18} />
             <div className="text-left">
               <p>{t("s.import")}</p>
@@ -628,7 +628,7 @@ export default function Settings() {
     about: (
       <div>
         <h2 className="text-[16px] font-bold mb-5" style={{ color: "#F5F5F7" }}>{t("settings.about")}</h2>
-        <div className="rounded-2xl overflow-hidden p-5" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+        <div className="rounded-2xl overflow-hidden p-5" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
           <div className="flex items-center gap-3 mb-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FF6D00] to-[#FFD60A]">
               <span className="text-lg font-bold text-white">CP</span>
@@ -654,10 +654,10 @@ export default function Settings() {
           </div>
           <Divider />
           <div className="space-y-1.5 my-4">
-            <button onClick={() => navigate("/privacy")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+            <button onClick={() => navigate("/privacy")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#22223A]" style={{ color: "#86868B" }}>
               <Shield size={14} /><span>{t("s.privacy")}</span><ChevronRight size={14} className="ml-auto" style={{ color: "#48484A" }} />
             </button>
-            <button onClick={() => navigate("/terms")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+            <button onClick={() => navigate("/terms")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] transition-colors hover:bg-[#22223A]" style={{ color: "#86868B" }}>
               <Info size={14} /><span>{t("s.terms")}</span><ChevronRight size={14} className="ml-auto" style={{ color: "#48484A" }} />
             </button>
           </div>
@@ -682,11 +682,11 @@ export default function Settings() {
   return (
     <div className="flex h-screen" style={{ background: "#0A0A0F" }}>
       {/* Sidebar */}
-      <aside className="w-[220px] shrink-0 flex flex-col border-r overflow-y-auto" style={{ background: "#0D0D12", borderColor: "#1C1C24" }}>
+      <aside className="w-[220px] shrink-0 flex flex-col border-r overflow-y-auto" style={{ background: "#0D0D12", borderColor: "#22223A" }}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: "1px solid #1C1C24" }}>
+        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: "1px solid #22223A" }}>
           <button onClick={() => navigate("/")} className="rounded-xl p-2 transition-all hover:scale-105 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #1C1C24, #242430)", border: "1px solid #2A2A36" }}>
+            style={{ background: "linear-gradient(135deg, #22223A, #242430)", border: "1px solid #2A2A36" }}>
             <ArrowLeft size={16} style={{ color: "#FF6D00" }} />
           </button>
           <h1 className="text-[15px] font-bold" style={{ color: "#F5F5F7" }}>{t("settings.title")}</h1>
@@ -717,11 +717,11 @@ export default function Settings() {
       {/* Reset confirm modal */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="rounded-2xl p-6 w-[90vw] max-w-sm" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+          <div className="rounded-2xl p-6 w-[90vw] max-w-sm" style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
             <h3 className="text-lg font-bold mb-2" style={{ color: "#F5F5F7" }}>{t("msg.reset_confirm")}</h3>
             <p className="text-sm mb-6" style={{ color: "#86868B" }}>Cette action est irréversible.</p>
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowResetConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium" style={{ background: "#1C1C24", color: "#86868B" }}>Annuler</button>
+              <button onClick={() => setShowResetConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium" style={{ background: "#22223A", color: "#86868B" }}>Annuler</button>
               <button onClick={confirmReset} className="px-5 py-2.5 rounded-xl text-sm font-medium text-white" style={{ background: "#FF6D00" }}>Confirmer</button>
             </div>
           </div>
