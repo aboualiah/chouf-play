@@ -1,71 +1,87 @@
-/**
- * TV Navigation Engine
- * Manages focus zones (columns) and items within each zone for D-PAD navigation.
- */
+export type TvSection = "categories" | "channels" | "preview";
 
-export interface TvZone {
-  id: string;
-  items: string[]; // array of focusable item IDs
+export interface TvFocusState {
+  section: TvSection;
+  indices: Record<TvSection, number>;
 }
 
-export interface TvNavState {
-  zoneIndex: number;
-  itemIndex: number;
+export interface TvCounts {
+  categories: number;
+  channels: number;
+  preview: number;
 }
 
-export function clampIndex(index: number, length: number): number {
-  if (length === 0) return 0;
-  return Math.max(0, Math.min(index, length - 1));
+export function clamp(value: number, min: number, max: number): number {
+  if (max < min) return min;
+  return Math.max(min, Math.min(max, value));
 }
 
-/**
- * Navigate within zones and items.
- * Returns the new state after applying a direction.
- */
-export function navigate(
-  state: TvNavState,
-  direction: "up" | "down" | "left" | "right",
-  zones: TvZone[]
-): TvNavState {
-  if (zones.length === 0) return state;
+export function createInitialTvFocus(): TvFocusState {
+  return {
+    section: "categories",
+    indices: {
+      categories: 0,
+      channels: 0,
+      preview: 0,
+    },
+  };
+}
 
-  const { zoneIndex, itemIndex } = state;
-  const zone = zones[clampIndex(zoneIndex, zones.length)];
+export function moveVertical(
+  state: TvFocusState,
+  direction: "up" | "down",
+  counts: TvCounts
+): TvFocusState {
+  const section = state.section;
+  const currentIndex = state.indices[section];
+  const maxIndex = Math.max(0, counts[section] - 1);
+  const nextIndex =
+    direction === "up"
+      ? clamp(currentIndex - 1, 0, maxIndex)
+      : clamp(currentIndex + 1, 0, maxIndex);
 
-  switch (direction) {
-    case "up":
-      return { zoneIndex, itemIndex: clampIndex(itemIndex - 1, zone.items.length) };
-    case "down":
-      return { zoneIndex, itemIndex: clampIndex(itemIndex + 1, zone.items.length) };
-    case "left": {
-      const newZone = clampIndex(zoneIndex - 1, zones.length);
-      const targetZone = zones[newZone];
-      return { zoneIndex: newZone, itemIndex: clampIndex(itemIndex, targetZone.items.length) };
-    }
-    case "right": {
-      const newZone = clampIndex(zoneIndex + 1, zones.length);
-      const targetZone = zones[newZone];
-      return { zoneIndex: newZone, itemIndex: clampIndex(itemIndex, targetZone.items.length) };
-    }
-    default:
-      return state;
+  return {
+    ...state,
+    indices: {
+      ...state.indices,
+      [section]: nextIndex,
+    },
+  };
+}
+
+export function moveHorizontal(
+  state: TvFocusState,
+  direction: "left" | "right",
+  counts: TvCounts
+): TvFocusState {
+  const order: TvSection[] = ["categories", "channels", "preview"];
+  const currentPos = order.indexOf(state.section);
+  const nextPos =
+    direction === "left"
+      ? clamp(currentPos - 1, 0, order.length - 1)
+      : clamp(currentPos + 1, 0, order.length - 1);
+
+  let nextSection = order[nextPos];
+
+  if (counts[nextSection] === 0) {
+    const fallbackSections =
+      direction === "right"
+        ? order.slice(nextPos + 1)
+        : [...order.slice(0, nextPos)].reverse();
+    const found = fallbackSections.find((s) => counts[s] > 0);
+    nextSection = found ?? state.section;
   }
-}
 
-/**
- * Get the currently focused item ID from state + zones.
- */
-export function getFocusedItemId(state: TvNavState, zones: TvZone[]): string | null {
-  if (zones.length === 0) return null;
-  const zone = zones[clampIndex(state.zoneIndex, zones.length)];
-  if (!zone || zone.items.length === 0) return null;
-  return zone.items[clampIndex(state.itemIndex, zone.items.length)] || null;
-}
-
-/**
- * Get the currently focused zone ID.
- */
-export function getFocusedZoneId(state: TvNavState, zones: TvZone[]): string | null {
-  if (zones.length === 0) return null;
-  return zones[clampIndex(state.zoneIndex, zones.length)]?.id || null;
+  return {
+    ...state,
+    section: nextSection,
+    indices: {
+      ...state.indices,
+      [nextSection]: clamp(
+        state.indices[nextSection],
+        0,
+        Math.max(0, counts[nextSection] - 1)
+      ),
+    },
+  };
 }
