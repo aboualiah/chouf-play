@@ -118,7 +118,7 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #2A2A36;
+    background: #303048;
     border-radius: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
@@ -136,13 +136,13 @@
 /* Global custom scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2A2A36; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #303048; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(24 100% 50%); }
 
 /* Global input styling for Android TV consistency */
 input[type="text"], input[type="password"], input[type="url"], input[type="email"], input[type="number"], input[type="search"], textarea {
-  background: #1A1A24 !important;
-  border: 1px solid #252530 !important;
+  background: #1E1E34 !important;
+  border: 1px solid #2A2A40 !important;
   color: #F5F5F7 !important;
   border-radius: 12px !important;
   padding: 10px 14px !important;
