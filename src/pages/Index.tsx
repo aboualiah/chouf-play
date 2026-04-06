@@ -351,43 +351,32 @@ export default function Index() {
     ];
   }, [previewChannel]);
 
-  const tvZones = useMemo<TvZone[]>(() => {
-    if (activeTab !== "live" || view !== "content" || activeChannel) return [];
-    return [
-      { id: "categories", items: categoryItems.map(c => `cat_${c.id}`) },
-      { id: "channels", items: filteredChannels.map(c => `ch_${c.id}`) },
-      { id: "preview", items: previewButtons.map(b => b.id) },
-    ];
-  }, [activeTab, view, activeChannel, categoryItems, filteredChannels, previewButtons]);
+  const tvCounts = useMemo<TvCounts>(() => ({
+    categories: categoryItems.length,
+    channels: filteredChannels.length,
+    preview: previewButtons.length,
+  }), [categoryItems.length, filteredChannels.length, previewButtons.length]);
 
-  const tvEnabled = activeTab === "live" && view === "content" && !activeChannel && tvZones.length > 0;
+  const tvEnabled = activeTab === "live" && view === "content" && !activeChannel;
 
-  const handleTvSelect = useCallback((zoneId: string, itemId: string, itemIndex: number) => {
-    if (zoneId === "categories") {
-      const catId = itemId.replace("cat_", "");
-      if (catId === "__all") {
-        setActiveCategory(null);
-        setActiveSubTab("all");
-      } else if (catId === "__fav") {
-        setActiveCategory("__fav" as any);
-        setActiveSubTab("favorites");
-      } else {
-        setActiveCategory(activeCategory === catId ? null : catId);
-        setActiveSubTab("all");
-      }
-    } else if (zoneId === "channels") {
-      const chId = itemId.replace("ch_", "");
-      const ch = filteredChannels.find(c => c.id === chId);
+  const handleTvSelect = useCallback((section: TvSection, index: number) => {
+    if (section === "categories") {
+      const item = categoryItems[index];
+      if (!item) return;
+      if (item.id === "__all") { setActiveCategory(null); setActiveSubTab("all"); }
+      else if (item.id === "__fav") { setActiveCategory("__fav" as any); setActiveSubTab("favorites"); }
+      else { setActiveCategory(activeCategory === item.id ? null : item.id); setActiveSubTab("all"); }
+    } else if (section === "channels") {
+      const ch = filteredChannels[index];
       if (ch) setPreviewChannel(ch);
-    } else if (zoneId === "preview") {
-      if (itemId === "tv_play" && previewChannel) handlePlay(previewChannel);
-      else if (itemId === "tv_fav" && previewChannel) handleToggleFavorite(previewChannel.id);
-      else if (itemId === "tv_epg" && previewChannel) {
-        handlePlay(previewChannel);
-        setTimeout(() => setShowEpg(true), 300);
-      }
+    } else if (section === "preview") {
+      const btn = previewButtons[index];
+      if (!btn || !previewChannel) return;
+      if (btn.id === "tv_play") handlePlay(previewChannel);
+      else if (btn.id === "tv_fav") handleToggleFavorite(previewChannel.id);
+      else if (btn.id === "tv_epg") { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); }
     }
-  }, [activeCategory, filteredChannels, previewChannel, handlePlay, handleToggleFavorite]);
+  }, [activeCategory, categoryItems, filteredChannels, previewButtons, previewChannel, handlePlay, handleToggleFavorite]);
 
   const handleTvBack = useCallback(() => {
     if (showEpg) { setShowEpg(false); return; }
@@ -395,8 +384,8 @@ export default function Index() {
     handleBackToDashboard();
   }, [showEpg, previewChannel, handleBackToDashboard]);
 
-  const { focusedItemId, focusedZoneId } = useTvNavigation({
-    zones: tvZones,
+  const { state: tvState } = useTvNavigation({
+    counts: tvCounts,
     enabled: tvEnabled,
     onSelect: handleTvSelect,
     onBack: handleTvBack,
