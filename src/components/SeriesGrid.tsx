@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Channel } from "@/lib/channels";
 import { Play, Heart, X, ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { colors, effects } from "@/lib/theme";
 
 interface SeriesGridProps {
   series: Channel[];
@@ -51,7 +52,7 @@ function SeriesModal({ series, open, onClose, onPlay, isFav, onToggleFav }: {
             className="fixed inset-0 z-50" style={{ background: "rgba(0,0,0,0.8)" }} onClick={onClose} />
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
             className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg max-h-[80vh] rounded-2xl overflow-hidden flex flex-col"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            style={{ background: colors.surfaceSolid, border: "1px solid #1C1C24" }}>
             {/* Header */}
             <div className="relative h-48 overflow-hidden shrink-0">
               {series.logo ? (
@@ -61,27 +62,27 @@ function SeriesModal({ series, open, onClose, onPlay, isFav, onToggleFav }: {
                 </>
               ) : (
                 <div className={`flex h-full items-center justify-center bg-gradient-to-br ${hashColor(series.name)}`}>
-                  <span className="text-3xl font-black" style={{ color: "#F5F5F7" }}>{getInitials(series.name)}</span>
+                  <span className="text-3xl font-black" style={{ color: colors.text }}>{getInitials(series.name)}</span>
                 </div>
               )}
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#131318]" />
               <button onClick={onClose} className="absolute right-3 top-3 z-20 rounded-full p-2" style={{ background: "rgba(0,0,0,0.5)" }}>
-                <X size={16} style={{ color: "#F5F5F7" }} />
+                <X size={16} style={{ color: colors.text }} />
               </button>
             </div>
 
             <div className="px-5 pb-2 -mt-4 relative z-10 shrink-0">
-              <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>{series.name}</h2>
-              <p className="text-[12px] mb-3" style={{ color: "#86868B" }}>{series.category}</p>
+              <h2 className="text-lg font-bold" style={{ color: colors.text }}>{series.name}</h2>
+              <p className="text-[12px] mb-3" style={{ color: colors.textMuted }}>{series.category}</p>
               <div className="flex gap-3 mb-4">
                 <button onClick={onPlay}
                   className="flex items-center gap-2 rounded-xl px-5 py-2 text-[13px] font-semibold transition-transform hover:scale-105"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #3B82F6)", color: "#F5F5F7" }}>
+                  style={{ background: "linear-gradient(135deg, #7C3AED, #3B82F6)", color: colors.text }}>
                   <Play size={16} fill="currentColor" /> Regarder
                 </button>
                 <button onClick={onToggleFav}
                   className="flex items-center gap-2 rounded-xl px-4 py-2 text-[13px]"
-                  style={{ background: "#1C1C24", color: isFav ? "#FF3B30" : "#86868B" }}>
+                  style={{ background: colors.surfaceSolid2, color: isFav ? "#FF3B30" : colors.textMuted }}>
                   <Heart size={14} className={isFav ? "fill-current" : ""} />
                 </button>
               </div>
@@ -93,10 +94,10 @@ function SeriesModal({ series, open, onClose, onPlay, isFav, onToggleFav }: {
                 <div key={s.num} className="mb-2">
                   <button onClick={() => setOpenSeason(openSeason === s.num ? null : s.num)}
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors"
-                    style={{ background: openSeason === s.num ? "rgba(124,58,237,0.1)" : "#1C1C24", color: openSeason === s.num ? "#A78BFA" : "#86868B" }}>
+                    style={{ background: openSeason === s.num ? "rgba(124,58,237,0.1)" : colors.surfaceSolid2, color: openSeason === s.num ? "#A78BFA" : colors.textMuted }}>
                     {openSeason === s.num ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     Saison {s.num}
-                    <span className="ml-auto text-[10px]" style={{ color: "#48484A" }}>{s.episodes.length} épisodes</span>
+                    <span className="ml-auto text-[10px]" style={{ color: colors.textDim }}>{s.episodes.length} épisodes</span>
                   </button>
                   <AnimatePresence>
                     {openSeason === s.num && (
@@ -105,10 +106,10 @@ function SeriesModal({ series, open, onClose, onPlay, isFav, onToggleFav }: {
                         {s.episodes.map(ep => (
                           <button key={ep.num} onClick={onPlay}
                             className="flex w-full items-center gap-3 px-4 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] rounded-lg"
-                            style={{ color: "#B0B0B5" }}>
-                            <span className="font-mono text-[10px] w-5 text-right" style={{ color: "#48484A" }}>{ep.num}</span>
+                            style={{ color: colors.textMuted }}>
+                            <span className="font-mono text-[10px] w-5 text-right" style={{ color: colors.textDim }}>{ep.num}</span>
                             <span className="flex-1 text-left">{ep.title}</span>
-                            <Play size={12} style={{ color: "#48484A" }} />
+                            <Play size={12} style={{ color: colors.textDim }} />
                           </button>
                         ))}
                       </motion.div>
@@ -156,13 +157,13 @@ export function SeriesGrid({ series, favorites, onPlay, onToggleFavorite }: Seri
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin">
       <div className="flex items-center gap-2 px-5 py-3">
-        <span className="text-[14px] font-bold" style={{ color: "#F5F5F7" }}>📺 Séries</span>
-        <span className="text-[11px]" style={{ color: "#48484A" }}>{series.length} séries</span>
+        <span className="text-[14px] font-bold" style={{ color: colors.text }}>📺 Séries</span>
+        <span className="text-[11px]" style={{ color: colors.textDim }}>{series.length} séries</span>
       </div>
 
       {grouped.map(([cat, catSeries]) => (
         <div key={cat} className="mb-5">
-          <h3 className="px-5 mb-2 text-[13px] font-semibold" style={{ color: "#B0B0B5" }}>{cat}</h3>
+          <h3 className="px-5 mb-2 text-[13px] font-semibold" style={{ color: colors.textMuted }}>{cat}</h3>
           <div className="flex gap-3 overflow-x-auto scrollbar-thin px-5 pb-2">
             {catSeries.map(s => (
               <div key={s.id} onClick={() => setSelected(s)}
@@ -173,7 +174,7 @@ export function SeriesGrid({ series, favorites, onPlay, onToggleFavorite }: Seri
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   ) : (
                     <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${hashColor(s.name)}`}>
-                      <span className="text-lg font-black" style={{ color: "#F5F5F7" }}>{getInitials(s.name)}</span>
+                      <span className="text-lg font-black" style={{ color: colors.text }}>{getInitials(s.name)}</span>
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100"
@@ -189,8 +190,8 @@ export function SeriesGrid({ series, favorites, onPlay, onToggleFavorite }: Seri
                     </div>
                   )}
                 </div>
-                <p className="text-[11px] font-medium leading-tight line-clamp-2 px-0.5" style={{ color: "#B0B0B5" }}>{s.name}</p>
-                <p className="text-[9px] px-0.5 truncate" style={{ color: "#48484A" }}>{s.category}</p>
+                <p className="text-[11px] font-medium leading-tight line-clamp-2 px-0.5" style={{ color: colors.textMuted }}>{s.name}</p>
+                <p className="text-[9px] px-0.5 truncate" style={{ color: colors.textDim }}>{s.category}</p>
               </div>
             ))}
           </div>

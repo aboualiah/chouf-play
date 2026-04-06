@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { colors, effects } from "@/lib/theme";
 
 /**
  * Generates a simulated current program for a channel based on its name (deterministic seed).
@@ -56,9 +57,9 @@ export const MiniEpg = React.memo(({ channelName }: { channelName: string }) => 
 
   return (
     <div className="mt-0.5">
-      <p className="text-[9px] truncate" style={{ color: "#48484A" }}>{prog.title}</p>
-      <div className="mt-0.5 h-[2px] rounded-full overflow-hidden" style={{ background: "#242430" }}>
-        <div className="h-full rounded-full" style={{ width: `${prog.progress}%`, background: "#FF6D00" }} />
+      <p className="text-[9px] truncate" style={{ color: colors.textDim }}>{prog.title}</p>
+      <div className="mt-0.5 h-[2px] rounded-full overflow-hidden" style={{ background: colors.surfaceSolid2 }}>
+        <div className="h-full rounded-full" style={{ width: `${prog.progress}%`, background: colors.orange }} />
       </div>
     </div>
   );

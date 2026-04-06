@@ -9,6 +9,7 @@ import { XtreamAccountBadge } from "./XtreamAccountBadge";
 import { QRCodePortal } from "./QRCodePortal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useI18n } from "@/lib/i18n";
+import { colors, effects } from "@/lib/theme";
 
 interface AppSidebarProps {
   channels: Channel[];
@@ -54,11 +55,11 @@ export function AppSidebar({
   if (collapsed) {
     return (
       <TooltipProvider delayDuration={200}>
-        <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
+        <aside className="flex h-screen w-16 flex-col items-center border-r py-4" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: colors.surfaceSolid2 }}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button onClick={onToggleCollapse} className="mb-6 transition-transform hover:scale-110">
-                <Menu size={20} style={{ color: "#C9A84C" }} />
+                <Menu size={20} style={{ color: colors.gold }} />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right"><p>{t("sidebar.open")}</p></TooltipContent>
@@ -72,8 +73,8 @@ export function AppSidebar({
                     onClick={() => onTabSelect(item.id)}
                     className="flex h-11 w-11 items-center justify-center rounded-xl transition-all"
                     style={activeTab === item.id
-                      ? { background: "rgba(255,109,0,0.12)", color: "#FF6D00" }
-                      : { color: "#86868B" }
+                      ? { background: "rgba(255,109,0,0.12)", color: colors.orange }
+                      : { color: colors.textMuted }
                     }
                   >
                     <item.icon size={20} />
@@ -108,18 +109,18 @@ export function AppSidebar({
   }
 
   return (
-    <aside className="flex h-screen w-[220px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: "#1C1C24" }}>
+    <aside className="flex h-screen w-[220px] flex-col border-r overflow-hidden" style={{ background: "rgba(19,19,24,0.85)", backdropFilter: "blur(20px)", borderColor: colors.surfaceSolid2 }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3.5">
         <button onClick={onToggleCollapse} className="shrink-0 transition-transform hover:scale-110" title="Réduire">
-          <Menu size={20} style={{ color: "#C9A84C" }} />
+          <Menu size={20} style={{ color: colors.gold }} />
         </button>
         <div className="min-w-0">
           <h1 className="text-base leading-tight">
-            <span className="font-black" style={{ color: "#F5F5F7" }}>CHOUF</span>
-            <span className="font-light" style={{ color: "#FF6D00" }}>Play</span>
+            <span className="font-black" style={{ color: colors.text }}>CHOUF</span>
+            <span className="font-light" style={{ color: colors.orange }}>Play</span>
           </h1>
-          <p className="text-[8px] font-medium uppercase" style={{ color: "#C9A84C", letterSpacing: "2px" }}>IPTV PLAYER</p>
+          <p className="text-[8px] font-medium uppercase" style={{ color: colors.gold, letterSpacing: "2px" }}>IPTV PLAYER</p>
         </div>
       </div>
 
@@ -138,12 +139,12 @@ export function AppSidebar({
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] transition-all ${
                   activeTab === item.id ? "font-semibold" : "font-medium hover:bg-[#1C1C24]"
                 }`}
-                style={activeTab === item.id ? { background: "rgba(255,109,0,0.1)", color: "#FF6D00" } : { color: "#86868B" }}
+                style={activeTab === item.id ? { background: "rgba(255,109,0,0.1)", color: colors.orange } : { color: colors.textMuted }}
               >
                 <item.icon size={17} style={activeTab === item.id ? { filter: "drop-shadow(0 0 4px rgba(255,109,0,0.4))" } : {}} />
                 <span>{item.label}</span>
                 {count != null && count > 0 && (
-                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "rgba(255,109,0,0.15)", color: "#FF6D00" }}>
+                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: "rgba(255,109,0,0.15)", color: colors.orange }}>
                     {count}
                   </span>
                 )}
@@ -160,7 +161,7 @@ export function AppSidebar({
           <button
             onClick={() => setListsOpen(!listsOpen)}
             className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider"
-            style={{ color: "#48484A" }}
+            style={{ color: colors.textDim }}
           >
             <span>{t("cat.my_lists")}</span>
             {listsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -175,7 +176,7 @@ export function AppSidebar({
                     onClick={() => onPlaylistSelect?.(p.id)}
                     className="group rounded-lg px-3 py-2 text-[12px] transition-colors hover:bg-[#1C1C24] cursor-pointer"
                     style={{
-                      color: isActive ? "#FF6D00" : "#86868B",
+                      color: isActive ? "#FF6D00" : colors.textMuted,
                       background: isActive ? "rgba(255,109,0,0.06)" : undefined,
                       borderLeft: isActive ? "2px solid #FF6D00" : "2px solid transparent",
                     }}
@@ -183,11 +184,11 @@ export function AppSidebar({
                     onMouseLeave={() => setHoverPlaylist(null)}
                   >
                     <div className="flex items-start gap-2">
-                      <Layers size={14} className="mt-0.5 shrink-0" style={{ color: isActive ? "#FF6D00" : "#48484A" }} />
+                      <Layers size={14} className="mt-0.5 shrink-0" style={{ color: isActive ? "#FF6D00" : colors.textDim }} />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="truncate flex-1">{p.name}</span>
-                          {p.isXtream && <Badge variant="outline" className="border-[#FF6D0030] bg-[#FF6D0012] text-[9px] uppercase tracking-wide" style={{ color: "#FF6D00" }}>Xtream</Badge>}
+                          {p.isXtream && <Badge variant="outline" className="border-[#FF6D0030] bg-[#FF6D0012] text-[9px] uppercase tracking-wide" style={{ color: colors.orange }}>Xtream</Badge>}
                           {hoverPlaylist === p.id ? (
                             <div className="flex gap-0.5">
                               <button onClick={(e) => { e.stopPropagation(); onRefreshPlaylist(p.id); }} className="rounded p-0.5 hover:bg-[#242430]">
@@ -198,7 +199,7 @@ export function AppSidebar({
                               </button>
                             </div>
                           ) : (
-                            <span className="text-[10px]" style={{ color: "#48484A" }}>
+                            <span className="text-[10px]" style={{ color: colors.textDim }}>
                               {p.channels.length + (p.vodStreams?.length || 0) + (p.series?.length || 0)}
                             </span>
                           )}
@@ -213,10 +214,10 @@ export function AppSidebar({
                           const daysLeft = Math.ceil((expDate.getTime() - Date.now()) / 86400000);
                           return (
                             <div className="flex items-center gap-1.5 mt-1">
-                              <CalendarDays size={10} style={{ color: daysLeft < 7 ? "#FF9F0A" : "#34C759", filter: "drop-shadow(0 0 3px rgba(52,199,89,0.3))" }} />
-                              <span className="text-[9px]" style={{ color: daysLeft < 7 ? "#FF9F0A" : "#48484A" }}>
+                              <CalendarDays size={10} style={{ color: daysLeft < 7 ? "#FF9F0A" : colors.green, filter: "drop-shadow(0 0 3px rgba(52,199,89,0.3))" }} />
+                              <span className="text-[9px]" style={{ color: daysLeft < 7 ? "#FF9F0A" : colors.textDim }}>
                                 {expDate.toLocaleDateString("fr-FR")}
-                                <span style={{ color: daysLeft < 7 ? "#FF9F0A" : "#34C759" }}> ({daysLeft}j)</span>
+                                <span style={{ color: daysLeft < 7 ? "#FF9F0A" : colors.green }}> ({daysLeft}j)</span>
                               </span>
                             </div>
                           );
@@ -230,7 +231,7 @@ export function AppSidebar({
                 <button
                   onClick={onAddPlaylist}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
-                  style={{ color: "#FF6D00", border: "1px solid #1C1C24" }}
+                  style={{ color: colors.orange, border: "1px solid #1C1C24" }}
                 >
                   <Plus size={14} />
                   <span>Ajouter une playlist</span>
@@ -238,7 +239,7 @@ export function AppSidebar({
                 <button
                   onClick={() => setQrOpen(true)}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors hover:bg-[#1C1C24]"
-                  style={{ color: "#C9A84C", border: "1px solid #1C1C24" }}
+                  style={{ color: colors.gold, border: "1px solid #1C1C24" }}
                 >
                   <QrCode size={14} />
                   <span>Ajouter à distance</span>
@@ -250,20 +251,20 @@ export function AppSidebar({
       </div>
 
       {/* Bottom nav */}
-      <div className="border-t px-2.5 py-2 space-y-0.5" style={{ borderColor: "#1C1C24" }}>
-        <button onClick={() => navigate("/demo")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#FF6D00" }}>
+      <div className="border-t px-2.5 py-2 space-y-0.5" style={{ borderColor: colors.surfaceSolid2 }}>
+        <button onClick={() => navigate("/demo")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: colors.orange }}>
           <Tv size={17} />
           <span>Chaînes Démo</span>
         </button>
-        <button onClick={() => window.location.reload()} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+        <button onClick={() => window.location.reload()} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: colors.textMuted }}>
           <RotateCcw size={17} />
           <span>Rafraîchir</span>
         </button>
-        <button onClick={() => navigate("/settings")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+        <button onClick={() => navigate("/settings")} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: colors.textMuted }}>
           <Settings size={17} />
           <span>Paramètres</span>
         </button>
-        <button onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: "#FF3B30" }}>
+        <button onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#1C1C24]" style={{ color: colors.red }}>
           <LogOut size={17} />
           <span>Déconnexion</span>
         </button>

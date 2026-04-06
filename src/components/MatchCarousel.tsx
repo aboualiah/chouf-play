@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Bell, BellOff, Play, RefreshCw } from "lucid
 import React from "react";
 import { getReminders, toggleReminder as toggleReminderStorage } from "@/lib/storage";
 import { getMatchSettings } from "@/pages/Settings";
+import { colors, effects } from "@/lib/theme";
 
 interface Match {
   id: string;
@@ -174,7 +175,7 @@ function TeamLogo({ src, name }: { src?: string; name: string }) {
   return src ? (
     <img src={src} alt={name} className="h-8 w-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
   ) : (
-    <span className="text-[11px] font-bold" style={{ color: "#86868B" }}>{name.slice(0, 3).toUpperCase()}</span>
+    <span className="text-[11px] font-bold" style={{ color: colors.textMuted }}>{name.slice(0, 3).toUpperCase()}</span>
   );
 }
 
@@ -193,11 +194,11 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-1.5">
         {match.leagueLogo && <img src={match.leagueLogo} alt="" className="h-4 w-4 object-contain" />}
-        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#86868B" }}>{match.league}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: colors.textMuted }}>{match.league}</span>
       </div>
       {match.status === "live" && (
-        <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255, 59, 48, 0.15)", color: "#FF3B30" }}>
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#FF3B30" }} />
+        <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "rgba(255, 59, 48, 0.15)", color: colors.red }}>
+          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: colors.red }} />
           LIVE
         </span>
       )}
@@ -205,21 +206,21 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <TeamLogo src={match.team1Logo} name={match.team1} />
-        <p className="text-[13px] font-bold truncate" style={{ color: "#F5F5F7" }}>{match.team1}</p>
+        <p className="text-[13px] font-bold truncate" style={{ color: colors.text }}>{match.team1}</p>
       </div>
       {match.score ? (
-        <span className="mx-2 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums shrink-0" style={{ background: "rgba(255, 109, 0, 0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
+        <span className="mx-2 rounded-lg px-3 py-1.5 text-sm font-black tabular-nums shrink-0" style={{ background: "rgba(255, 109, 0, 0.15)", color: colors.orange, border: "1px solid rgba(255,109,0,0.2)" }}>{match.score}</span>
       ) : (
-        <span className="mx-2 text-xs shrink-0" style={{ color: "#86868B" }}>vs</span>
+        <span className="mx-2 text-xs shrink-0" style={{ color: colors.textMuted }}>vs</span>
       )}
       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-        <p className="text-[13px] font-bold truncate text-right" style={{ color: "#F5F5F7" }}>{match.team2}</p>
+        <p className="text-[13px] font-bold truncate text-right" style={{ color: colors.text }}>{match.team2}</p>
         <TeamLogo src={match.team2Logo} name={match.team2} />
       </div>
     </div>
     <div className="flex items-center justify-between text-[11px] mb-3">
-      <span className="font-semibold" style={{ color: match.status === "live" ? "#FF6D00" : "#B0B0B5" }}>{match.timeLabel}</span>
-      {match.channel && <span className="font-medium" style={{ color: "#86868B" }}>📺 {match.channel}</span>}
+      <span className="font-semibold" style={{ color: match.status === "live" ? "#FF6D00" : colors.textMuted }}>{match.timeLabel}</span>
+      {match.channel && <span className="font-medium" style={{ color: colors.textMuted }}>📺 {match.channel}</span>}
     </div>
     {match.status === "live" ? (
       <button className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-semibold text-white bg-gradient-orange active:scale-[0.97] transition-transform">
@@ -229,7 +230,7 @@ const MatchCard = React.memo(({ match, hasReminder, onToggleReminder }: {
       <button
         onClick={onToggleReminder}
         className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-medium transition-colors active:scale-[0.97]"
-        style={hasReminder ? { background: "rgba(255, 109, 0, 0.1)", color: "#FF6D00" } : { background: "#1C1C24", color: "#86868B" }}
+        style={hasReminder ? { background: "rgba(255, 109, 0, 0.1)", color: colors.orange } : { background: colors.surfaceSolid2, color: colors.textMuted }}
       >
         {hasReminder ? <BellOff size={12} /> : <Bell size={12} />}
         {hasReminder ? "Rappel activé" : "Rappel"}
@@ -296,19 +297,19 @@ export function MatchCarousel() {
   return (
     <div className="px-3 pt-3">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-[13px] font-semibold flex items-center gap-2" style={{ color: "#F5F5F7" }}>
+        <h3 className="text-[13px] font-semibold flex items-center gap-2" style={{ color: colors.text }}>
           ⚽ Matchs
-          {syncing && <RefreshCw size={11} className="animate-spin" style={{ color: "#FF6D00" }} />}
+          {syncing && <RefreshCw size={11} className="animate-spin" style={{ color: colors.orange }} />}
         </h3>
         <div className="flex gap-1">
-          <button onClick={handleManualSync} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: "#131318" }} title="Synchroniser">
-            <RefreshCw size={12} style={{ color: "#86868B" }} />
+          <button onClick={handleManualSync} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: colors.surfaceSolid }} title="Synchroniser">
+            <RefreshCw size={12} style={{ color: colors.textMuted }} />
           </button>
-          <button onClick={() => scroll(-1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: "#131318" }}>
-            <ChevronLeft size={14} style={{ color: "#86868B" }} />
+          <button onClick={() => scroll(-1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: colors.surfaceSolid }}>
+            <ChevronLeft size={14} style={{ color: colors.textMuted }} />
           </button>
-          <button onClick={() => scroll(1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: "#131318" }}>
-            <ChevronRight size={14} style={{ color: "#86868B" }} />
+          <button onClick={() => scroll(1)} className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ background: colors.surfaceSolid }}>
+            <ChevronRight size={14} style={{ color: colors.textMuted }} />
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
+import { colors, effects } from "@/lib/theme";
 
 interface TermsScreenProps {
   onAccept: () => void;
@@ -10,7 +11,7 @@ export function TermsScreen({ onAccept }: TermsScreenProps) {
   const [accepted, setAccepted] = useState(false);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center" style={{ background: "#12121A" }}>
+    <div className="flex h-screen w-full items-center justify-center" style={{ background: colors.surfaceSolid }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -20,19 +21,19 @@ export function TermsScreen({ onAccept }: TermsScreenProps) {
       >
         <div className="flex items-center gap-3 mb-4 shrink-0">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(201,168,76,0.12)" }}>
-            <ScrollText size={20} style={{ color: "#C9A84C" }} />
+            <ScrollText size={20} style={{ color: colors.gold }} />
           </div>
-          <h1 className="text-[18px] font-bold" style={{ color: "#F5F5F7" }}>
+          <h1 className="text-[18px] font-bold" style={{ color: colors.text }}>
             Conditions d'utilisation
           </h1>
         </div>
 
         <div
           className="rounded-xl p-4 mb-4 overflow-y-auto scrollbar-thin text-[11px] leading-relaxed shrink"
-          style={{ background: "#1A1A24", border: "1px solid #252530", color: "#86868B", maxHeight: "40vh" }}
+          style={{ background: colors.surfaceSolid2, border: "1px solid #252530", color: colors.textMuted, maxHeight: "40vh" }}
         >
           <p className="mb-3">
-            <strong style={{ color: "#F5F5F7" }}>CHOUF Play</strong> est un lecteur multimédia IPTV. L'application ne fournit, n'héberge et ne distribue aucun contenu audiovisuel.
+            <strong style={{ color: colors.text }}>CHOUF Play</strong> est un lecteur multimédia IPTV. L'application ne fournit, n'héberge et ne distribue aucun contenu audiovisuel.
           </p>
           <p className="mb-3">
             L'utilisateur est seul responsable des playlists, liens et flux qu'il ajoute dans l'application. Il lui incombe de s'assurer qu'il dispose des droits nécessaires pour accéder aux contenus qu'il utilise via CHOUF Play.
@@ -63,7 +64,7 @@ export function TermsScreen({ onAccept }: TermsScreenProps) {
               </svg>
             )}
           </div>
-          <span className="text-[12px] font-medium" style={{ color: "#86868B" }}>
+          <span className="text-[12px] font-medium" style={{ color: colors.textMuted }}>
             J'ai lu et j'accepte les conditions d'utilisation
           </span>
         </label>
@@ -78,8 +79,8 @@ export function TermsScreen({ onAccept }: TermsScreenProps) {
           disabled={!accepted}
           className="w-full rounded-2xl py-3 text-[14px] font-bold transition-all shrink-0"
           style={{
-            background: accepted ? "linear-gradient(135deg, #FF6D00, #FF8C38)" : "#1C1C24",
-            color: accepted ? "#fff" : "#48484A",
+            background: accepted ? "linear-gradient(135deg, #FF6D00, #FF8C38)" : colors.surfaceSolid2,
+            color: accepted ? "#fff" : colors.textDim,
             boxShadow: accepted ? "0 8px 32px rgba(255,109,0,0.3)" : "none",
             cursor: accepted ? "pointer" : "not-allowed",
           }}

@@ -1,5 +1,6 @@
 import { X, Clock } from "lucide-react";
 import { Channel } from "@/lib/channels";
+import { colors, effects } from "@/lib/theme";
 
 interface EpgPanelProps {
   channel: Channel;
@@ -47,19 +48,19 @@ export function EpgPanel({ channel, onClose }: EpgPanelProps) {
   const programs = generateEpgData(channel.name);
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "#131318" }}>
+    <div className="flex flex-col h-full" style={{ background: colors.surfaceSolid }}>
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #1C1C24" }}>
         <div className="flex items-center gap-2">
-          <Clock size={14} style={{ color: "#34C759" }} />
-          <span className="text-[12px] font-semibold" style={{ color: "#F5F5F7" }}>Guide des programmes</span>
+          <Clock size={14} style={{ color: colors.green }} />
+          <span className="text-[12px] font-semibold" style={{ color: colors.text }}>Guide des programmes</span>
         </div>
         <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-[#1C1C24] transition-colors">
-          <X size={14} style={{ color: "#86868B" }} />
+          <X size={14} style={{ color: colors.textMuted }} />
         </button>
       </div>
       <div className="flex items-center gap-2 px-4 py-2" style={{ borderBottom: "1px solid #1C1C24" }}>
         {channel.logo && <img src={channel.logo} className="h-5 w-5 rounded object-contain" alt="" />}
-        <span className="text-[11px] font-medium" style={{ color: "#FF6D00" }}>{channel.name}</span>
+        <span className="text-[11px] font-medium" style={{ color: colors.orange }}>{channel.name}</span>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {programs.map((p, i) => (
@@ -72,21 +73,21 @@ export function EpgPanel({ channel, onClose }: EpgPanelProps) {
             }}
           >
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-mono tabular-nums w-12 shrink-0" style={{ color: p.isCurrent ? "#FF6D00" : "#48484A" }}>
+              <span className="text-[10px] font-mono tabular-nums w-12 shrink-0" style={{ color: p.isCurrent ? "#FF6D00" : colors.textDim }}>
                 {p.start.toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" })}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-medium truncate" style={{ color: p.isCurrent ? "#F5F5F7" : "#86868B" }}>
+                <p className="text-[12px] font-medium truncate" style={{ color: p.isCurrent ? "#F5F5F7" : colors.textMuted }}>
                   {p.title}
                 </p>
                 {p.isCurrent && (
-                  <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: "#1C1C24" }}>
+                  <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: colors.surfaceSolid2 }}>
                     <div className="h-full rounded-full transition-all" style={{ width: `${p.progress}%`, background: "linear-gradient(90deg, #FF6D00, #C9A84C)" }} />
                   </div>
                 )}
               </div>
               {p.isCurrent && (
-                <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: "rgba(52,199,89,0.15)", color: "#34C759" }}>
+                <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full" style={{ background: "rgba(52,199,89,0.15)", color: colors.green }}>
                   EN COURS
                 </span>
               )}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FolderOpen, Bell, Check, Shield } from "lucide-react";
+import { colors, effects } from "@/lib/theme";
 
 interface PermissionsScreenProps {
   onContinue: () => void;
@@ -30,7 +31,7 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
   ];
 
   return (
-    <div className="flex h-screen w-full items-center justify-center" style={{ background: "#0A0A0F" }}>
+    <div className="flex h-screen w-full items-center justify-center" style={{ background: colors.background }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -39,11 +40,11 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
       >
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "rgba(201,168,76,0.12)" }}>
-            <Shield size={20} style={{ color: "#C9A84C" }} />
+            <Shield size={20} style={{ color: colors.gold }} />
           </div>
           <div>
-            <h1 className="text-[20px] font-bold" style={{ color: "#F5F5F7" }}>Autorisations requises</h1>
-            <p className="text-[11px] mt-0.5" style={{ color: "#48484A" }}>Ces permissions améliorent votre expérience</p>
+            <h1 className="text-[20px] font-bold" style={{ color: colors.text }}>Autorisations requises</h1>
+            <p className="text-[11px] mt-0.5" style={{ color: colors.textDim }}>Ces permissions améliorent votre expérience</p>
           </div>
         </div>
 
@@ -55,19 +56,19 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + i * 0.15 }}
               className="rounded-xl p-4 flex items-center gap-4"
-              style={{ background: "#131318", border: "1px solid #1C1C24" }}
+              style={{ background: colors.surfaceSolid, border: "1px solid #1C1C24" }}
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
                 style={{ background: perm.granted ? "rgba(52,199,89,0.12)" : "rgba(255,109,0,0.12)" }}>
                 {perm.granted ? (
-                  <Check size={20} style={{ color: "#34C759" }} />
+                  <Check size={20} style={{ color: colors.green }} />
                 ) : (
-                  <perm.icon size={20} style={{ color: "#FF6D00" }} />
+                  <perm.icon size={20} style={{ color: colors.orange }} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold" style={{ color: "#F5F5F7" }}>{perm.title}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: "#48484A" }}>{perm.desc}</p>
+                <p className="text-[13px] font-semibold" style={{ color: colors.text }}>{perm.title}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: colors.textDim }}>{perm.desc}</p>
               </div>
               {!perm.granted ? (
                 <div className="flex gap-2">
@@ -75,7 +76,7 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
                     <button
                       onClick={perm.onSkip}
                       className="rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors"
-                      style={{ color: "#48484A" }}
+                      style={{ color: colors.textDim }}
                     >
                       Plus tard
                     </button>
@@ -83,13 +84,13 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
                   <button
                     onClick={perm.onGrant}
                     className="rounded-lg px-4 py-1.5 text-[11px] font-semibold transition-all hover:opacity-90"
-                    style={{ background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.2)" }}
+                    style={{ background: "rgba(255,109,0,0.15)", color: colors.orange, border: "1px solid rgba(255,109,0,0.2)" }}
                   >
                     Autoriser
                   </button>
                 </div>
               ) : (
-                <span className="text-[11px] font-medium" style={{ color: "#34C759" }}>Accordé</span>
+                <span className="text-[11px] font-medium" style={{ color: colors.green }}>Accordé</span>
               )}
             </motion.div>
           ))}
@@ -104,8 +105,8 @@ export function PermissionsScreen({ onContinue }: PermissionsScreenProps) {
           disabled={!filesGranted}
           className="w-full rounded-2xl py-3.5 text-[14px] font-bold transition-all"
           style={{
-            background: filesGranted ? "linear-gradient(135deg, #FF6D00, #FF8C38)" : "#1C1C24",
-            color: filesGranted ? "#fff" : "#48484A",
+            background: filesGranted ? "linear-gradient(135deg, #FF6D00, #FF8C38)" : colors.surfaceSolid2,
+            color: filesGranted ? "#fff" : colors.textDim,
             boxShadow: filesGranted ? "0 8px 32px rgba(255,109,0,0.3)" : "none",
             cursor: filesGranted ? "pointer" : "not-allowed",
           }}

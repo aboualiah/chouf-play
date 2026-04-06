@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Plus, QrCode, Globe, ArrowRight, Fingerprint, Shield, Gift } from "lucide-react";
 import { QRCodePortal } from "./QRCodePortal";
+import { colors, effects } from "@/lib/theme";
 
 interface WelcomeScreenProps {
   onAddPlaylist: () => void;
@@ -68,7 +69,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
       : {};
 
   return (
-    <div className="flex h-screen w-full overflow-y-auto" style={{ background: "#151524" }}>
+    <div className="flex h-screen w-full overflow-y-auto" style={{ background: colors.surfaceSolid }}>
       <div className="flex flex-col items-center justify-center w-full min-h-screen px-5 py-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -99,7 +100,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
                 style={{
                   background: "linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.08))",
                   border: "1px solid rgba(201,168,76,0.25)",
-                  color: "#C9A84C",
+                  color: colors.gold,
                   ...focusStyle(1),
                 }}
               >
@@ -114,7 +115,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
                 style={{
                   background: "rgba(26,26,36,0.8)",
                   border: "1px solid rgba(37,37,48,0.6)",
-                  color: "#86868B",
+                  color: colors.textMuted,
                 }}
               >
                 <Globe size={16} />
@@ -145,15 +146,15 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                 style={{ background: "rgba(52,199,89,0.15)" }}>
-                <Gift size={18} style={{ color: "#34C759" }} />
+                <Gift size={18} style={{ color: colors.green }} />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-[12px] font-bold" style={{ color: "#34C759" }}>Accès gratuit 10 jours</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "#48484A" }}>
+                <p className="text-[12px] font-bold" style={{ color: colors.green }}>Accès gratuit 10 jours</p>
+                <p className="text-[10px] mt-0.5" style={{ color: colors.textDim }}>
                   Essayez avec les chaînes démo
                 </p>
               </div>
-              <ArrowRight size={16} style={{ color: "#34C759" }} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={16} style={{ color: colors.green }} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
 
@@ -166,14 +167,14 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
           >
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
-              <Fingerprint size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
+              <Fingerprint size={12} style={{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
               <span className="text-muted-foreground font-sans text-xs">
                 MAC : {deviceId}
               </span>
             </div>
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
-              <Shield size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
+              <Shield size={12} style={{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
               <span className="text-muted-foreground font-sans font-light text-xs">
                 KEY : {deviceId.replace(/:/g, "").slice(0, 8)}
               </span>
@@ -181,7 +182,7 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
 
             <div className="flex items-center gap-3 mt-1">
               <span className="text-[10px] text-muted-foreground">v2.0.0</span>
-              <span style={{ color: "#3A3A3C" }}>·</span>
+              <span style={{ color: colors.textDim }}>·</span>
               <a href="/privacy" className="text-[10px] hover:underline text-secondary-foreground">
                 Politique de confidentialité
               </a>

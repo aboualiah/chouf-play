@@ -6,6 +6,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { colors, effects } from "@/lib/theme";
 
 interface HeaderBarProps {
   searchQuery: string;
@@ -52,11 +53,11 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
       <div className="flex items-center gap-2 flex-1 justify-between">
         <div className="flex items-center gap-2">
           <ChoufPlayLogo size={22} showCP={false} />
-          <span className="text-[12px] font-bold" style={{ color: "#F5F5F7" }}>CHOUF</span>
-          <span className="text-[12px] font-light" style={{ color: "#FF6D00" }}>Play</span>
+          <span className="text-[12px] font-bold" style={{ color: colors.text }}>CHOUF</span>
+          <span className="text-[12px] font-light" style={{ color: colors.orange }}>Play</span>
         </div>
         <div className="text-right">
-          <p className="text-[14px] font-light tabular-nums" style={{ color: "#F5F5F7", fontFamily: CLOCK_FONT }}>{time}</p>
+          <p className="text-[14px] font-light tabular-nums" style={{ color: colors.text, fontFamily: CLOCK_FONT }}>{time}</p>
         </div>
       </div>
     );
@@ -73,7 +74,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
     >
       {/* Back button (content view) */}
       {onBackToDashboard && (
-        <button onClick={onBackToDashboard} className="rounded-lg p-2 transition-colors hover:bg-white/5" style={{ color: "#FF6D00" }}>
+        <button onClick={onBackToDashboard} className="rounded-lg p-2 transition-colors hover:bg-white/5" style={{ color: colors.orange }}>
           <ArrowLeft size={18} />
         </button>
       )}
@@ -83,8 +84,8 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
         <div className="flex items-center gap-2 shrink-0">
           <ChoufPlayLogo size={28} showCP={false} />
           <div className="leading-none">
-            <span className="text-[14px] font-black" style={{ color: "#F5F5F7" }}>CHOUF</span>
-            <span className="text-[14px] font-light" style={{ color: "#FF6D00" }}>Play</span>
+            <span className="text-[14px] font-black" style={{ color: colors.text }}>CHOUF</span>
+            <span className="text-[14px] font-light" style={{ color: colors.orange }}>Play</span>
           </div>
         </div>
       )}
@@ -95,8 +96,8 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
       {/* Clock + Date + Action icons */}
       <div className="flex items-center gap-3">
         <div className="text-right hidden sm:block">
-          <p className="text-[22px] font-light tabular-nums" style={{ color: "#F5F5F7", fontFamily: CLOCK_FONT, letterSpacing: "0.04em", lineHeight: 1 }}>{time}</p>
-          <p className="text-[10px] capitalize" style={{ color: "#48484A", fontFamily: CLOCK_FONT }}>{date}</p>
+          <p className="text-[22px] font-light tabular-nums" style={{ color: colors.text, fontFamily: CLOCK_FONT, letterSpacing: "0.04em", lineHeight: 1 }}>{time}</p>
+          <p className="text-[10px] capitalize" style={{ color: colors.textDim, fontFamily: CLOCK_FONT }}>{date}</p>
         </div>
 
         {/* Dashboard */}
@@ -106,7 +107,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
             className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
             title="Dashboard"
           >
-            <LayoutDashboard size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+            <LayoutDashboard size={16} style={{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
           </button>
         )}
 
@@ -116,7 +117,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
             onClick={onOpenSettings}
             className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
             title="Paramètres"
-            style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-3) }}
+            style={{ ...{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-3) }}
           >
             <Settings size={16} />
           </button>
@@ -127,7 +128,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           onClick={() => window.location.reload()}
           className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
           title="Rafraîchir"
-          style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-2) }}
+          style={{ ...{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-2) }}
         >
           <RefreshCw size={16} />
         </button>
@@ -137,7 +138,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           onClick={() => setShowQuitDialog(true)}
           className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
           title="Quitter"
-          style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-1) }}
+          style={{ ...{ color: colors.gold, filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-1) }}
         >
           <LogOut size={16} />
         </button>
@@ -145,23 +146,23 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
 
       {/* Quit confirmation dialog */}
       <AlertDialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
-        <AlertDialogContent style={{ background: "#1A1A2E", border: "1px solid #22223A" }}>
+        <AlertDialogContent style={{ background: colors.surfaceSolid2, border: "1px solid #22223A" }}>
           <AlertDialogHeader>
-            <AlertDialogTitle style={{ color: "#F5F5F7" }}>Quitter CHOUF Play ?</AlertDialogTitle>
-            <AlertDialogDescription style={{ color: "#86868B" }}>
+            <AlertDialogTitle style={{ color: colors.text }}>Quitter CHOUF Play ?</AlertDialogTitle>
+            <AlertDialogDescription style={{ color: colors.textMuted }}>
               Vous allez être déconnecté et redirigé vers la page d'accueil.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               className="border-[#22223A] hover:bg-[#22223A]"
-              style={{ background: "transparent", color: "#86868B" }}
+              style={{ background: "transparent", color: colors.textMuted }}
             >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => { localStorage.removeItem("chouf_has_setup"); window.location.href = "/"; }}
-              style={{ background: "#FF6D00", color: "#fff" }}
+              style={{ background: colors.orange, color: "#fff" }}
               className="hover:opacity-90"
             >
               Quitter

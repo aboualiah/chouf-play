@@ -6,50 +6,52 @@
 
 @layer base {
   :root {
-    --cp-black: 230 18% 10%;
-    --cp-surface: 232 16% 14%;
-    --cp-surface-light: 230 13% 18%;
-    --cp-orange: 24 100% 50%;
-    --cp-gold: 42 53% 54%;
-    --cp-gray: 230 5% 56%;
-    --cp-gray-dark: 230 6% 32%;
-    --cp-white: 230 20% 97%;
-    --cp-green: 142 71% 50%;
-    --cp-red: 4 100% 59%;
-    --cp-blue: 211 100% 50%;
-    --cp-yellow: 50 100% 52%;
+    /* CHOUFPlay v2 tokens — synced with src/lib/theme.ts */
+    --cp-black: 240 40% 4%;        /* #07070F */
+    --cp-surface: 240 20% 12%;     /* #181825 */
+    --cp-surface-light: 240 18% 15%; /* #1E1E2E */
+    --cp-orange: 24 100% 50%;      /* #FF6B00 */
+    --cp-gold: 36 51% 41%;         /* #C9963A */
+    --cp-gray: 240 7% 42%;         /* #60607A (textDim) */
+    --cp-gray-dark: 240 10% 28%;
+    --cp-white: 240 33% 97%;       /* #F0F0FA */
+    --cp-green: 142 71% 45%;       /* #22C55E */
+    --cp-red: 3 100% 59%;          /* #FF3B30 */
+    --cp-blue: 211 100% 50%;       /* #007AFF */
+    --cp-yellow: 50 100% 52%;      /* #FFD60A */
+    --cp-violet: 260 36% 55%;      /* #7C5CBF */
 
-    --background: 230 18% 10%;
-    --foreground: 230 20% 97%;
-    --card: 232 16% 14%;
-    --card-foreground: 230 20% 97%;
-    --popover: 232 16% 14%;
-    --popover-foreground: 230 20% 97%;
-    --primary: 24 100% 50%;
+    --background: 240 40% 4%;      /* #07070F */
+    --foreground: 240 33% 97%;     /* #F0F0FA */
+    --card: 240 20% 12%;           /* #181825 */
+    --card-foreground: 240 33% 97%;
+    --popover: 240 20% 12%;
+    --popover-foreground: 240 33% 97%;
+    --primary: 24 100% 50%;        /* #FF6B00 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 230 13% 18%;
-    --secondary-foreground: 230 20% 97%;
-    --muted: 230 11% 20%;
-    --muted-foreground: 230 5% 56%;
-    --accent: 42 53% 54%;
+    --secondary: 240 18% 15%;      /* #1E1E2E */
+    --secondary-foreground: 240 33% 97%;
+    --muted: 240 15% 17%;
+    --muted-foreground: 240 10% 42%; /* #60607A / textDim */
+    --accent: 36 51% 41%;          /* #C9963A */
     --accent-foreground: 0 0% 100%;
-    --destructive: 4 100% 59%;
+    --destructive: 3 100% 59%;     /* #FF3B30 */
     --destructive-foreground: 0 0% 100%;
-    --border: 230 12% 20%;
-    --input: 230 12% 20%;
+    --border: 240 14% 17%;
+    --input: 240 14% 17%;
     --ring: 24 100% 50%;
     --radius: 0.75rem;
-    --success: 142 71% 50%;
-    --info: 211 100% 50%;
-    --warning: 50 100% 52%;
+    --success: 142 71% 45%;        /* #22C55E */
+    --info: 211 100% 50%;          /* #007AFF */
+    --warning: 32 100% 53%;        /* #FF9F0A */
 
-    --sidebar-background: 232 16% 14%;
-    --sidebar-foreground: 230 20% 97%;
+    --sidebar-background: 240 20% 12%;
+    --sidebar-foreground: 240 33% 97%;
     --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 13% 18%;
-    --sidebar-accent-foreground: 230 20% 97%;
-    --sidebar-border: 230 12% 20%;
+    --sidebar-accent: 240 18% 15%;
+    --sidebar-accent-foreground: 240 33% 97%;
+    --sidebar-border: 240 14% 17%;
     --sidebar-ring: 24 100% 50%;
   }
 }

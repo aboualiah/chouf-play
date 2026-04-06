@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { cleanupPlayer, startPlayback, type PlayResult } from "@/lib/playerEngine";
 import type { ColorFlash } from "@/hooks/useKeyboardShortcuts";
 import { getCurrentProgram } from "@/components/MiniEpg";
+import { colors, effects } from "@/lib/theme";
 
 interface VideoPlayerProps {
   channel: Channel;
@@ -119,32 +120,32 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const handleRecord = () => { toast.info("📱 L'enregistrement sera disponible dans la version Android"); };
 
   const REMOTE_BUTTONS = [
-    { color: "#FF3B30", colorKey: "red", icon: Heart, label: "Favoris", shortcut: "R", action: onToggleFavorite, active: isFavorite },
-    { color: "#34C759", colorKey: "green", icon: BookOpen, label: "EPG", shortcut: "G", action: onShowEpg || (() => {}) },
-    { color: "#FFD60A", colorKey: "yellow", icon: Rewind, label: "Catch-up", shortcut: "Y", action: onShowCatchup || (() => {}) },
-    { color: "#007AFF", colorKey: "blue", icon: MoreHorizontal, label: "Options", shortcut: "B", action: () => {} },
+    { color: colors.red, colorKey: "red", icon: Heart, label: "Favoris", shortcut: "R", action: onToggleFavorite, active: isFavorite },
+    { color: colors.green, colorKey: "green", icon: BookOpen, label: "EPG", shortcut: "G", action: onShowEpg || (() => {}) },
+    { color: colors.yellow, colorKey: "yellow", icon: Rewind, label: "Catch-up", shortcut: "Y", action: onShowCatchup || (() => {}) },
+    { color: colors.blue, colorKey: "blue", icon: MoreHorizontal, label: "Options", shortcut: "B", action: () => {} },
   ];
 
   const volPercent = Math.round((muted ? 0 : volume) * 100);
 
   return (
-    <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: "#12121A" }}
+    <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: colors.surfaceSolid }}
       onMouseMove={hideControlsAfterDelay} onClick={hideControlsAfterDelay}>
 
       {/* Video */}
-      <video ref={videoRef} className="absolute inset-0 h-full w-full object-contain" style={{ background: "#12121A" }} autoPlay playsInline onClick={togglePlay} />
+      <video ref={videoRef} className="absolute inset-0 h-full w-full object-contain" style={{ background: colors.surfaceSolid }} autoPlay playsInline onClick={togglePlay} />
 
       {/* Loading */}
       {loading && !error && (
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-          <Loader2 size={40} className="animate-spin" style={{ color: "#FF6D00" }} />
+          <Loader2 size={40} className="animate-spin" style={{ color: colors.orange }} />
         </div>
       )}
 
       {/* Error */}
       {error && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3">
-          <p className="rounded-xl px-5 py-3 text-sm max-w-md text-center font-medium" style={{ background: "rgba(255,59,48,0.12)", color: "#FF6D6D", textShadow: txtShadowSm }}>{error}</p>
+          <p className="rounded-xl px-5 py-3 text-sm max-w-md text-center font-medium" style={{ background: "rgba(255,59,48,0.12)", color: colors.redLight, textShadow: txtShadowSm }}>{error}</p>
           <button onClick={() => {
             setError(null); setLoading(true);
             const video = videoRef.current;
@@ -154,7 +155,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
               const result = startPlayback(video, channel.url, () => { setLoading(false); setPlaying(true); }, (msg) => { setLoading(false); setError(msg); });
               playResultRef.current = result;
             }
-          }} className="rounded-lg px-4 py-2 text-[12px] font-medium transition-all hover:scale-105" style={{ background: "#1C1C24", color: "#86868B" }}>
+          }} className="rounded-lg px-4 py-2 text-[12px] font-medium transition-all hover:scale-105" style={{ background: colors.surfaceSolid2, color: colors.textMuted }}>
             Réessayer
           </button>
         </div>
@@ -165,13 +166,13 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)", height: 100 }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={onBack} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium"
-            style={{ background: "rgba(10,10,15,0.6)", backdropFilter: "blur(8px)", color: "#F5F5F7", textShadow: txtShadow }}>
+            style={{ background: "rgba(10,10,15,0.6)", backdropFilter: "blur(8px)", color: colors.text, textShadow: txtShadow }}>
             <ArrowLeft size={14} style={{ filter: iconFilter }} /> Retour
           </button>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[14px] font-bold truncate" style={{ color: "#F5F5F7", textShadow: txtShadow }}>{channel.name}</span>
-            <span className="text-[10px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{channel.category}</span>
-            <div className="flex items-center gap-1 shrink-0 rounded px-2 py-0.5" style={{ background: "#E53935" }}>
+            <span className="text-[14px] font-bold truncate" style={{ color: colors.text, textShadow: txtShadow }}>{channel.name}</span>
+            <span className="text-[10px]" style={{ color: colors.textMuted, textShadow: txtShadowSm }}>{channel.category}</span>
+            <div className="flex items-center gap-1 shrink-0 rounded px-2 py-0.5" style={{ background: colors.live }}>
               <div className="h-1.5 w-1.5 rounded-full animate-pulse bg-white" />
               <span className="text-[9px] font-semibold text-white">LIVE</span>
             </div>
@@ -188,24 +189,24 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           <div className="flex items-center gap-4 mb-3">
             <div className="flex items-center gap-3 shrink-0">
               {channelIndex !== undefined && (
-                <span className="text-[20px] font-black tabular-nums" style={{ color: "#FF6D00", textShadow: txtShadow }}>{channelIndex + 1}</span>
+                <span className="text-[20px] font-black tabular-nums" style={{ color: colors.orange, textShadow: txtShadow }}>{channelIndex + 1}</span>
               )}
               {channel.logo && (
                 <img src={channel.logo} className="h-8 w-8 rounded-lg object-contain" alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               )}
               <div className="min-w-0">
-                <p className="text-[14px] font-bold leading-tight" style={{ color: "#F5F5F7", textShadow: txtShadow }}>{channel.name}</p>
-                <p className="text-[11px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{channel.category}</p>
+                <p className="text-[14px] font-bold leading-tight" style={{ color: colors.text, textShadow: txtShadow }}>{channel.name}</p>
+                <p className="text-[11px]" style={{ color: colors.textMuted, textShadow: txtShadowSm }}>{channel.category}</p>
               </div>
             </div>
 
             {epgInfo && (
               <div className="flex items-center gap-2 min-w-0">
-                <div className="h-4 w-px" style={{ background: "#48484A" }} />
-                <span className="text-[11px] font-medium truncate" style={{ color: "#FF6D00", textShadow: txtShadowSm }}>{epgInfo.title}</span>
+                <div className="h-4 w-px" style={{ background: colors.textDim }} />
+                <span className="text-[11px] font-medium truncate" style={{ color: colors.orange, textShadow: txtShadowSm }}>{epgInfo.title}</span>
                 {epgInfo.nextTitle && (
-                  <span className="text-[10px] truncate" style={{ color: "#AAAAAA", textShadow: txtShadowSm }}>→ {epgInfo.nextStart} {epgInfo.nextTitle}</span>
+                  <span className="text-[10px] truncate" style={{ color: colors.textMuted, textShadow: txtShadowSm }}>→ {epgInfo.nextStart} {epgInfo.nextTitle}</span>
                 )}
               </div>
             )}
@@ -221,7 +222,7 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
                       style={{ background: btn.color, boxShadow: `0 0 ${isFlashing ? "20px" : "8px"} ${btn.color}${isFlashing ? "80" : "30"}` }}>
                       <btn.icon size={14} className="text-white" fill={btn.active ? "currentColor" : "none"} style={{ filter: iconFilter }} />
                     </div>
-                    <span className="text-[8px]" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{btn.label}({btn.shortcut})</span>
+                    <span className="text-[8px]" style={{ color: colors.textMuted, textShadow: txtShadowSm }}>{btn.label}({btn.shortcut})</span>
                   </button>
                 );
               })}
@@ -231,32 +232,32 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
           {/* Transport controls */}
           <div className="flex items-center justify-center gap-2">
             <button onClick={onPrev} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <SkipBack size={16} style={{ color: "#F5F5F7", filter: iconFilter }} />
+              <SkipBack size={16} style={{ color: colors.text, filter: iconFilter }} />
             </button>
             <button onClick={togglePlay} className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-orange">
               {playing ? <Pause size={18} className="text-white" style={{ filter: iconFilter }} /> : <Play size={18} className="text-white" fill="currentColor" style={{ filter: iconFilter }} />}
             </button>
             <button onClick={onNext} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <SkipForward size={16} style={{ color: "#F5F5F7", filter: iconFilter }} />
+              <SkipForward size={16} style={{ color: colors.text, filter: iconFilter }} />
             </button>
-            <div className="mx-1 h-5 w-px" style={{ background: "#48484A" }} />
+            <div className="mx-1 h-5 w-px" style={{ background: colors.textDim }} />
             <button onClick={handleRecord} className="rounded-full p-1.5 transition-colors hover:bg-white/10" title="Enregistrer">
-              <Circle size={14} className="fill-[#FF3B30]" style={{ color: "#FF3B30", filter: iconFilter }} />
+              <Circle size={14} className="fill-[#FF3B30]" style={{ color: colors.red, filter: iconFilter }} />
             </button>
-            <div className="mx-1 h-5 w-px" style={{ background: "#48484A" }} />
+            <div className="mx-1 h-5 w-px" style={{ background: colors.textDim }} />
             <button onClick={toggleMute} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              {muted ? <VolumeX size={14} style={{ color: "#F5F5F7", filter: iconFilter }} /> : <Volume2 size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />}
+              {muted ? <VolumeX size={14} style={{ color: colors.text, filter: iconFilter }} /> : <Volume2 size={14} style={{ color: colors.text, filter: iconFilter }} />}
             </button>
             <input type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume}
               onChange={e => handleVolume(parseFloat(e.target.value))}
               className="w-20 h-1 rounded-full appearance-none cursor-pointer"
               style={{ background: `linear-gradient(to right, #FF6D00 ${volPercent}%, #242430 ${volPercent}%)` }} />
-            <span className="text-[10px] w-7 text-right" style={{ color: "#CCCCCC", textShadow: txtShadowSm }}>{volPercent}%</span>
+            <span className="text-[10px] w-7 text-right" style={{ color: colors.textMuted, textShadow: txtShadowSm }}>{volPercent}%</span>
             <button onClick={togglePiP} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              <PictureInPicture2 size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />
+              <PictureInPicture2 size={14} style={{ color: colors.text, filter: iconFilter }} />
             </button>
             <button onClick={toggleFullscreen} className="rounded-full p-1.5 transition-colors hover:bg-white/10">
-              {fullscreen ? <Minimize size={14} style={{ color: "#F5F5F7", filter: iconFilter }} /> : <Maximize size={14} style={{ color: "#F5F5F7", filter: iconFilter }} />}
+              {fullscreen ? <Minimize size={14} style={{ color: colors.text, filter: iconFilter }} /> : <Maximize size={14} style={{ color: colors.text, filter: iconFilter }} />}
             </button>
           </div>
         </div>

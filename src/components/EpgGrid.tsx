@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Channel } from "@/lib/channels";
 import { ChevronLeft, ChevronRight, Play, Clock, Tv } from "lucide-react";
+import { colors, effects } from "@/lib/theme";
 
 interface EpgGridProps {
   channels: Channel[];
@@ -131,23 +132,23 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-3 shrink-0" style={{ borderBottom: "1px solid #1C1C24" }}>
-        <Clock size={16} style={{ color: "#FF6D00" }} />
-        <span className="text-[14px] font-bold" style={{ color: "#F5F5F7" }}>Guide des programmes</span>
+        <Clock size={16} style={{ color: colors.orange }} />
+        <span className="text-[14px] font-bold" style={{ color: colors.text }}>Guide des programmes</span>
         <div className="flex items-center gap-2 ml-auto">
           <button onClick={() => setBaseHour(h => Math.max(0, h - 2))} tabIndex={0}
-            className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+            className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: colors.textMuted }}>
             <ChevronLeft size={16} />
           </button>
-          <span className="text-[12px] font-medium min-w-[90px] text-center" style={{ color: "#F5F5F7" }}>
+          <span className="text-[12px] font-medium min-w-[90px] text-center" style={{ color: colors.text }}>
             {timeSlots[0]} — {timeSlots[timeSlots.length - 1]}
           </span>
           <button onClick={() => setBaseHour(h => Math.min(22, h + 2))} tabIndex={0}
-            className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: "#86868B" }}>
+            className="rounded-lg p-1.5 transition-colors hover:bg-[#1C1C24]" style={{ color: colors.textMuted }}>
             <ChevronRight size={16} />
           </button>
           <button onClick={() => { const n = new Date(); setBaseHour(Math.max(0, n.getHours() - 1)); }} tabIndex={0}
             className="rounded-full px-3 py-1 text-[10px] font-medium ml-2"
-            style={{ background: "rgba(255,109,0,0.15)", color: "#FF6D00" }}>
+            style={{ background: "rgba(255,109,0,0.15)", color: colors.orange }}>
             Maintenant
           </button>
         </div>
@@ -164,24 +165,24 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
               className="flex items-center gap-2 px-3 cursor-pointer hover:bg-[#1C1C24] transition-colors"
               style={{ height: CHANNEL_ROW_HEIGHT, borderBottom: "1px solid #0F0F14" }}
               onClick={() => onPlay(channel)}>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: colors.surfaceSolid2 }}>
                 {channel.logo ? (
                   <img src={channel.logo} className="h-5 w-5 object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 ) : (
-                  <Tv size={12} style={{ color: "#48484A" }} />
+                  <Tv size={12} style={{ color: colors.textDim }} />
                 )}
               </div>
-              <span className="text-[11px] font-medium truncate" style={{ color: "#B0B0B5" }}>{channel.name}</span>
+              <span className="text-[11px] font-medium truncate" style={{ color: colors.textMuted }}>{channel.name}</span>
             </div>
           ))}
         </div>
 
         {/* Timeline + programs */}
         <div ref={scrollRef} onScroll={handleTimelineScroll} className="flex-1 overflow-auto scrollbar-thin">
-          <div className="sticky top-0 z-10 flex h-8 shrink-0" style={{ width: totalWidth, background: "#0A0A0F", borderBottom: "1px solid #1C1C24" }}>
+          <div className="sticky top-0 z-10 flex h-8 shrink-0" style={{ width: totalWidth, background: colors.background, borderBottom: "1px solid #1C1C24" }}>
             {timeSlots.map((slot, i) => (
               <div key={i} className="text-[10px] font-mono px-2 flex items-center"
-                style={{ width: HOUR_WIDTH, color: "#48484A", borderLeft: "1px solid #1C1C24" }}>
+                style={{ width: HOUR_WIDTH, color: colors.textDim, borderLeft: "1px solid #1C1C24" }}>
                 {slot}
               </div>
             ))}
@@ -189,8 +190,8 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
 
           <div style={{ position: "relative", width: totalWidth }}>
             {nowLineOffset >= 0 && nowLineOffset <= totalWidth && (
-              <div className="absolute top-0 bottom-0 z-20 pointer-events-none" style={{ left: nowLineOffset, width: 2, background: "#FF3B30" }}>
-                <div className="absolute -top-1 -left-1 w-[6px] h-[6px] rounded-full" style={{ background: "#FF3B30" }} />
+              <div className="absolute top-0 bottom-0 z-20 pointer-events-none" style={{ left: nowLineOffset, width: 2, background: colors.red }}>
+                <div className="absolute -top-1 -left-1 w-[6px] h-[6px] rounded-full" style={{ background: colors.red }} />
               </div>
             )}
 
@@ -208,8 +209,8 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
                       style={{
                         left: Math.max(0, startOffset),
                         width: Math.max(40, width - 2),
-                        background: prog.isCurrent ? "rgba(255,109,0,0.15)" : "#131318",
-                        border: `1px solid ${prog.isCurrent ? "rgba(255,109,0,0.4)" : "#1C1C24"}`,
+                        background: prog.isCurrent ? "rgba(255,109,0,0.15)" : colors.surfaceSolid,
+                        border: `1px solid ${prog.isCurrent ? "rgba(255,109,0,0.4)" : colors.surfaceSolid2}`,
                       }}
                       onClick={() => {
                         if (prog.isCurrent) onPlay(channel);
@@ -217,15 +218,15 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
                       }}
                       onMouseEnter={(e) => setTooltip({ x: e.clientX, y: e.clientY, program: prog })}
                       onMouseLeave={() => setTooltip(null)}>
-                      <p className="text-[10px] font-medium truncate" style={{ color: prog.isCurrent ? "#FF6D00" : "#86868B" }}>
+                      <p className="text-[10px] font-medium truncate" style={{ color: prog.isCurrent ? "#FF6D00" : colors.textMuted }}>
                         {prog.title}
                       </p>
-                      <p className="text-[8px] truncate" style={{ color: "#48484A" }}>
+                      <p className="text-[8px] truncate" style={{ color: colors.textDim }}>
                         {formatTime(prog.start)} - {formatTime(prog.end)}
                       </p>
                       {prog.isCurrent && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: "#1C1C24" }}>
-                          <div className="h-full" style={{ width: `${prog.progress}%`, background: "#FF6D00" }} />
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: colors.surfaceSolid2 }}>
+                          <div className="h-full" style={{ width: `${prog.progress}%`, background: colors.orange }} />
                         </div>
                       )}
                     </div>
@@ -240,13 +241,13 @@ export function EpgGrid({ channels, onPlay }: EpgGridProps) {
       {/* Tooltip */}
       {tooltip && (
         <div className="fixed z-50 rounded-xl px-3 py-2 pointer-events-none"
-          style={{ left: tooltip.x + 10, top: tooltip.y - 60, background: "#1C1C24", border: "1px solid #242430", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-          <p className="text-[12px] font-semibold" style={{ color: "#F5F5F7" }}>{tooltip.program.title}</p>
-          <p className="text-[10px]" style={{ color: "#48484A" }}>
+          style={{ left: tooltip.x + 10, top: tooltip.y - 60, background: colors.surfaceSolid2, border: "1px solid #242430", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+          <p className="text-[12px] font-semibold" style={{ color: colors.text }}>{tooltip.program.title}</p>
+          <p className="text-[10px]" style={{ color: colors.textDim }}>
             {formatTime(tooltip.program.start)} — {formatTime(tooltip.program.end)}
           </p>
           {tooltip.program.isCurrent && (
-            <p className="text-[9px] mt-1" style={{ color: "#FF6D00" }}>▶ Cliquez pour regarder</p>
+            <p className="text-[9px] mt-1" style={{ color: colors.orange }}>▶ Cliquez pour regarder</p>
           )}
         </div>
       )}

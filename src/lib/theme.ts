@@ -19,6 +19,16 @@ export const colors = {
   gold:    "#C9963A",
   green:   "#22C55E",
   violet:  "#7C5CBF",
+  violetLight: "#A78BFA",
+
+  // Status / Semantic
+  red:     "#FF3B30",
+  redLight: "#FF6D6D",
+  yellow:  "#FFD60A",
+  blue:    "#007AFF",
+  pink:    "#FF3B80",
+  warning: "#FF9F0A",
+  live:    "#E53935",
 
   // Borders glass
   borderGlass:  "rgba(255,255,255,0.08)",
