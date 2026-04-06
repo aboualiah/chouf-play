@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
+import { Radio, Star, Play, Filter, ArrowLeft, Heart, LogOut } from "lucide-react";
 import { getCurrentProgram } from "@/components/MiniEpg";
 import { MiniEpg } from "@/components/MiniEpg";
 import { useTvNavigation } from "@/hooks/useTvNavigation";
