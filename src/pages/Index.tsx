@@ -661,7 +661,7 @@ export default function Index() {
 
       {/* Welcome / Setup screen */}
       {!splash && onboardingStep === "welcome" && (
-        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#12121A" }}>
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#151524" }}>
           <WelcomeScreen
             onAddPlaylist={() => setPlaylistModalOpen(true)}
             onSkipTrial={() => {
@@ -680,9 +680,9 @@ export default function Index() {
             {!activeChannel && hasContent && (
               <>
                 {isMobile ? (
-                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1C1C24", background: "rgba(10,10,15,0.8)" }}>
+                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #252538", background: "rgba(18,18,30,0.85)" }}>
                     {view === "content" && (
-                      <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#131318", color: "#FF6D00" }}>
+                      <button onClick={handleBackToDashboard} className="rounded-lg p-2" style={{ background: "#1C1C30", color: "#FF6D00" }}>
                         <ArrowLeft size={18} />
                       </button>
                     )}
@@ -705,19 +705,19 @@ export default function Index() {
                 {activeChannel ? (
                   <motion.div key="player" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-1">
                     {/* Split view channel list */}
-                    <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#1A1A24", borderColor: "#252530" }}>
-                      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #1C1C24" }}>
+                    <div className="hidden w-[360px] flex-col border-r lg:flex overflow-y-auto scrollbar-thin" style={{ background: "#1C1C2E", borderColor: "#2A2A3E" }}>
+                      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #252538" }}>
                         <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>Chaînes ({filteredChannels.length})</p>
-                        <div className="flex items-center gap-1 rounded-lg px-2 py-1" style={{ background: "#1C1C24" }}>
+                        <div className="flex items-center gap-1 rounded-lg px-2 py-1" style={{ background: "#22223A" }}>
                           <input placeholder="Filtrer..." className="bg-transparent text-[10px] w-20 outline-none placeholder:text-[#48484A]" style={{ color: "#F5F5F7" }} />
                         </div>
                       </div>
                       {filteredChannels.map((ch, i) => (
                         <button key={ch.id} onClick={() => handlePlay(ch)}
                           className="flex items-center gap-3 px-4 py-2.5 text-left transition-all hover:bg-[#1C1C24] group"
-                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.06)", borderLeft: "3px solid #FF6D00" } : { borderLeft: "3px solid transparent" }}>
+                          style={activeChannel?.id === ch.id ? { background: "rgba(255,109,0,0.08)", borderLeft: "3px solid #FF6D00" } : { borderLeft: "3px solid transparent" }}>
                           <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>{i + 1}</span>
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#22223A" }}>
                             {ch.logo ? (
                               <img src={ch.logo} loading="lazy" className="h-6 w-6 rounded object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                             ) : (
@@ -767,7 +767,7 @@ export default function Index() {
                         </AnimatePresence>
                       </div>
                       {/* Now playing bar */}
-                      <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#131318", borderTop: "1px solid #1C1C24" }}>
+                      <div className="flex items-center gap-3 px-4 py-2.5" style={{ background: "#181830", borderTop: "1px solid #252538" }}>
                         <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: "#34C759", boxShadow: "0 0 8px rgba(52,199,89,0.5)" }} />
                         <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: "#F5F5F7" }}>{activeChannel.name}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,109,0,0.1)", color: "#FF6D00" }}>{activeChannel.category}</span>
