@@ -26,6 +26,17 @@ export default function PlaylistManager() {
     setPlaylists(pls);
   }, []);
 
+  // History guard — prevent hardware back from exiting
+  useEffect(() => {
+    window.history.pushState({ choufPl: true }, '', window.location.href);
+    const handlePopState = () => {
+      window.history.pushState({ choufPl: true }, '', window.location.href);
+      window.dispatchEvent(new CustomEvent('chouf-back'));
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Handle Android back on this page
   useEffect(() => {
     const handleBack = () => {
