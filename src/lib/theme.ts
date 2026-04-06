@@ -26,6 +26,13 @@ export const colors = {
   green:   "#22C55E",
   violet:  "#7C5CBF",
   red:     "#FF3B30",           // déconnexion, erreurs (v1: colors.red)
+  redLight: "#FF6D6D",
+  yellow:  "#FFD60A",
+  blue:    "#007AFF",
+  pink:    "#FF3B80",
+  warning: "#FF9F0A",
+  live:    "#E53935",
+  violetLight: "#A78BFA",
 
   // ─── Borders glass ─────────────────────────────────────────────
   borderGlass:   "rgba(255,255,255,0.08)",
