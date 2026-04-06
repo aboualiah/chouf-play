@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { I18nContext, getSavedLang, saveLang, Lang, t as tFn } from "@/lib/i18n";
+import { useCapacitorBack } from "@/hooks/useCapacitorBack";
 
 const Index = lazy(() => import("./pages/Index"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -51,6 +52,9 @@ function I18nProvider({ children }: { children: React.ReactNode }) {
 }
 
 function GlobalTVHandlers({ children }: { children: React.ReactNode }) {
+  // Official Capacitor back-button listener (native Android TV)
+  useCapacitorBack();
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.keyCode === 13 || e.keyCode === 23) { // Enter or DPAD_CENTER
@@ -60,14 +64,12 @@ function GlobalTVHandlers({ children }: { children: React.ReactNode }) {
           focused.click();
         }
       }
-      // Intercept Android Back / TV remote back — prevent default browser back only
-      const isBack = e.keyCode === 4 || e.keyCode === 10009;
+      // Fallback keydown interception for web / WebView without Capacitor plugin
+      const isBack = e.key === "Escape" || e.keyCode === 4 || e.keyCode === 10009;
       if (isBack) {
         e.preventDefault();
-        // Dispatch a custom event so page-level handlers can react
         window.dispatchEvent(new CustomEvent('chouf-back'));
       }
-      // Backspace: only prevent when NOT in a text field
       if (e.key === "Backspace") {
         const tag = document.activeElement?.tagName;
         if (tag !== "INPUT" && tag !== "TEXTAREA") {
