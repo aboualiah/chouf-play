@@ -418,9 +418,9 @@ export default function Index() {
     // Live TV with 3-panel layout: Categories | Channels | Preview
     if (activeTab === "live") {
       return (
-        <div className="flex flex-1 h-full overflow-hidden">
+        <div className="flex flex-1 h-full overflow-hidden" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,109,0,0.03) 0%, #0D0D1A 60%)" }}>
           {/* ═══ Column 1: Categories ═══ */}
-          <div className="w-[220px] shrink-0 flex flex-col overflow-hidden" style={{ background: "#14142A", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="w-[220px] shrink-0 flex flex-col overflow-hidden" style={{ background: "rgba(18,18,40,0.85)", backdropFilter: "blur(12px)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="px-4 py-3 flex items-center gap-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
               <div className="h-2 w-2 rounded-full" style={{ background: "#FF6D00", boxShadow: "0 0 8px rgba(255,109,0,0.5)" }} />
               <p className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: "#86868B" }}>Catégories</p>
@@ -471,7 +471,7 @@ export default function Index() {
           </div>
 
           {/* ═══ Column 2: Channel List ═══ */}
-          <div className="w-[340px] shrink-0 flex flex-col overflow-hidden" style={{ background: "#181830", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="w-[340px] shrink-0 flex flex-col overflow-hidden" style={{ background: "rgba(20,20,48,0.80)", backdropFilter: "blur(12px)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
               <div className="flex items-center gap-2.5">
                 <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759", boxShadow: "0 0 8px rgba(52,199,89,0.5)" }} />
@@ -575,7 +575,7 @@ export default function Index() {
           </div>
 
           {/* ═══ Column 3: Preview / Program / Actions ═══ */}
-          <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #161630 0%, #1A1A36 100%)" }}>
+          <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(255,109,0,0.04) 0%, #12122A 70%)" }}>
             {previewChannel ? (() => {
               const prog = getCurrentProgram(previewChannel.name);
               const isFav = favorites.includes(previewChannel.id);
