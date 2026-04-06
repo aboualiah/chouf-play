@@ -77,6 +77,7 @@ export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
   onShowEpg, onShowRecordings, onAddPlaylist, onOpenSettings,
+  onHeaderFocusChange,
 }: DashboardCardsProps) {
   const counts = useMemo(() => ({
     live: allChannels.length,
