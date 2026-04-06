@@ -64,6 +64,7 @@ export default function Index() {
   const [showEpgGrid, setShowEpgGrid] = useState(false);
   const [showRecordings, setShowRecordings] = useState(false);
   const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
+  const [headerTvFocus, setHeaderTvFocus] = useState<number | null>(null);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
