@@ -497,9 +497,11 @@ export default function Index() {
                         <button
                           className="flex items-center gap-3 w-full px-3 py-3 text-left rounded-xl transition-all"
                           style={
-                            isSelected
-                              ? { background: "rgba(255,109,0,0.08)", borderLeft: "3px solid #FF6D00" }
-                              : { background: focused ? "rgba(255,255,255,0.03)" : "transparent", borderLeft: "3px solid transparent" }
+                            focused
+                              ? { background: "rgba(255,109,0,0.15)", borderLeft: "3px solid #FF6D00", boxShadow: "inset 0 0 20px rgba(255,109,0,0.08)" }
+                              : isSelected
+                                ? { background: "rgba(255,109,0,0.08)", borderLeft: "3px solid #FF6D00" }
+                                : { background: "transparent", borderLeft: "3px solid transparent" }
                           }
                         >
                           <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>
@@ -515,7 +517,7 @@ export default function Index() {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[13px] font-semibold truncate" style={{ color: focused || isSelected ? "#F5F5F7" : "#B0B0B5" }}>
+                            <p className="text-[13px] font-semibold truncate" style={{ color: focused || isSelected ? "#FFFFFF" : "#B0B0B5", textShadow: focused ? "0 0 8px rgba(255,109,0,0.3)" : "none" }}>
                               {ch.name}
                             </p>
                             <p className="text-[10px]" style={{ color: "#48484A" }}>
