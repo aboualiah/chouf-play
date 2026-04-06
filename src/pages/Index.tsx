@@ -481,38 +481,49 @@ export default function Index() {
                 </div>
                 <div className="flex-1 overflow-y-auto scrollbar-thin">
                   {filteredChannels.map((ch, i) => {
-                    const isFav = favorites.includes(ch.id);
+                    const focused = isFocused("channels", i);
                     const isSelected = previewChannel?.id === ch.id;
-                    const tvId = `tv-channels-${i}`;
-                    const isTvFocused = isFocused("channels", i);
+                    const isFav = favorites.includes(ch.id);
                     return (
                       <TvFocusable
                         key={ch.id}
                         section="channels"
                         index={i}
-                        focused={isTvFocused}
+                        focused={focused}
+                        as="div"
+                        className="mx-2 my-1 rounded-xl"
                         onClick={() => setPreviewChannel(ch)}
-                        onDoubleClick={() => handlePlay(ch)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left group"
-                        style={isSelected && !isTvFocused
-                          ? { background: "linear-gradient(90deg, rgba(255,109,0,0.08) 0%, rgba(255,109,0,0.02) 100%)", borderLeft: "3px solid #FF6D00" }
-                          : !isTvFocused ? { borderLeft: "3px solid transparent" } : { borderLeft: "3px solid #FF6D00" }
-                        }
                       >
-                        <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: isSelected || isTvFocused ? "#FF6D00" : "#3A3A42" }}>{i + 1}</span>
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden" style={{ background: isSelected || isTvFocused ? "rgba(255,109,0,0.08)" : "#161620", border: isSelected || isTvFocused ? "1px solid rgba(255,109,0,0.2)" : "1px solid rgba(255,255,255,0.03)" }}>
-                          {ch.logo ? (
-                            <img src={ch.logo} loading="lazy" className="h-7 w-7 rounded-lg object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          ) : (
-                            <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>{ch.name.split(" ").map(w => w[0]).join("").slice(0, 2)}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-semibold truncate" style={{ color: isSelected || isTvFocused ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
-                          <p className="text-[10px] mt-0.5" style={{ color: "#48484A" }}>{ch.category}</p>
-                        </div>
-                        {isFav && <Heart size={11} className="fill-[#FF3B30] text-[#FF3B30] shrink-0" />}
-                        {(isSelected || isTvFocused) && <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#FF6D00", boxShadow: "0 0 6px rgba(255,109,0,0.5)" }} />}
+                        <button
+                          className="flex items-center gap-3 w-full px-3 py-3 text-left rounded-xl transition-all"
+                          style={
+                            isSelected
+                              ? { background: "rgba(255,109,0,0.08)", borderLeft: "3px solid #FF6D00" }
+                              : { background: focused ? "rgba(255,255,255,0.03)" : "transparent", borderLeft: "3px solid transparent" }
+                          }
+                        >
+                          <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>
+                            {i + 1}
+                          </span>
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg overflow-hidden" style={{ background: "#1C1C24" }}>
+                            {ch.logo ? (
+                              <img src={ch.logo} className="h-6 w-6 object-contain" alt="" />
+                            ) : (
+                              <span className="text-[10px] font-bold" style={{ color: "#86868B" }}>
+                                {ch.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[13px] font-semibold truncate" style={{ color: focused || isSelected ? "#F5F5F7" : "#B0B0B5" }}>
+                              {ch.name}
+                            </p>
+                            <p className="text-[10px]" style={{ color: "#48484A" }}>
+                              {ch.category}
+                            </p>
+                          </div>
+                          {isFav && <span className="text-[10px]" style={{ color: "#FF3B30" }}>♥</span>}
+                        </button>
                       </TvFocusable>
                     );
                   })}
