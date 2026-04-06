@@ -61,8 +61,28 @@ export default function PlaylistManager() {
   const totalVod = playlists.reduce((s, p) => s + (p.vodStreams?.length || 0), 0);
   const totalSeries = playlists.reduce((s, p) => s + (p.series?.length || 0), 0);
 
+  // TV navigation for playlist cards
+  const { isFocused } = useTvNavigation({
+    counts: { categories: 0, channels: 0, preview: activeTab === "manage" ? Math.max(1, playlists.length + 1) : 4 },
+    enabled: !modalOpen && !showQr,
+    onEnter: (state) => {
+      if (activeTab === "manage") {
+        if (state.indices.preview < playlists.length) {
+          // Could open details or refresh
+        } else {
+          setModalOpen(true);
+        }
+      } else {
+        // Add tab items
+        const actions = [() => setModalOpen(true), () => setModalOpen(true), () => setModalOpen(true), () => setShowQr(true)];
+        actions[state.indices.preview]?.();
+      }
+    },
+    onBack: () => navigate("/", { replace: true }),
+  });
+
   return (
-    <div className="min-h-screen" style={{ background: "#12121A" }}>
+    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: "#12121A" }}>
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
         style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #252530" }}>
