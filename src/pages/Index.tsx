@@ -508,9 +508,9 @@ export default function Index() {
                       style={
                         focused
                           ? {
-                              background: "linear-gradient(90deg, rgba(255,109,0,0.30) 0%, rgba(255,109,0,0.10) 100%)",
+                              background: "linear-gradient(90deg, rgba(255,109,0,0.35) 0%, rgba(255,109,0,0.12) 100%)",
                               borderLeft: "5px solid #FF6D00",
-                              boxShadow: "inset 0 0 30px rgba(255,109,0,0.12), 0 0 20px rgba(255,109,0,0.12)",
+                              boxShadow: "inset 0 0 40px rgba(255,109,0,0.15), 0 0 30px rgba(255,109,0,0.2), 0 0 60px rgba(255,109,0,0.08)",
                             }
                           : isPlaying
                             ? {
