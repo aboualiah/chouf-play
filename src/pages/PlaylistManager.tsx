@@ -132,7 +132,7 @@ export default function PlaylistManager() {
             ].map((item, i) => (
               <button key={i} onClick={item.action}
                 className="flex w-full items-center gap-4 rounded-2xl p-4 transition-all hover:bg-[#1A1A22]"
-                style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+                style={{ background: "#1A1A24", border: "1px solid #252530" }}>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: "rgba(255,109,0,0.08)" }}>
                   <item.icon size={18} style={{ color: "#FF6D00" }} />
                 </div>
@@ -153,7 +153,7 @@ export default function PlaylistManager() {
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
                     transition={{ delay: i * 0.06 }}
                     className="rounded-2xl p-4 mb-3 transition-all"
-                    style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+                    style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0"
                         style={{ background: pl.isXtream ? "rgba(124,58,237,0.12)" : "rgba(201,168,76,0.12)" }}>
@@ -191,7 +191,7 @@ export default function PlaylistManager() {
               })}
             </AnimatePresence>
             {playlists.length === 0 && (
-              <div className="text-center py-16 rounded-2xl" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+              <div className="text-center py-16 rounded-2xl" style={{ background: "#1A1A24", border: "1px solid #252530" }}>
                 <Layers size={48} className="mx-auto mb-4" style={{ color: "#1C1C24" }} />
                 <p className="text-[14px] font-medium mb-1" style={{ color: "#48484A" }}>Aucune playlist chargée</p>
                 <p className="text-[12px]" style={{ color: "#2C2C34" }}>Ajoutez une playlist pour commencer</p>
