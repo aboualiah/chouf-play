@@ -1,52 +1,37 @@
 import React from "react";
+import clsx from "clsx";
 
-interface TvFocusableProps {
-  tvId: string;
+interface TvFocusableProps extends React.HTMLAttributes<HTMLDivElement> {
+  section: "categories" | "channels" | "preview";
+  index: number;
   focused: boolean;
+  as?: "div" | "button";
   children: React.ReactNode;
-  onClick?: () => void;
-  onDoubleClick?: () => void;
-  className?: string;
-  style?: React.CSSProperties;
-  as?: "button" | "div";
 }
 
-/**
- * Wrapper that applies TV focus styling based on the `focused` prop.
- * Uses `data-tv-id` for scroll-into-view targeting.
- */
-export const TvFocusable = React.memo(({
-  tvId,
+export function TvFocusable({
+  section,
+  index,
   focused,
+  as = "div",
   children,
-  onClick,
-  onDoubleClick,
-  className = "",
-  style = {},
-  as = "button",
-}: TvFocusableProps) => {
-  const focusStyle: React.CSSProperties = focused
-    ? {
-        boxShadow: "0 0 0 2px #FF6D00, 0 0 15px rgba(255,109,0,0.3)",
-        background: "rgba(255,109,0,0.10)",
-        ...style,
-      }
-    : style;
-
-  const Tag = as;
-
+  className,
+  ...props
+}: TvFocusableProps) {
+  const Comp = as;
   return (
-    <Tag
-      data-tv-id={tvId}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
-      className={`transition-all duration-150 outline-none ${className}`}
-      style={focusStyle}
-      tabIndex={focused ? 0 : -1}
+    <Comp
+      data-tv-section={section}
+      data-tv-index={index}
+      data-tv-focus={focused ? "true" : "false"}
+      className={clsx(
+        "transition-all duration-150 outline-none",
+        focused && "ring-2 ring-orange-500 scale-[1.02] shadow-[0_0_0_1px_rgba(255,109,0,0.35),0_0_24px_rgba(255,109,0,0.18)]",
+        className
+      )}
+      {...props}
     >
       {children}
-    </Tag>
+    </Comp>
   );
-});
-
-TvFocusable.displayName = "TvFocusable";
+}
