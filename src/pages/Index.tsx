@@ -456,7 +456,7 @@ export default function Index() {
                   >
                     <div className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer">
                       {Icon && <Icon size={15} style={{ color: isItemActive || isTvFocused ? "#FF6D00" : "#48484A" }} />}
-                      <span className="text-[13px] font-semibold flex-1 truncate" style={{ color: isTvFocused ? "#FFFFFF" : isItemActive ? "#F5F5F7" : "#86868B" }}>
+                      <span className="text-[13px] font-semibold flex-1 truncate" style={{ color: isTvFocused ? "#FFFFFF" : isItemActive ? "#F5F5F7" : "#9E9EA8" }}>
                         {item.label}
                       </span>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{
@@ -545,7 +545,7 @@ export default function Index() {
                       {/* Info */}
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold truncate" style={{
-                          color: focused ? "#FFFFFF" : isPlaying ? "#34C759" : isSelected ? "#F5F5F7" : "#B0B0B5",
+                          color: focused ? "#FFFFFF" : isPlaying ? "#34C759" : isSelected ? "#F5F5F7" : "#C8C8D0",
                           textShadow: focused ? "0 0 12px rgba(255,109,0,0.4)" : "none",
                           fontSize: focused ? "14px" : "13px",
                           fontWeight: focused ? 700 : 600,
@@ -744,7 +744,7 @@ export default function Index() {
 
       {/* Main App */}
       {!splash && onboardingStep === "app" && (
-        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#151524" }}>
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "radial-gradient(ellipse at 50% 20%, rgba(255,109,0,0.025) 0%, #0D0D1A 50%, #151524 100%)" }}>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Header */}
             {!activeChannel && hasContent && (
