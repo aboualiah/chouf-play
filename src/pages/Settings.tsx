@@ -160,6 +160,15 @@ const DEFAULT_HIDDEN_CATS = ["Adult", "XXX", "+18", "Pour adultes", "Adults"];
 export default function Settings() {
   const navigate = useNavigate();
   const { t, lang, setLang } = useI18n();
+
+  // Android TV Back → retour dashboard
+  useEffect(() => {
+    const handler = () => {
+      navigate("/", { replace: true });
+    };
+    window.addEventListener("chouf-back", handler);
+    return () => window.removeEventListener("chouf-back", handler);
+  }, [navigate]);
   const [activeSection, setActiveSection] = useState("general");
 
   // States
