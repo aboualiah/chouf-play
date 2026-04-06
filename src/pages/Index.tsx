@@ -435,7 +435,8 @@ export default function Index() {
                     return (
                       <TvFocusable
                         key={item.id}
-                        tvId={tvId}
+                        section="categories"
+                        index={catIdx}
                         focused={isTvFocused}
                         onClick={() => {
                           if (isFavItem) { setActiveCategory("__fav" as any); setActiveSubTab("favorites"); }
@@ -479,7 +480,8 @@ export default function Index() {
                     return (
                       <TvFocusable
                         key={ch.id}
-                        tvId={tvId}
+                        section="channels"
+                        index={i}
                         focused={isTvFocused}
                         onClick={() => setPreviewChannel(ch)}
                         onDoubleClick={() => handlePlay(ch)}
@@ -556,7 +558,8 @@ export default function Index() {
                         return (
                           <TvFocusable
                             key={btn.id}
-                            tvId={`tv-preview-${btnIdx}`}
+                            section="preview"
+                            index={btnIdx}
                             focused={isTvFocused}
                             onClick={btn.action}
                             className="flex items-center gap-2 rounded-xl px-5 py-2.5 hover:scale-105 active:scale-95"
