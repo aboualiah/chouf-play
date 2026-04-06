@@ -436,7 +436,7 @@ export default function Index() {
                     const isFavItem = item.id === "__fav";
                     const isItemActive = (isAll && !activeCategory && activeSubTab === "all") || (isFavItem && activeSubTab === "favorites") || activeCategory === item.id;
                     const tvId = `tv-categories-${catIdx}`;
-                    const isTvFocused = tvFocused("categories", catIdx);
+                    const isTvFocused = isFocused("categories", catIdx);
                     const count = isAll ? allChannels.length : isFavItem ? allChannels.filter(c => favorites.includes(c.id)).length : allChannels.filter(c => c.category === item.id).length;
                     const Icon = isAll ? Radio : isFavItem ? Star : null;
 
@@ -484,7 +484,7 @@ export default function Index() {
                     const isFav = favorites.includes(ch.id);
                     const isSelected = previewChannel?.id === ch.id;
                     const tvId = `tv-channels-${i}`;
-                    const isTvFocused = tvFocused("channels", i);
+                    const isTvFocused = isFocused("channels", i);
                     return (
                       <TvFocusable
                         key={ch.id}
@@ -562,7 +562,7 @@ export default function Index() {
                         { id: "tv_epg", color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
                         { id: "tv_options", color: "#FFD60A", label: "Options", action: () => {} },
                       ].map((btn, btnIdx) => {
-                        const isTvFocused = tvFocused("preview", btnIdx);
+                        const isTvFocused = isFocused("preview", btnIdx);
                         return (
                           <TvFocusable
                             key={btn.id}
