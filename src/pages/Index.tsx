@@ -690,7 +690,8 @@ export default function Index() {
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
                     onBackToDashboard={view === "content" ? handleBackToDashboard : undefined}
-                    onOpenSettings={() => { window.location.href = "/settings"; }} />
+                    onOpenSettings={() => { window.location.href = "/settings"; }}
+                    tvHeaderFocus={view === "dashboard" ? headerTvFocus : null} />
                 )}
               </>
             )}
@@ -801,6 +802,7 @@ export default function Index() {
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
                       onAddPlaylist={() => { navigate("/playlists"); }}
                       onOpenSettings={() => { navigate("/settings"); }}
+                      onHeaderFocusChange={setHeaderTvFocus}
                     />
                   </motion.div>
                 ) : (
