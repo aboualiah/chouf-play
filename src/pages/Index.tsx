@@ -330,6 +330,78 @@ export default function Index() {
     { color: "#007AFF", glow: "rgba(0,122,255,0.4)", label: "Options", action: () => {} },
   ];
 
+  // ── TV Navigation for 3-column Live TV ──
+  const categories = useMemo(() => getCategories(allChannels), [allChannels]);
+
+  const categoryItems = useMemo(() => {
+    const base = [
+      { id: "__all", label: t("cat.all") },
+      { id: "__fav", label: t("nav.favorites") },
+    ];
+    return [...base, ...categories.map(c => ({ id: c, label: c }))];
+  }, [categories, t]);
+
+  const previewButtons = useMemo(() => {
+    if (!previewChannel) return [];
+    return [
+      { id: "tv_play", label: "Regarder" },
+      { id: "tv_fav", label: "Favoris" },
+      { id: "tv_epg", label: "EPG" },
+      { id: "tv_options", label: "Options" },
+    ];
+  }, [previewChannel]);
+
+  const tvZones = useMemo<TvZone[]>(() => {
+    if (activeTab !== "live" || view !== "content" || activeChannel) return [];
+    return [
+      { id: "categories", items: categoryItems.map(c => `cat_${c.id}`) },
+      { id: "channels", items: filteredChannels.map(c => `ch_${c.id}`) },
+      { id: "preview", items: previewButtons.map(b => b.id) },
+    ];
+  }, [activeTab, view, activeChannel, categoryItems, filteredChannels, previewButtons]);
+
+  const tvEnabled = activeTab === "live" && view === "content" && !activeChannel && tvZones.length > 0;
+
+  const handleTvSelect = useCallback((zoneId: string, itemId: string, itemIndex: number) => {
+    if (zoneId === "categories") {
+      const catId = itemId.replace("cat_", "");
+      if (catId === "__all") {
+        setActiveCategory(null);
+        setActiveSubTab("all");
+      } else if (catId === "__fav") {
+        setActiveCategory("__fav" as any);
+        setActiveSubTab("favorites");
+      } else {
+        setActiveCategory(activeCategory === catId ? null : catId);
+        setActiveSubTab("all");
+      }
+    } else if (zoneId === "channels") {
+      const chId = itemId.replace("ch_", "");
+      const ch = filteredChannels.find(c => c.id === chId);
+      if (ch) setPreviewChannel(ch);
+    } else if (zoneId === "preview") {
+      if (itemId === "tv_play" && previewChannel) handlePlay(previewChannel);
+      else if (itemId === "tv_fav" && previewChannel) handleToggleFavorite(previewChannel.id);
+      else if (itemId === "tv_epg" && previewChannel) {
+        handlePlay(previewChannel);
+        setTimeout(() => setShowEpg(true), 300);
+      }
+    }
+  }, [activeCategory, filteredChannels, previewChannel, handlePlay, handleToggleFavorite]);
+
+  const handleTvBack = useCallback(() => {
+    if (showEpg) { setShowEpg(false); return; }
+    if (previewChannel) { setPreviewChannel(null); return; }
+    handleBackToDashboard();
+  }, [showEpg, previewChannel, handleBackToDashboard]);
+
+  const { focusedItemId, focusedZoneId } = useTvNavigation({
+    zones: tvZones,
+    enabled: tvEnabled,
+    onSelect: handleTvSelect,
+    onBack: handleTvBack,
+  });
+
   // Determine which content view to render (content mode only, not dashboard)
   const renderContent = () => {
     if (showEpgGrid) {
@@ -351,54 +423,44 @@ export default function Index() {
     return (
       <>
         {activeTab === "live" && (() => {
-          const categories = getCategories(allChannels);
           return (
             <div className="flex flex-1 overflow-hidden">
               {/* Panel 1: Categories */}
-              {categories.length > 0 && (
+              {categoryItems.length > 0 && (
                 <div className="w-[200px] shrink-0 overflow-y-auto scrollbar-thin flex flex-col" style={{ background: "#141420", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
                   <div className="px-4 py-3.5 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#FF6D00" }} />
                     <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>Catégories</p>
                   </div>
-                  {[
-                    { id: null, label: t("cat.all"), icon: Radio, count: allChannels.length },
-                    { id: "__fav", label: t("nav.favorites"), icon: Star, count: allChannels.filter(c => favorites.includes(c.id)).length },
-                  ].map(item => {
-                    const isItemActive = (item.id === null && !activeCategory && activeSubTab === "all") || (item.id === "__fav" && activeSubTab === "favorites");
+                  {categoryItems.map((item) => {
+                    const isAll = item.id === "__all";
+                    const isFavItem = item.id === "__fav";
+                    const isItemActive = (isAll && !activeCategory && activeSubTab === "all") || (isFavItem && activeSubTab === "favorites") || activeCategory === item.id;
+                    const tvId = `cat_${item.id}`;
+                    const isTvFocused = focusedItemId === tvId;
+                    const count = isAll ? allChannels.length : isFavItem ? allChannels.filter(c => favorites.includes(c.id)).length : allChannels.filter(c => c.category === item.id).length;
+                    const Icon = isAll ? Radio : isFavItem ? Star : null;
+
                     return (
-                      <button
-                        key={item.id || "all"}
-                        onClick={() => { setActiveCategory(item.id === "__fav" ? "__fav" as any : null); setActiveSubTab(item.id === "__fav" ? "favorites" : "all"); }}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-left transition-all"
-                        style={isItemActive
+                      <TvFocusable
+                        key={item.id}
+                        tvId={tvId}
+                        focused={isTvFocused}
+                        onClick={() => {
+                          if (isFavItem) { setActiveCategory("__fav" as any); setActiveSubTab("favorites"); }
+                          else if (isAll) { setActiveCategory(null); setActiveSubTab("all"); }
+                          else { setActiveCategory(isItemActive ? null : item.id); setActiveSubTab("all"); }
+                        }}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-left w-full"
+                        style={isItemActive && !isTvFocused
                           ? { background: "linear-gradient(90deg, rgba(255,109,0,0.12) 0%, transparent 100%)", borderLeft: "3px solid #FF6D00" }
-                          : { borderLeft: "3px solid transparent" }
+                          : !isTvFocused ? { borderLeft: "3px solid transparent" } : { borderLeft: "3px solid #FF6D00" }
                         }
                       >
-                        <item.icon size={14} style={{ color: isItemActive ? "#FF6D00" : "#48484A" }} />
-                        <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: isItemActive ? "#F5F5F7" : "#86868B" }}>{item.label}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: isItemActive ? "rgba(255,109,0,0.15)" : "rgba(255,255,255,0.03)", color: isItemActive ? "#FF6D00" : "#48484A" }}>{item.count}</span>
-                      </button>
-                    );
-                  })}
-                  <div className="h-px mx-4 my-1.5" style={{ background: "rgba(255,255,255,0.04)" }} />
-                  {categories.map(cat => {
-                    const count = allChannels.filter(c => c.category === cat).length;
-                    const isActive = activeCategory === cat;
-                    return (
-                      <button
-                        key={cat}
-                        onClick={() => { setActiveCategory(isActive ? null : cat); setActiveSubTab("all"); }}
-                        className="flex items-center gap-2.5 px-4 py-2 text-left transition-all"
-                        style={isActive
-                          ? { background: "linear-gradient(90deg, rgba(201,168,76,0.10) 0%, transparent 100%)", borderLeft: "3px solid #C9A84C" }
-                          : { borderLeft: "3px solid transparent" }
-                        }
-                      >
-                        <span className="text-[12px] font-medium flex-1 truncate" style={{ color: isActive ? "#F5F5F7" : "#86868B" }}>{cat}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: isActive ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.03)", color: isActive ? "#C9A84C" : "#48484A" }}>{count}</span>
-                      </button>
+                        {Icon && <Icon size={14} style={{ color: isItemActive || isTvFocused ? "#FF6D00" : "#48484A" }} />}
+                        <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: isItemActive || isTvFocused ? "#F5F5F7" : "#86868B" }}>{item.label}</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{ background: isItemActive || isTvFocused ? "rgba(255,109,0,0.15)" : "rgba(255,255,255,0.03)", color: isItemActive || isTvFocused ? "#FF6D00" : "#48484A" }}>{count}</span>
+                      </TvFocusable>
                     );
                   })}
                 </div>
@@ -421,19 +483,23 @@ export default function Index() {
                   {filteredChannels.map((ch, i) => {
                     const isFav = favorites.includes(ch.id);
                     const isSelected = previewChannel?.id === ch.id;
+                    const tvId = `ch_${ch.id}`;
+                    const isTvFocused = focusedItemId === tvId;
                     return (
-                      <button
+                      <TvFocusable
                         key={ch.id}
+                        tvId={tvId}
+                        focused={isTvFocused}
                         onClick={() => setPreviewChannel(ch)}
                         onDoubleClick={() => handlePlay(ch)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left transition-all group"
-                        style={isSelected
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left group"
+                        style={isSelected && !isTvFocused
                           ? { background: "linear-gradient(90deg, rgba(255,109,0,0.08) 0%, rgba(255,109,0,0.02) 100%)", borderLeft: "3px solid #FF6D00" }
-                          : { borderLeft: "3px solid transparent" }
+                          : !isTvFocused ? { borderLeft: "3px solid transparent" } : { borderLeft: "3px solid #FF6D00" }
                         }
                       >
-                        <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: isSelected ? "#FF6D00" : "#3A3A42" }}>{i + 1}</span>
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden" style={{ background: isSelected ? "rgba(255,109,0,0.08)" : "#161620", border: isSelected ? "1px solid rgba(255,109,0,0.2)" : "1px solid rgba(255,255,255,0.03)" }}>
+                        <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: isSelected || isTvFocused ? "#FF6D00" : "#3A3A42" }}>{i + 1}</span>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden" style={{ background: isSelected || isTvFocused ? "rgba(255,109,0,0.08)" : "#161620", border: isSelected || isTvFocused ? "1px solid rgba(255,109,0,0.2)" : "1px solid rgba(255,255,255,0.03)" }}>
                           {ch.logo ? (
                             <img src={ch.logo} loading="lazy" className="h-7 w-7 rounded-lg object-contain" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                           ) : (
@@ -441,26 +507,24 @@ export default function Index() {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-semibold truncate" style={{ color: isSelected ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
+                          <p className="text-[12px] font-semibold truncate" style={{ color: isSelected || isTvFocused ? "#F5F5F7" : "#B0B0B5" }}>{ch.name}</p>
                           <p className="text-[10px] mt-0.5" style={{ color: "#48484A" }}>{ch.category}</p>
                         </div>
                         {isFav && <Heart size={11} className="fill-[#FF3B30] text-[#FF3B30] shrink-0" />}
-                        {isSelected && <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#FF6D00", boxShadow: "0 0 6px rgba(255,109,0,0.5)" }} />}
-                      </button>
+                        {(isSelected || isTvFocused) && <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: "#FF6D00", boxShadow: "0 0 6px rgba(255,109,0,0.5)" }} />}
+                      </TvFocusable>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Panel 3: Channel Preview — Premium TV Style */}
+              {/* Panel 3: Channel Preview */}
               <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #12121A 0%, #161622 100%)" }}>
                 {previewChannel ? (
                   <div className="flex flex-col h-full">
                     {/* Main preview area */}
                     <div className="flex-1 flex items-center justify-center relative overflow-hidden">
-                      {/* Ambient background glow */}
                       <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(255,109,0,0.04) 0%, transparent 70%)" }} />
-
                       <div className="relative z-10 text-center">
                         {previewChannel.logo ? (
                           <div className="mx-auto mb-5 h-28 w-28 rounded-2xl flex items-center justify-center overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
@@ -479,19 +543,9 @@ export default function Index() {
                           </span>
                         )}
                       </div>
-
-                      {/* Big play button */}
-                      <button
-                        onClick={() => handlePlay(previewChannel)}
-                        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-2xl px-8 py-3.5 transition-all hover:scale-105 active:scale-95"
-                        style={{ background: "linear-gradient(135deg, #FF6D00 0%, #FF8C33 100%)", color: "#fff", boxShadow: "0 4px 20px rgba(255,109,0,0.35)" }}
-                      >
-                        <Play size={20} fill="currentColor" />
-                        <span className="text-[14px] font-bold tracking-wide">Regarder</span>
-                      </button>
                     </div>
 
-                    {/* Program info */}
+                    {/* Action buttons with TV focus */}
                     <div className="px-6 py-4" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
                       <div className="flex items-center gap-2 mb-1">
                         <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759" }} />
@@ -500,24 +554,28 @@ export default function Index() {
                       <p className="text-[11px]" style={{ color: "#86868B" }}>Programme en cours</p>
                     </div>
 
-                    {/* 4 Colored action buttons */}
                     <div className="flex items-center justify-center gap-3 px-6 py-3.5" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
                       {[
-                        { color: "#FF3B30", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
-                        { color: "#007AFF", label: "Options", action: () => {} },
-                        { color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
-                        { color: "#FFD60A", label: "Listes", action: () => {} },
-                      ].map((btn, i) => (
-                        <button
-                          key={i}
-                          onClick={btn.action}
-                          className="flex items-center gap-2 rounded-xl px-5 py-2.5 transition-all hover:scale-105 active:scale-95"
-                          style={{ background: `${btn.color}10`, border: `1px solid ${btn.color}25` }}
-                        >
-                          <div className="h-3.5 w-3.5 rounded-full" style={{ background: btn.color, boxShadow: `0 0 10px ${btn.color}40` }} />
-                          <span className="text-[11px] font-semibold" style={{ color: btn.color }}>{btn.label}</span>
-                        </button>
-                      ))}
+                        { id: "tv_play", color: "#FF6D00", label: "▶ Regarder", action: () => handlePlay(previewChannel) },
+                        { id: "tv_fav", color: "#FF3B30", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
+                        { id: "tv_epg", color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
+                        { id: "tv_options", color: "#FFD60A", label: "Options", action: () => {} },
+                      ].map((btn) => {
+                        const isTvFocused = focusedItemId === btn.id;
+                        return (
+                          <TvFocusable
+                            key={btn.id}
+                            tvId={btn.id}
+                            focused={isTvFocused}
+                            onClick={btn.action}
+                            className="flex items-center gap-2 rounded-xl px-5 py-2.5 hover:scale-105 active:scale-95"
+                            style={!isTvFocused ? { background: `${btn.color}10`, border: `1px solid ${btn.color}25` } : { border: `1px solid ${btn.color}` }}
+                          >
+                            <div className="h-3.5 w-3.5 rounded-full" style={{ background: btn.color, boxShadow: `0 0 10px ${btn.color}40` }} />
+                            <span className="text-[11px] font-semibold" style={{ color: isTvFocused ? "#F5F5F7" : btn.color }}>{btn.label}</span>
+                          </TvFocusable>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (
@@ -527,7 +585,7 @@ export default function Index() {
                         <Filter size={24} style={{ color: "#2C2C34" }} />
                       </div>
                       <p className="text-[14px] font-semibold" style={{ color: "#48484A" }}>Sélectionnez une chaîne</p>
-                      <p className="text-[11px] mt-1.5" style={{ color: "#2C2C34" }}>Double-cliquez pour regarder</p>
+                      <p className="text-[11px] mt-1.5" style={{ color: "#2C2C34" }}>Utilisez les flèches pour naviguer</p>
                     </div>
                   </div>
                 )}
