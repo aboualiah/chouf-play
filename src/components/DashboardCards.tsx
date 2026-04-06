@@ -65,6 +65,13 @@ const QUICK_BUTTONS = [
   { label: "TV Démo", icon: Monitor, action: "demo" },
 ];
 
+// Header buttons for TV D-pad navigation
+const HEADER_BUTTONS = [
+  { id: "settings", label: "Paramètres", icon: Settings },
+  { id: "refresh", label: "Actualiser", icon: ArrowRight },
+  { id: "quit", label: "Quitter", icon: ArrowRight },
+];
+
 export function DashboardCards({
   playlists, allChannels, allVod, allSeries,
   onTabSelect, onPlay, activePlaylistId, onPlaylistSelect,
@@ -76,9 +83,13 @@ export function DashboardCards({
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
-  // TV D-pad navigation: 3 stat cards (row 0) + 6 quick buttons (row 1, 3 cols x 2 rows) + premium (row 2)
-  // Flatten: 0-2 = stat cards, 3-8 = quick buttons, 9 = premium
-  const totalItems = 10;
+  // TV D-pad navigation layout:
+  // Row -1: header buttons (indices -3, -2, -1) => settings, refresh, quit
+  // Row 0: stat cards (0-2)
+  // Row 1: quick buttons top (3-5)
+  // Row 2: quick buttons bottom (6-8)
+  // Row 3: premium (9)
+  // We use negative indices for header, mapped as: -3=settings, -2=refresh, -1=quit
   const [tvFocus, setTvFocus] = useState(0);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -86,26 +97,38 @@ export function DashboardCards({
     if (key === "ArrowUp") {
       e.preventDefault();
       if (tvFocus >= 9) setTvFocus(6); // premium → quick row 2
-      else if (tvFocus >= 6) setTvFocus(Math.min(tvFocus - 3, 2)); // quick row2 → quick row1 → stat
+      else if (tvFocus >= 6) setTvFocus(Math.min(tvFocus - 3, 2)); // quick row2 → stat
       else if (tvFocus >= 3) setTvFocus(Math.min(tvFocus - 3, 2)); // quick row1 → stat
+      else if (tvFocus >= 0) setTvFocus(-3 + tvFocus); // stat → header (map 0→-3, 1→-2, 2→-1)
+      // already in header, do nothing
     } else if (key === "ArrowDown") {
       e.preventDefault();
-      if (tvFocus < 3) setTvFocus(Math.min(tvFocus + 3, 8)); // stat → quick row1
+      if (tvFocus < -2) setTvFocus(0); // header left → stat left
+      else if (tvFocus === -2) setTvFocus(1); // header middle → stat middle
+      else if (tvFocus === -1) setTvFocus(2); // header right → stat right
+      else if (tvFocus < 3) setTvFocus(Math.min(tvFocus + 3, 8)); // stat → quick row1
       else if (tvFocus < 6) setTvFocus(Math.min(tvFocus + 3, 8)); // quick row1 → quick row2
       else if (tvFocus < 9) setTvFocus(9); // quick row2 → premium
     } else if (key === "ArrowLeft") {
       e.preventDefault();
-      if (tvFocus > 0 && tvFocus < 3) setTvFocus(tvFocus - 1);
+      if (tvFocus === -2) setTvFocus(-3);
+      else if (tvFocus === -1) setTvFocus(-2);
+      else if (tvFocus > 0 && tvFocus < 3) setTvFocus(tvFocus - 1);
       else if (tvFocus > 3 && tvFocus < 6) setTvFocus(tvFocus - 1);
       else if (tvFocus > 6 && tvFocus < 9) setTvFocus(tvFocus - 1);
     } else if (key === "ArrowRight") {
       e.preventDefault();
-      if (tvFocus < 2) setTvFocus(tvFocus + 1);
+      if (tvFocus === -3) setTvFocus(-2);
+      else if (tvFocus === -2) setTvFocus(-1);
+      else if (tvFocus < 2) setTvFocus(tvFocus + 1);
       else if (tvFocus >= 3 && tvFocus < 5) setTvFocus(tvFocus + 1);
       else if (tvFocus >= 6 && tvFocus < 8) setTvFocus(tvFocus + 1);
     } else if (key === "Enter") {
       e.preventDefault();
-      if (tvFocus < 3) {
+      if (tvFocus === -3) onOpenSettings?.();
+      else if (tvFocus === -2) window.location.reload();
+      else if (tvFocus === -1) { /* quit handled by header */ }
+      else if (tvFocus < 3) {
         onTabSelect(STAT_CARDS[tvFocus].id);
       } else if (tvFocus < 9) {
         const btn = QUICK_BUTTONS[tvFocus - 3];
@@ -118,7 +141,7 @@ export function DashboardCards({
         // premium
       }
     }
-  }, [tvFocus, onTabSelect, onAddPlaylist, onShowEpg, onShowRecordings]);
+  }, [tvFocus, onTabSelect, onAddPlaylist, onShowEpg, onShowRecordings, onOpenSettings]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);

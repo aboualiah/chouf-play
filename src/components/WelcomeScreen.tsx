@@ -49,6 +49,16 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Handle Android Back button — close QR or do nothing (stay on welcome)
+  useEffect(() => {
+    const handleBack = () => {
+      if (qrOpen) { setQrOpen(false); }
+      // On welcome screen root, do nothing — don't quit
+    };
+    window.addEventListener("chouf-back", handleBack);
+    return () => window.removeEventListener("chouf-back", handleBack);
+  }, [qrOpen]);
+
   const focusStyle = (i: number) =>
     focusIndex === i
       ? {
