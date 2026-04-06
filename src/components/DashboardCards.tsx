@@ -18,6 +18,7 @@ interface DashboardCardsProps {
   onShowRecordings?: () => void;
   onAddPlaylist?: () => void;
   onOpenSettings?: () => void;
+  onHeaderFocusChange?: (focusIdx: number | null) => void;
 }
 
 const STAT_CARDS = [
