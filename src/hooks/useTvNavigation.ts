@@ -42,12 +42,24 @@ export function useTvNavigation({
       if (!enabled) return;
 
       const key = e.key;
+      const code = e.keyCode;
+
+      const isBack =
+        key === "Escape" ||
+        key === "Backspace" ||
+        code === 4 ||      // Android back
+        code === 10009;    // certaines télécommandes TV
 
       if (
-        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape", "Backspace"].includes(key)
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(key) || isBack
       ) {
         e.preventDefault();
         e.stopPropagation();
+      }
+
+      if (isBack) {
+        onBack?.();
+        return;
       }
 
       switch (key) {
@@ -65,10 +77,6 @@ export function useTvNavigation({
           break;
         case "Enter":
           onEnter?.(focus);
-          break;
-        case "Escape":
-        case "Backspace":
-          onBack?.();
           break;
       }
     },
