@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Wifi, RefreshCw, Layers, Radio, Tv, Film, Clapperboard, Clock, Globe, QrCode, Link, Upload, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPlaylists, savePlaylists, Playlist } from "@/lib/storage";
@@ -6,16 +6,25 @@ import { PlaylistModal } from "@/components/PlaylistModal";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { Channel } from "@/lib/channels";
 import { QRCodePortal } from "@/components/QRCodePortal";
+import { TvFocusable } from "@/components/TvFocusable";
+import { useTvNavigation } from "@/hooks/useTvNavigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PlaylistManager() {
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"add" | "manage">("manage");
+
+  // Reload playlists on mount (fixes TV/box localStorage read issue)
+  useEffect(() => {
+    const pls = getPlaylists();
+    console.log("PLAYLISTS LOADED:", pls);
+    setPlaylists(pls);
+  }, []);
 
   const handleDelete = (id: string) => {
     const updated = playlists.filter(p => p.id !== id);
