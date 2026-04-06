@@ -274,17 +274,8 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
-  // ── Android TV: Back button navigation ──
-  // History guard active on ALL steps to prevent hardware back from exiting
-  useEffect(() => {
-    window.history.pushState({ chouf: true }, '', window.location.href);
-    const handlePopState = () => {
-      window.history.pushState({ chouf: true }, '', window.location.href);
-      window.dispatchEvent(new CustomEvent('chouf-back'));
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  // ── Android TV: Back button navigation (Capacitor plugin + keydown fallback) ──
+  // No more history.pushState / popstate hacks — handled by useCapacitorBack + GlobalTVHandlers
 
   // Listen for internal back navigation (from keydown or popstate)
   useEffect(() => {
