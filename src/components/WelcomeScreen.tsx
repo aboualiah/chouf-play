@@ -167,14 +167,14 @@ export function WelcomeScreen({ onAddPlaylist, onSkipTrial }: WelcomeScreenProps
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
               <Fingerprint size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
-              <span className="text-muted-foreground font-sans text-xs" style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
+              <span className="text-muted-foreground font-sans text-xs">
                 MAC : {deviceId}
               </span>
             </div>
             <div className="flex items-center gap-2 rounded-lg px-3 py-1.5"
               style={{ background: "rgba(26,26,36,0.6)", border: "1px solid rgba(37,37,48,0.4)" }}>
               <Shield size={12} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.4))" }} />
-              <span className="text-muted-foreground font-sans font-light text-xs" style={{ fontFamily: "'Share Tech Mono', monospace", letterSpacing: "2px" }}>
+              <span className="text-muted-foreground font-sans font-light text-xs">
                 KEY : {deviceId.replace(/:/g, "").slice(0, 8)}
               </span>
             </div>
