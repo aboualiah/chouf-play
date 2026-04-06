@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Link, Upload, Server, Loader2, Tv, Type } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Channel } from "@/lib/channels";
@@ -59,6 +59,16 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("");
   const [xtream, setXtream] = useState({ server: "", user: "", pass: "" });
+
+  // Android TV Back → fermer la modal
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => {
+      onClose();
+    };
+    window.addEventListener("chouf-back", handler);
+    return () => window.removeEventListener("chouf-back", handler);
+  }, [open, onClose]);
 
   const inputStyle = { background: "#22223A", border: "1px solid #242430", color: "#F5F5F7" };
 
@@ -236,7 +246,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                 value={playlistName}
                 onChange={(e) => setPlaylistName(e.target.value)}
                 placeholder="Ex: Bouquet Salon, Abonnement Papa..."
-                className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                tabIndex={0}
+                className="w-full rounded-xl px-4 py-3 text-[13px] outline-none focus:ring-2 focus:ring-[#FF6D00] focus:border-[#FF6D00]"
                 style={inputStyle}
               />
             </div>
@@ -247,7 +258,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="URL M3U ou Xtream (auto-détection)"
-                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                  tabIndex={0}
+                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none focus:ring-2 focus:ring-[#FF6D00] focus:border-[#FF6D00]"
                   style={inputStyle}
                 />
                 {url && detectXtreamUrl(url) && (
@@ -280,14 +292,16 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   value={xtream.server}
                   onChange={(e) => setXtream({ ...xtream, server: e.target.value })}
                   placeholder="http://serveur.com:port"
-                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                  tabIndex={0}
+                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none focus:ring-2 focus:ring-[#FF6D00] focus:border-[#FF6D00]"
                   style={inputStyle}
                 />
                 <input
                   value={xtream.user}
                   onChange={(e) => setXtream({ ...xtream, user: e.target.value })}
                   placeholder="Nom d'utilisateur"
-                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                  tabIndex={0}
+                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none focus:ring-2 focus:ring-[#FF6D00] focus:border-[#FF6D00]"
                   style={inputStyle}
                 />
                 <input
@@ -295,7 +309,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   onChange={(e) => setXtream({ ...xtream, pass: e.target.value })}
                   placeholder="Mot de passe"
                   type="password"
-                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none"
+                  tabIndex={0}
+                  className="w-full rounded-xl px-4 py-3 text-[13px] outline-none focus:ring-2 focus:ring-[#FF6D00] focus:border-[#FF6D00]"
                   style={inputStyle}
                 />
                 <button
