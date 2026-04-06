@@ -27,8 +27,6 @@ export function TvFocusable({
   const Comp = as as any;
   const ref = useRef<HTMLElement>(null);
 
-  // When focused, ensure this element has browser focus so scrollIntoView works
-  // but do NOT trigger click — only visual focus
   useEffect(() => {
     if (focused && ref.current) {
       ref.current.focus({ preventScroll: false });
@@ -44,16 +42,20 @@ export function TvFocusable({
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       className={clsx(
-        "transition-all duration-150 outline-none",
+        "transition-all duration-200 outline-none",
         focused && [
           "ring-[3px] ring-[#FF6D00]",
-          "scale-[1.03]",
-          "shadow-[0_0_0_2px_rgba(255,109,0,0.7),0_0_35px_rgba(255,109,0,0.4),0_0_70px_rgba(255,109,0,0.15)]",
+          "scale-[1.04]",
+          "shadow-[0_0_0_3px_rgba(255,109,0,0.8),0_0_40px_rgba(255,109,0,0.45),0_0_80px_rgba(255,109,0,0.2)]",
           "z-10",
+          "brightness-110",
         ],
         className
       )}
-      style={style}
+      style={{
+        ...style,
+        ...(focused ? { filter: "brightness(1.1)" } : {}),
+      }}
       tabIndex={focused ? 0 : -1}
     >
       {children}

@@ -66,6 +66,7 @@ export default function Index() {
   const [showRecordings, setShowRecordings] = useState(false);
   const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
   const [headerTvFocus, setHeaderTvFocus] = useState<number | null>(null);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
