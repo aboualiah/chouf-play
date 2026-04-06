@@ -8,9 +8,11 @@ const config: CapacitorConfig = {
     url: 'https://66c8ec26-5f5c-4e8e-98ca-9d99bab43c81.lovableproject.com?forceHideBadge=true',
     cleartext: true,
   },
-  android: {
-    // Disable Capacitor's default back handler so we control it entirely
-    backButtonHandler: false,
+  plugins: {
+    App: {
+      // Disable Capacitor's default back-button handler so we control it entirely
+      disableBackButtonHandler: true,
+    },
   },
 };
 
