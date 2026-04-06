@@ -6,9 +6,9 @@
 
 @layer base {
   :root {
-    --cp-black: 240 33% 5%;
-    --cp-surface: 240 17% 9%;
-    --cp-surface-light: 240 14% 13%;
+    --cp-black: 240 20% 8%;
+    --cp-surface: 240 17% 12%;
+    --cp-surface-light: 240 14% 15%;
     --cp-orange: 24 100% 50%;
     --cp-gold: 42 53% 54%;
     --cp-gray: 240 3% 54%;
@@ -19,37 +19,37 @@
     --cp-blue: 211 100% 50%;
     --cp-yellow: 50 100% 52%;
 
-    --background: 240 33% 5%;
+    --background: 240 20% 8%;
     --foreground: 240 20% 97%;
-    --card: 240 17% 9%;
+    --card: 240 17% 12%;
     --card-foreground: 240 20% 97%;
-    --popover: 240 17% 9%;
+    --popover: 240 17% 12%;
     --popover-foreground: 240 20% 97%;
     --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 14% 13%;
+    --secondary: 240 14% 15%;
     --secondary-foreground: 240 20% 97%;
-    --muted: 240 10% 15%;
+    --muted: 240 10% 17%;
     --muted-foreground: 240 3% 54%;
     --accent: 42 53% 54%;
     --accent-foreground: 0 0% 100%;
     --destructive: 4 100% 59%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 14% 13%;
-    --input: 240 14% 15%;
+    --border: 240 14% 16%;
+    --input: 240 14% 17%;
     --ring: 24 100% 50%;
     --radius: 0.75rem;
     --success: 142 71% 50%;
     --info: 211 100% 50%;
     --warning: 50 100% 52%;
 
-    --sidebar-background: 240 17% 9%;
+    --sidebar-background: 240 17% 12%;
     --sidebar-foreground: 240 20% 97%;
     --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 14% 13%;
+    --sidebar-accent: 240 14% 15%;
     --sidebar-accent-foreground: 240 20% 97%;
-    --sidebar-border: 240 14% 13%;
+    --sidebar-border: 240 14% 16%;
     --sidebar-ring: 24 100% 50%;
   }
 }
@@ -71,19 +71,19 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* D-PAD / TV focus styles — subtle, no orange outline */
+  /* D-PAD / TV focus styles — visible orange glow */
   *:focus {
     outline: none !important;
-    box-shadow: none !important;
   }
   *:focus-visible {
     outline: none !important;
-    box-shadow: none !important;
-    background-color: rgba(255,109,0,0.1);
+    box-shadow: 0 0 0 2px #FF6D00, 0 0 15px rgba(255,109,0,0.3) !important;
+    background-color: rgba(255,109,0,0.08) !important;
   }
   *:focus:not(:focus-visible) {
     outline: none !important;
-    box-shadow: none;
+    box-shadow: none !important;
+    background-color: transparent !important;
   }
 
   /* Modals: never overflow screen */
@@ -109,7 +109,7 @@
     box-shadow: 0 0 15px hsl(24 100% 50% / 0.2);
   }
   .border-surface {
-    border-color: hsl(240 14% 13%);
+    border-color: hsl(240 14% 16%);
   }
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
@@ -118,7 +118,7 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #242430;
+    background: #2A2A36;
     border-radius: 4px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
@@ -136,13 +136,13 @@
 /* Global custom scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #242430; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #2A2A36; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(24 100% 50%); }
 
 /* Global input styling for Android TV consistency */
 input[type="text"], input[type="password"], input[type="url"], input[type="email"], input[type="number"], input[type="search"], textarea {
-  background: #1C1C24 !important;
-  border: 1px solid #242430 !important;
+  background: #1A1A24 !important;
+  border: 1px solid #252530 !important;
   color: #F5F5F7 !important;
   border-radius: 12px !important;
   padding: 10px 14px !important;
