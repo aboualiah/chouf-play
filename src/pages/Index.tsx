@@ -331,66 +331,74 @@ export default function Index() {
   ];
 
   // ── TV Navigation for 3-column Live TV ──
-  const categories = useMemo(() => getCategories(allChannels), [allChannels]);
+  const categories = getCategories(allChannels);
 
-  const categoryItems = useMemo(() => {
-    const base = [
-      { id: "__all", label: t("cat.all") },
-      { id: "__fav", label: t("nav.favorites") },
-    ];
-    return [...base, ...categories.map(c => ({ id: c, label: c }))];
-  }, [categories, t]);
+  const categoryItems = [
+    { id: null, label: t("cat.all") },
+    { id: "__fav", label: t("nav.favorites") },
+    ...categories.map((cat) => ({ id: cat, label: cat })),
+  ];
 
-  const previewButtons = useMemo(() => {
-    if (!previewChannel) return [];
-    return [
-      { id: "tv_play", label: "Regarder" },
-      { id: "tv_fav", label: "Favoris" },
-      { id: "tv_epg", label: "EPG" },
-      { id: "tv_options", label: "Options" },
-    ];
-  }, [previewChannel]);
+  const previewButtons = [
+    { id: "tv_play", color: "#FF6D00", label: "▶ Regarder" },
+    { id: "tv_fav", color: "#FF3B30", label: "Favoris" },
+    { id: "tv_epg", color: "#34C759", label: "EPG" },
+    { id: "tv_options", color: "#FFD60A", label: "Options" },
+  ];
 
-  const tvCounts = useMemo<TvCounts>(() => ({
+  const counts: TvCounts = {
     categories: categoryItems.length,
     channels: filteredChannels.length,
-    preview: previewButtons.length,
-  }), [categoryItems.length, filteredChannels.length, previewButtons.length]);
+    preview: previewChannel ? 4 : 1,
+  };
 
-  const tvEnabled = activeTab === "live" && view === "content" && !activeChannel;
-
-  const handleTvEnter = useCallback((state: TvFocusState) => {
-    const { section } = state;
-    const index = state.indices[section];
-    if (section === "categories") {
-      const item = categoryItems[index];
-      if (!item) return;
-      if (item.id === "__all") { setActiveCategory(null); setActiveSubTab("all"); }
-      else if (item.id === "__fav") { setActiveCategory("__fav" as any); setActiveSubTab("favorites"); }
-      else { setActiveCategory(activeCategory === item.id ? null : item.id); setActiveSubTab("all"); }
-    } else if (section === "channels") {
-      const ch = filteredChannels[index];
-      if (ch) setPreviewChannel(ch);
-    } else if (section === "preview") {
-      const btn = previewButtons[index];
-      if (!btn || !previewChannel) return;
-      if (btn.id === "tv_play") handlePlay(previewChannel);
-      else if (btn.id === "tv_fav") handleToggleFavorite(previewChannel.id);
-      else if (btn.id === "tv_epg") { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); }
-    }
-  }, [activeCategory, categoryItems, filteredChannels, previewButtons, previewChannel, handlePlay, handleToggleFavorite]);
-
-  const handleTvBack = useCallback(() => {
-    if (showEpg) { setShowEpg(false); return; }
-    if (previewChannel) { setPreviewChannel(null); return; }
-    handleBackToDashboard();
-  }, [showEpg, previewChannel, handleBackToDashboard]);
-
-  const { isFocused: tvFocused } = useTvNavigation({
-    counts: tvCounts,
-    enabled: tvEnabled,
-    onEnter: handleTvEnter,
-    onBack: handleTvBack,
+  const { focus, isFocused, setFocus } = useTvNavigation({
+    counts,
+    enabled: !activeChannel,
+    onEnter: (state) => {
+      if (state.section === "categories") {
+        const item = categoryItems[state.indices.categories];
+        if (!item) return;
+        if (item.id === null) {
+          setActiveCategory(null);
+          setActiveSubTab("all");
+        } else if (item.id === "__fav") {
+          setActiveCategory("__fav" as any);
+          setActiveSubTab("favorites");
+        } else {
+          setActiveCategory(item.id as string);
+          setActiveSubTab("all");
+        }
+      }
+      if (state.section === "channels") {
+        const ch = filteredChannels[state.indices.channels];
+        if (ch) {
+          setPreviewChannel(ch);
+        }
+      }
+      if (state.section === "preview") {
+        if (previewChannel) {
+          if (state.indices.preview === 0) handlePlay(previewChannel);
+          if (state.indices.preview === 1) handleToggleFavorite(previewChannel.id);
+          if (state.indices.preview === 2) {
+            handlePlay(previewChannel);
+            setTimeout(() => setShowEpg(true), 300);
+          }
+        }
+      }
+    },
+    onBack: () => {
+      if (showEpg) {
+        setShowEpg(false);
+        return;
+      }
+      if (previewChannel) {
+        setPreviewChannel(null);
+        setFocus((prev) => ({ ...prev, section: "channels" }));
+        return;
+      }
+      handleBackToDashboard();
+    },
   });
 
   // Determine which content view to render (content mode only, not dashboard)
@@ -428,7 +436,7 @@ export default function Index() {
                     const isFavItem = item.id === "__fav";
                     const isItemActive = (isAll && !activeCategory && activeSubTab === "all") || (isFavItem && activeSubTab === "favorites") || activeCategory === item.id;
                     const tvId = `tv-categories-${catIdx}`;
-                    const isTvFocused = tvFocused("categories", catIdx);
+                    const isTvFocused = isFocused("categories", catIdx);
                     const count = isAll ? allChannels.length : isFavItem ? allChannels.filter(c => favorites.includes(c.id)).length : allChannels.filter(c => c.category === item.id).length;
                     const Icon = isAll ? Radio : isFavItem ? Star : null;
 
@@ -476,7 +484,7 @@ export default function Index() {
                     const isFav = favorites.includes(ch.id);
                     const isSelected = previewChannel?.id === ch.id;
                     const tvId = `tv-channels-${i}`;
-                    const isTvFocused = tvFocused("channels", i);
+                    const isTvFocused = isFocused("channels", i);
                     return (
                       <TvFocusable
                         key={ch.id}
@@ -554,7 +562,7 @@ export default function Index() {
                         { id: "tv_epg", color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
                         { id: "tv_options", color: "#FFD60A", label: "Options", action: () => {} },
                       ].map((btn, btnIdx) => {
-                        const isTvFocused = tvFocused("preview", btnIdx);
+                        const isTvFocused = isFocused("preview", btnIdx);
                         return (
                           <TvFocusable
                             key={btn.id}
