@@ -185,7 +185,7 @@ export function DashboardCards({
         </div>
 
         {/* Quick buttons */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           {QUICK_BUTTONS.map((btn, qi) => (
             <button
               key={btn.label}
@@ -193,6 +193,8 @@ export function DashboardCards({
                 if (btn.action === "playlist") onAddPlaylist?.();
                 else if (btn.action === "epg") onShowEpg?.();
                 else if (btn.action === "recordings") onShowRecordings?.();
+                else if (btn.action === "radio") onTabSelect("radio");
+                else if (btn.action === "demo") { window.location.href = "/demo"; }
               }}
               className="flex flex-col items-center gap-2.5 rounded-xl py-4 px-3 transition-all hover:bg-white/5 backdrop-blur-sm"
               style={{
