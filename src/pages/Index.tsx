@@ -64,6 +64,7 @@ export default function Index() {
   const [showEpgGrid, setShowEpgGrid] = useState(false);
   const [showRecordings, setShowRecordings] = useState(false);
   const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
+  const [headerTvFocus, setHeaderTvFocus] = useState<number | null>(null);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
@@ -492,10 +493,10 @@ export default function Index() {
                           className="flex items-center gap-3 w-full px-3 py-3 text-left rounded-xl transition-all"
                           style={
                             focused
-                              ? { background: "rgba(255,109,0,0.15)", borderLeft: "3px solid #FF6D00", boxShadow: "inset 0 0 20px rgba(255,109,0,0.08)" }
+                              ? { background: "linear-gradient(90deg, rgba(255,109,0,0.25) 0%, rgba(255,109,0,0.08) 100%)", borderLeft: "4px solid #FF6D00", boxShadow: "inset 0 0 30px rgba(255,109,0,0.12), 0 0 20px rgba(255,109,0,0.1)" }
                               : isSelected
-                                ? { background: "rgba(255,109,0,0.08)", borderLeft: "3px solid #FF6D00" }
-                                : { background: "transparent", borderLeft: "3px solid transparent" }
+                                ? { background: "rgba(255,109,0,0.10)", borderLeft: "4px solid #FF6D00" }
+                                : { background: "transparent", borderLeft: "4px solid transparent" }
                           }
                         >
                           <span className="text-[10px] font-mono w-5 text-right tabular-nums" style={{ color: "#48484A" }}>
@@ -511,7 +512,7 @@ export default function Index() {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[13px] font-semibold truncate" style={{ color: focused || isSelected ? "#FFFFFF" : "#B0B0B5", textShadow: focused ? "0 0 8px rgba(255,109,0,0.3)" : "none" }}>
+                            <p className="text-[13px] font-semibold truncate" style={{ color: focused ? "#FFFFFF" : isSelected ? "#F5F5F7" : "#B0B0B5", textShadow: focused ? "0 0 12px rgba(255,109,0,0.5)" : "none", fontSize: focused ? "14px" : "13px" }}>
                               {ch.name}
                             </p>
                             <p className="text-[10px]" style={{ color: "#48484A" }}>
@@ -689,7 +690,8 @@ export default function Index() {
                     activeTab={activeTab} onTabSelect={handleTabSelect}
                     allChannels={allChannels} allVod={allVod} allSeries={allSeries} onPlay={handlePlay}
                     onBackToDashboard={view === "content" ? handleBackToDashboard : undefined}
-                    onOpenSettings={() => { window.location.href = "/settings"; }} />
+                    onOpenSettings={() => { window.location.href = "/settings"; }}
+                    tvHeaderFocus={view === "dashboard" ? headerTvFocus : null} />
                 )}
               </>
             )}
@@ -800,6 +802,7 @@ export default function Index() {
                       onShowRecordings={() => { setShowRecordings(true); setShowEpgGrid(false); setView("content"); }}
                       onAddPlaylist={() => { navigate("/playlists"); }}
                       onOpenSettings={() => { navigate("/settings"); }}
+                      onHeaderFocusChange={setHeaderTvFocus}
                     />
                   </motion.div>
                 ) : (

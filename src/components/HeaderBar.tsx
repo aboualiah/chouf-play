@@ -21,6 +21,8 @@ interface HeaderBarProps {
   onPlay?: (ch: Channel) => void;
   onBackToDashboard?: () => void;
   onOpenSettings?: () => void;
+  /** TV focus index for header buttons: -3=settings, -2=refresh, -1=quit */
+  tvHeaderFocus?: number | null;
 }
 
 const CLOCK_FONT = "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
@@ -34,9 +36,14 @@ function useClock() {
   return now;
 }
 
-export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard, onOpenSettings }: HeaderBarProps) {
+export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeChange, activeTab, onTabSelect, compact, allChannels = [], allVod = [], allSeries = [], onPlay, onBackToDashboard, onOpenSettings, tvHeaderFocus }: HeaderBarProps) {
   const now = useClock();
   const [showQuitDialog, setShowQuitDialog] = useState(false);
+
+  const headerFocusStyle = (idx: number) =>
+    tvHeaderFocus === idx
+      ? { boxShadow: "0 0 0 3px #FF6D00, 0 0 20px rgba(255,109,0,0.3)", transform: "scale(1.15)", transition: "all 150ms ease" }
+      : {};
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });
 
@@ -109,8 +116,9 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
             onClick={onOpenSettings}
             className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
             title="Paramètres"
+            style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-3) }}
           >
-            <Settings size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+            <Settings size={16} />
           </button>
         )}
 
@@ -119,8 +127,9 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           onClick={() => window.location.reload()}
           className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
           title="Rafraîchir"
+          style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-2) }}
         >
-          <RefreshCw size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          <RefreshCw size={16} />
         </button>
 
         {/* Quit */}
@@ -128,8 +137,9 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
           onClick={() => setShowQuitDialog(true)}
           className="rounded-lg p-2 transition-all hover:bg-white/5 hover:scale-110"
           title="Quitter"
+          style={{ ...{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }, ...headerFocusStyle(-1) }}
         >
-          <LogOut size={16} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
+          <LogOut size={16} />
         </button>
       </div>
 
