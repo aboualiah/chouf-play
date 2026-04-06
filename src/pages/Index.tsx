@@ -432,7 +432,7 @@ export default function Index() {
                     <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>Catégories</p>
                   </div>
                   {categoryItems.map((item, catIdx) => {
-                    const isAll = item.id === "__all";
+                    const isAll = item.id === null;
                     const isFavItem = item.id === "__fav";
                     const isItemActive = (isAll && !activeCategory && activeSubTab === "all") || (isFavItem && activeSubTab === "favorites") || activeCategory === item.id;
                     const tvId = `tv-categories-${catIdx}`;
