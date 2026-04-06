@@ -1,94 +1,109 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  TvFocusState,
   TvCounts,
-  TvSection,
+  TvFocusState,
   createInitialTvFocus,
-  moveVertical,
   moveHorizontal,
-  clamp,
+  moveVertical,
 } from "@/lib/tvNavigation";
 
 interface UseTvNavigationOptions {
   counts: TvCounts;
   enabled?: boolean;
-  onSelect?: (section: TvSection, index: number) => void;
+  onEnter?: (state: TvFocusState) => void;
   onBack?: () => void;
 }
 
-export function useTvNavigation({ counts, enabled = true, onSelect, onBack }: UseTvNavigationOptions) {
-  const [state, setState] = useState<TvFocusState>(createInitialTvFocus);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const countsRef = useRef(counts);
-  countsRef.current = counts;
+export function useTvNavigation({
+  counts,
+  enabled = true,
+  onEnter,
+  onBack,
+}: UseTvNavigationOptions) {
+  const [focus, setFocus] = useState<TvFocusState>(createInitialTvFocus);
 
-  // Keep indices in bounds when counts change
   useEffect(() => {
-    setState(prev => ({
+    setFocus((prev) => ({
       ...prev,
       indices: {
-        categories: clamp(prev.indices.categories, 0, Math.max(0, counts.categories - 1)),
-        channels: clamp(prev.indices.channels, 0, Math.max(0, counts.channels - 1)),
-        preview: clamp(prev.indices.preview, 0, Math.max(0, counts.preview - 1)),
+        categories: Math.min(prev.indices.categories, Math.max(0, counts.categories - 1)),
+        channels: Math.min(prev.indices.channels, Math.max(0, counts.channels - 1)),
+        preview: Math.min(prev.indices.preview, Math.max(0, counts.preview - 1)),
       },
+      section:
+        counts[prev.section] > 0
+          ? prev.section
+          : (["categories", "channels", "preview"] as const).find((s) => counts[s] > 0) ?? "categories",
     }));
-  }, [counts.categories, counts.channels, counts.preview]);
+  }, [counts]);
 
-  // Scroll focused element into view
-  useEffect(() => {
-    if (!enabled) return;
-    const id = `tv-${state.section}-${state.indices[state.section]}`;
-    const el = document.querySelector(`[data-tv-id="${id}"]`) as HTMLElement;
-    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [state, enabled]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!enabled) return;
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (!enabled) return;
-    const tag = (e.target as HTMLElement)?.tagName;
-    if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const key = e.key;
 
-    const c = countsRef.current;
-    const s = stateRef.current;
+      if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape", "Backspace"].includes(key)
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
 
-    switch (e.key) {
-      case "ArrowUp":
-        e.preventDefault();
-        setState(moveVertical(s, "up", c));
-        break;
-      case "ArrowDown":
-        e.preventDefault();
-        setState(moveVertical(s, "down", c));
-        break;
-      case "ArrowLeft":
-        e.preventDefault();
-        setState(moveHorizontal(s, "left", c));
-        break;
-      case "ArrowRight":
-        e.preventDefault();
-        setState(moveHorizontal(s, "right", c));
-        break;
-      case "Enter":
-        e.preventDefault();
-        onSelect?.(s.section, s.indices[s.section]);
-        break;
-      case "Escape":
-      case "Backspace":
-        e.preventDefault();
-        onBack?.();
-        break;
-    }
-  }, [enabled, onSelect, onBack]);
+      switch (key) {
+        case "ArrowUp":
+          setFocus((prev) => moveVertical(prev, "up", counts));
+          break;
+        case "ArrowDown":
+          setFocus((prev) => moveVertical(prev, "down", counts));
+          break;
+        case "ArrowLeft":
+          setFocus((prev) => moveHorizontal(prev, "left", counts));
+          break;
+        case "ArrowRight":
+          setFocus((prev) => moveHorizontal(prev, "right", counts));
+          break;
+        case "Enter":
+          onEnter?.(focus);
+          break;
+        case "Escape":
+        case "Backspace":
+          onBack?.();
+          break;
+      }
+    },
+    [counts, enabled, focus, onBack, onEnter]
+  );
 
   useEffect(() => {
-    if (!enabled) return;
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, { passive: false });
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown, enabled]);
+  }, [handleKeyDown]);
 
-  const setFocus = useCallback((section: TvSection, index: number) => {
-    setState(prev => ({ ...prev, section, indices: { ...prev.indices, [section]: index } }));
-  }, []);
+  const selectors = useMemo(
+    () => ({
+      categories: `[data-tv-section="categories"][data-tv-index="${focus.indices.categories}"]`,
+      channels: `[data-tv-section="channels"][data-tv-index="${focus.indices.channels}"]`,
+      preview: `[data-tv-section="preview"][data-tv-index="${focus.indices.preview}"]`,
+    }),
+    [focus]
+  );
 
-  return { state, setFocus };
+  useEffect(() => {
+    const el = document.querySelector(
+      `[data-tv-section="${focus.section}"][data-tv-index="${focus.indices[focus.section]}"]`
+    ) as HTMLElement | null;
+
+    if (el) {
+      el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    }
+  }, [focus]);
+
+  return {
+    focus,
+    setFocus,
+    selectors,
+    isFocused: (section: keyof TvCounts, index: number) =>
+      focus.section === section && focus.indices[section] === index,
+  };
 }
