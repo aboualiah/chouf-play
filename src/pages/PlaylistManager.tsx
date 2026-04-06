@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Wifi, RefreshCw, Layers, Radio, Tv, Film, Clapperboard, Clock, Globe, QrCode, Link, Upload, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPlaylists, savePlaylists, Playlist } from "@/lib/storage";
@@ -6,16 +6,25 @@ import { PlaylistModal } from "@/components/PlaylistModal";
 import { XtreamPlaylistData } from "@/lib/xtream";
 import { Channel } from "@/lib/channels";
 import { QRCodePortal } from "@/components/QRCodePortal";
+import { TvFocusable } from "@/components/TvFocusable";
+import { useTvNavigation } from "@/hooks/useTvNavigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PlaylistManager() {
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState<Playlist[]>(getPlaylists());
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"add" | "manage">("manage");
+
+  // Reload playlists on mount (fixes TV/box localStorage read issue)
+  useEffect(() => {
+    const pls = getPlaylists();
+    console.log("PLAYLISTS LOADED:", pls);
+    setPlaylists(pls);
+  }, []);
 
   const handleDelete = (id: string) => {
     const updated = playlists.filter(p => p.id !== id);
@@ -52,8 +61,28 @@ export default function PlaylistManager() {
   const totalVod = playlists.reduce((s, p) => s + (p.vodStreams?.length || 0), 0);
   const totalSeries = playlists.reduce((s, p) => s + (p.series?.length || 0), 0);
 
+  // TV navigation for playlist cards
+  const { isFocused } = useTvNavigation({
+    counts: { categories: 0, channels: 0, preview: activeTab === "manage" ? Math.max(1, playlists.length + 1) : 4 },
+    enabled: !modalOpen && !showQr,
+    onEnter: (state) => {
+      if (activeTab === "manage") {
+        if (state.indices.preview < playlists.length) {
+          // Could open details or refresh
+        } else {
+          setModalOpen(true);
+        }
+      } else {
+        // Add tab items
+        const actions = [() => setModalOpen(true), () => setModalOpen(true), () => setModalOpen(true), () => setShowQr(true)];
+        actions[state.indices.preview]?.();
+      }
+    },
+    onBack: () => navigate("/", { replace: true }),
+  });
+
   return (
-    <div className="min-h-screen" style={{ background: "#12121A" }}>
+    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: "#12121A" }}>
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
         style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #252530" }}>
@@ -149,10 +178,18 @@ export default function PlaylistManager() {
               {playlists.map((pl, i) => {
                 const addedDate = new Date(pl.addedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
                 return (
-                  <motion.div key={pl.id}
+                <TvFocusable
+                  key={pl.id}
+                  section="preview"
+                  index={i}
+                  focused={isFocused("preview", i)}
+                  as="div"
+                  className="rounded-2xl mb-3"
+                >
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
                     transition={{ delay: i * 0.06 }}
-                    className="rounded-2xl p-4 mb-3 transition-all"
+                    className="rounded-2xl p-4 transition-all"
                     style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0"
@@ -187,6 +224,7 @@ export default function PlaylistManager() {
                       </div>
                     </div>
                   </motion.div>
+                </TvFocusable>
                 );
               })}
             </AnimatePresence>
