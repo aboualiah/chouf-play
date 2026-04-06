@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard, Radio, Monitor } from "lucide-react";
 import { Playlist } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -61,6 +61,8 @@ const QUICK_BUTTONS = [
   { label: "Rattrapage", icon: Rewind, action: "catchup" },
   { label: "Enregistrements", icon: Circle, action: "recordings" },
   { label: "Playlist", icon: Layers, action: "playlist" },
+  { label: "Radio", icon: Radio, action: "radio" },
+  { label: "TV Démo", icon: Monitor, action: "demo" },
 ];
 
 export function DashboardCards({
@@ -74,40 +76,44 @@ export function DashboardCards({
     series: allSeries.length,
   }), [allChannels.length, allVod.length, allSeries.length]);
 
-  // TV D-pad navigation: 3 stat cards (row 0) + 4 quick buttons (row 1) + premium (row 2)
-  // Flatten: 0-2 = stat cards, 3-6 = quick buttons, 7 = premium
-  const totalItems = 8;
+  // TV D-pad navigation: 3 stat cards (row 0) + 6 quick buttons (row 1, 3 cols x 2 rows) + premium (row 2)
+  // Flatten: 0-2 = stat cards, 3-8 = quick buttons, 9 = premium
+  const totalItems = 10;
   const [tvFocus, setTvFocus] = useState(0);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const key = e.key;
     if (key === "ArrowUp") {
       e.preventDefault();
-      if (tvFocus >= 7) setTvFocus(3); // premium → quick row
-      else if (tvFocus >= 3) setTvFocus(Math.min(tvFocus - 3, 2)); // quick → stat
-      // else stay at top
+      if (tvFocus >= 9) setTvFocus(6); // premium → quick row 2
+      else if (tvFocus >= 6) setTvFocus(Math.min(tvFocus - 3, 2)); // quick row2 → quick row1 → stat
+      else if (tvFocus >= 3) setTvFocus(Math.min(tvFocus - 3, 2)); // quick row1 → stat
     } else if (key === "ArrowDown") {
       e.preventDefault();
-      if (tvFocus < 3) setTvFocus(Math.min(tvFocus + 3, 6)); // stat → quick
-      else if (tvFocus < 7) setTvFocus(7); // quick → premium
-      // else stay
+      if (tvFocus < 3) setTvFocus(Math.min(tvFocus + 3, 8)); // stat → quick row1
+      else if (tvFocus < 6) setTvFocus(Math.min(tvFocus + 3, 8)); // quick row1 → quick row2
+      else if (tvFocus < 9) setTvFocus(9); // quick row2 → premium
     } else if (key === "ArrowLeft") {
       e.preventDefault();
       if (tvFocus > 0 && tvFocus < 3) setTvFocus(tvFocus - 1);
-      else if (tvFocus > 3 && tvFocus < 7) setTvFocus(tvFocus - 1);
+      else if (tvFocus > 3 && tvFocus < 6) setTvFocus(tvFocus - 1);
+      else if (tvFocus > 6 && tvFocus < 9) setTvFocus(tvFocus - 1);
     } else if (key === "ArrowRight") {
       e.preventDefault();
       if (tvFocus < 2) setTvFocus(tvFocus + 1);
-      else if (tvFocus >= 3 && tvFocus < 6) setTvFocus(tvFocus + 1);
+      else if (tvFocus >= 3 && tvFocus < 5) setTvFocus(tvFocus + 1);
+      else if (tvFocus >= 6 && tvFocus < 8) setTvFocus(tvFocus + 1);
     } else if (key === "Enter") {
       e.preventDefault();
       if (tvFocus < 3) {
         onTabSelect(STAT_CARDS[tvFocus].id);
-      } else if (tvFocus < 7) {
+      } else if (tvFocus < 9) {
         const btn = QUICK_BUTTONS[tvFocus - 3];
         if (btn.action === "playlist") onAddPlaylist?.();
         else if (btn.action === "epg") onShowEpg?.();
         else if (btn.action === "recordings") onShowRecordings?.();
+        else if (btn.action === "radio") onTabSelect("radio");
+        else if (btn.action === "demo") { window.location.href = "/demo"; }
       } else {
         // premium
       }
@@ -179,7 +185,7 @@ export function DashboardCards({
         </div>
 
         {/* Quick buttons */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           {QUICK_BUTTONS.map((btn, qi) => (
             <button
               key={btn.label}
@@ -187,6 +193,8 @@ export function DashboardCards({
                 if (btn.action === "playlist") onAddPlaylist?.();
                 else if (btn.action === "epg") onShowEpg?.();
                 else if (btn.action === "recordings") onShowRecordings?.();
+                else if (btn.action === "radio") onTabSelect("radio");
+                else if (btn.action === "demo") { window.location.href = "/demo"; }
               }}
               className="flex flex-col items-center gap-2.5 rounded-xl py-4 px-3 transition-all hover:bg-white/5 backdrop-blur-sm"
               style={{
@@ -202,7 +210,7 @@ export function DashboardCards({
         </div>
 
         {/* Premium Banner */}
-        <div style={tvFocusStyle(7)}>
+        <div style={tvFocusStyle(9)}>
           <PremiumBanner />
         </div>
       </div>
