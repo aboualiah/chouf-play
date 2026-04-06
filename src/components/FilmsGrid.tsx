@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { Channel } from "@/lib/channels";
 import { Play, Star, ChevronLeft, ChevronRight, X, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { colors, effects } from "@/lib/theme";
 
 interface FilmsGridProps {
   films: Channel[];
@@ -44,7 +45,7 @@ function FilmModal({ film, open, onClose, onPlay, isFav, onToggleFav }: {
             className="fixed inset-0 z-50" style={{ background: "rgba(0,0,0,0.8)" }} onClick={onClose} />
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
             className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg rounded-2xl overflow-hidden"
-            style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            style={{ background: colors.surfaceSolid, border: "1px solid #1C1C24" }}>
             {/* Poster header */}
             <div className="relative h-64 overflow-hidden">
               {film.logo ? (
@@ -54,26 +55,26 @@ function FilmModal({ film, open, onClose, onPlay, isFav, onToggleFav }: {
                 </>
               ) : (
                 <div className={`flex h-full items-center justify-center bg-gradient-to-br ${hashColor(film.name)}`}>
-                  <span className="text-4xl font-black" style={{ color: "#F5F5F7" }}>{getInitials(film.name)}</span>
+                  <span className="text-4xl font-black" style={{ color: colors.text }}>{getInitials(film.name)}</span>
                 </div>
               )}
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#131318]" />
               <button onClick={onClose} className="absolute right-3 top-3 z-20 rounded-full p-2" style={{ background: "rgba(0,0,0,0.5)" }}>
-                <X size={16} style={{ color: "#F5F5F7" }} />
+                <X size={16} style={{ color: colors.text }} />
               </button>
             </div>
             <div className="px-5 pb-5 -mt-6 relative z-10">
-              <h2 className="text-lg font-bold mb-1" style={{ color: "#F5F5F7" }}>{film.name}</h2>
-              <p className="text-[12px] mb-4" style={{ color: "#86868B" }}>{film.category}</p>
+              <h2 className="text-lg font-bold mb-1" style={{ color: colors.text }}>{film.name}</h2>
+              <p className="text-[12px] mb-4" style={{ color: colors.textMuted }}>{film.category}</p>
               <div className="flex gap-3">
                 <button onClick={onPlay}
                   className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-transform hover:scale-105"
-                  style={{ background: "linear-gradient(135deg, #FF6D00, #FFD60A)", color: "#0A0A0F" }}>
+                  style={{ background: "linear-gradient(135deg, #FF6D00, #FFD60A)", color: colors.background }}>
                   <Play size={16} fill="currentColor" /> Regarder
                 </button>
                 <button onClick={onToggleFav}
                   className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] transition-colors"
-                  style={{ background: "#1C1C24", color: isFav ? "#FF3B30" : "#86868B" }}>
+                  style={{ background: colors.surfaceSolid2, color: isFav ? "#FF3B30" : colors.textMuted }}>
                   <Heart size={14} className={isFav ? "fill-current" : ""} />
                 </button>
               </div>
@@ -95,7 +96,7 @@ const PosterCard = React.memo(({ film, isFav, onClick }: { film: Channel; isFav:
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       ) : (
         <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${hashColor(film.name)}`}>
-          <span className="text-lg font-black" style={{ color: "#F5F5F7" }}>{getInitials(film.name)}</span>
+          <span className="text-lg font-black" style={{ color: colors.text }}>{getInitials(film.name)}</span>
         </div>
       )}
       {/* Hover overlay */}
@@ -112,8 +113,8 @@ const PosterCard = React.memo(({ film, isFav, onClick }: { film: Channel; isFav:
         </div>
       )}
     </div>
-    <p className="text-[11px] font-medium leading-tight line-clamp-2 px-0.5" style={{ color: "#B0B0B5" }}>{film.name}</p>
-    <p className="text-[9px] px-0.5 truncate" style={{ color: "#48484A" }}>{film.category}</p>
+    <p className="text-[11px] font-medium leading-tight line-clamp-2 px-0.5" style={{ color: colors.textMuted }}>{film.name}</p>
+    <p className="text-[9px] px-0.5 truncate" style={{ color: colors.textDim }}>{film.category}</p>
   </div>
 ));
 PosterCard.displayName = "PosterCard";
@@ -187,11 +188,11 @@ export function FilmsGrid({ films, favorites, onPlay, onToggleFavorite }: FilmsG
                   <img src={heroFilm.logo} className="h-40 w-28 rounded-xl object-cover shadow-2xl hidden sm:block" style={{ border: "1px solid rgba(255,255,255,0.1)" }} alt="" />
                 )}
                 <div className="flex-1 min-w-0 pb-2">
-                  <h2 className="text-2xl font-bold mb-1 line-clamp-1" style={{ color: "#F5F5F7" }}>{heroFilm.name}</h2>
-                  <p className="text-[12px] mb-3" style={{ color: "#86868B" }}>{heroFilm.category}</p>
+                  <h2 className="text-2xl font-bold mb-1 line-clamp-1" style={{ color: colors.text }}>{heroFilm.name}</h2>
+                  <p className="text-[12px] mb-3" style={{ color: colors.textMuted }}>{heroFilm.category}</p>
                   <button onClick={(e) => { e.stopPropagation(); onPlay(heroFilm); }}
                     className="flex items-center gap-2 rounded-xl px-5 py-2 text-[13px] font-semibold transition-transform hover:scale-105"
-                    style={{ background: "linear-gradient(135deg, #FF6D00, #FFD60A)", color: "#0A0A0F" }}>
+                    style={{ background: "linear-gradient(135deg, #FF6D00, #FFD60A)", color: colors.background }}>
                     <Play size={16} fill="currentColor" /> Regarder
                   </button>
                 </div>
@@ -202,7 +203,7 @@ export function FilmsGrid({ films, favorites, onPlay, onToggleFavorite }: FilmsG
           <div className="absolute bottom-3 right-5 z-20 flex gap-1.5">
             {heroFilms.slice(0, 10).map((_, i) => (
               <button key={i} onClick={(e) => { e.stopPropagation(); setHeroIdx(i); }}
-                className="h-1.5 rounded-full transition-all" style={{ width: i === heroIdx ? 16 : 6, background: i === heroIdx ? "#FF6D00" : "#48484A" }} />
+                className="h-1.5 rounded-full transition-all" style={{ width: i === heroIdx ? 16 : 6, background: i === heroIdx ? "#FF6D00" : colors.textDim }} />
             ))}
           </div>
         </div>
@@ -210,21 +211,21 @@ export function FilmsGrid({ films, favorites, onPlay, onToggleFavorite }: FilmsG
 
       {/* Sort bar */}
       <div className="flex items-center gap-2 px-5 pb-3">
-        <span className="text-[11px] font-semibold" style={{ color: "#48484A" }}>Trier :</span>
+        <span className="text-[11px] font-semibold" style={{ color: colors.textDim }}>Trier :</span>
         {([["default", "Par défaut"], ["az", "A → Z"], ["za", "Z → A"]] as [SortMode, string][]).map(([id, label]) => (
           <button key={id} onClick={() => setSortMode(id)}
             className="rounded-full px-3 py-1 text-[10px] font-medium transition-all"
-            style={sortMode === id ? { background: "rgba(255,109,0,0.15)", color: "#FF6D00", border: "1px solid rgba(255,109,0,0.3)" } : { color: "#86868B", border: "1px solid #1C1C24" }}>
+            style={sortMode === id ? { background: "rgba(255,109,0,0.15)", color: colors.orange, border: "1px solid rgba(255,109,0,0.3)" } : { color: colors.textMuted, border: "1px solid #1C1C24" }}>
             {label}
           </button>
         ))}
-        <span className="ml-auto text-[11px]" style={{ color: "#48484A" }}>{films.length} films</span>
+        <span className="ml-auto text-[11px]" style={{ color: colors.textDim }}>{films.length} films</span>
       </div>
 
       {/* Grouped rows */}
       {grouped.map(([cat, catFilms]) => (
         <div key={cat} className="mb-5">
-          <h3 className="px-5 mb-2 text-[13px] font-semibold" style={{ color: "#B0B0B5" }}>{cat}</h3>
+          <h3 className="px-5 mb-2 text-[13px] font-semibold" style={{ color: colors.textMuted }}>{cat}</h3>
           <div className="flex gap-3 overflow-x-auto scrollbar-thin px-5 pb-2">
             {catFilms.map(f => (
               <PosterCard key={f.id} film={f} isFav={favorites.includes(f.id)} onClick={() => setSelectedFilm(f)} />

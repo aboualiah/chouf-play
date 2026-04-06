@@ -10,6 +10,7 @@ import { TvFocusable } from "@/components/TvFocusable";
 import { useTvNavigation } from "@/hooks/useTvNavigation";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { colors, effects } from "@/lib/theme";
 
 export default function PlaylistManager() {
   const navigate = useNavigate();
@@ -95,16 +96,16 @@ export default function PlaylistManager() {
   });
 
   return (
-    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: "#151524" }}>
+    <div className="min-h-screen overflow-y-auto scrollbar-thin" style={{ background: colors.surfaceSolid }}>
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
         style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #2A2A40" }}>
         <button onClick={() => navigate("/", { replace: true })} className="rounded-xl p-2 transition-all hover:scale-105 active:scale-95"
           style={{ background: "linear-gradient(135deg, #22223A, #28283E)", border: "1px solid #303048" }}>
-          <ArrowLeft size={18} style={{ color: "#FF6D00" }} />
+          <ArrowLeft size={18} style={{ color: colors.orange }} />
         </button>
         <div className="flex-1">
-          <h1 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Mes Playlists</h1>
+          <h1 className="text-lg font-bold" style={{ color: colors.text }}>Mes Playlists</h1>
         </div>
       </header>
 
@@ -113,17 +114,17 @@ export default function PlaylistManager() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { icon: Layers, label: "Total playlists", count: playlists.length, color: "#FF6D00", bg: "rgba(255,109,0,0.08)" },
-            { icon: Tv, label: "Total chaînes", count: totalChannels, color: "#FF6D00", bg: "rgba(255,109,0,0.08)" },
-            { icon: Film, label: "Total films", count: totalVod, color: "#7C3AED", bg: "rgba(124,58,237,0.08)" },
-            { icon: Clapperboard, label: "Total séries", count: totalSeries, color: "#34C759", bg: "rgba(52,199,89,0.08)" },
+            { icon: Layers, label: "Total playlists", count: playlists.length, color: colors.orange, bg: "rgba(255,109,0,0.08)" },
+            { icon: Tv, label: "Total chaînes", count: totalChannels, color: colors.orange, bg: "rgba(255,109,0,0.08)" },
+            { icon: Film, label: "Total films", count: totalVod, color: colors.violet, bg: "rgba(124,58,237,0.08)" },
+            { icon: Clapperboard, label: "Total séries", count: totalSeries, color: colors.green, bg: "rgba(52,199,89,0.08)" },
           ].map((s, i) => (
             <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #2A2A40" }}>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ background: s.bg }}>
                 <s.icon size={20} style={{ color: s.color }} />
               </div>
-              <p className="text-[22px] font-bold" style={{ color: "#F5F5F7" }}>{s.count.toLocaleString()}</p>
-              <p className="text-[11px]" style={{ color: "#48484A" }}>{s.label}</p>
+              <p className="text-[22px] font-bold" style={{ color: colors.text }}>{s.count.toLocaleString()}</p>
+              <p className="text-[11px]" style={{ color: colors.textDim }}>{s.label}</p>
             </div>
           ))}
         </motion.div>
@@ -132,10 +133,10 @@ export default function PlaylistManager() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="rounded-2xl p-5" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #2A2A40" }}>
           <div className="flex items-center gap-3 mb-4">
-            <Smartphone size={18} style={{ color: "#48484A" }} />
+            <Smartphone size={18} style={{ color: colors.textDim }} />
             <div>
-              <p className="text-[14px] font-semibold" style={{ color: "#F5F5F7" }}>Liaison TV</p>
-              <p className="text-[11px]" style={{ color: "#48484A" }}>Scannez le code ou entrez-le sur votre TV pour lier les appareils</p>
+              <p className="text-[14px] font-semibold" style={{ color: colors.text }}>Liaison TV</p>
+              <p className="text-[11px]" style={{ color: colors.textDim }}>Scannez le code ou entrez-le sur votre TV pour lier les appareils</p>
             </div>
           </div>
           <button onClick={() => setShowQr(true)}
@@ -147,7 +148,7 @@ export default function PlaylistManager() {
         </motion.div>
 
         {/* Add + Manage tabs */}
-        <div className="flex gap-1 rounded-xl p-1" style={{ background: "#1E1E34" }}>
+        <div className="flex gap-1 rounded-xl p-1" style={{ background: colors.surfaceSolid2 }}>
           {[
             { id: "add" as const, icon: Plus, label: "Ajouter une playlist" },
             { id: "manage" as const, icon: Layers, label: "Gérer les playlists" },
@@ -155,8 +156,8 @@ export default function PlaylistManager() {
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className="flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-[13px] font-medium transition-all"
               style={activeTab === tab.id
-                ? { background: "rgba(255,109,0,0.1)", color: "#FF6D00" }
-                : { color: "#48484A" }}>
+                ? { background: "rgba(255,109,0,0.1)", color: colors.orange }
+                : { color: colors.textDim }}>
               <tab.icon size={16} />
               {tab.label}
             </button>
@@ -174,13 +175,13 @@ export default function PlaylistManager() {
             ].map((item, i) => (
               <button key={i} onClick={item.action}
                 className="flex w-full items-center gap-4 rounded-2xl p-4 transition-all hover:bg-[#1A1A22]"
-                style={{ background: "#1E1E34", border: "1px solid #2A2A40" }}>
+                style={{ background: colors.surfaceSolid2, border: "1px solid #2A2A40" }}>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: "rgba(255,109,0,0.08)" }}>
-                  <item.icon size={18} style={{ color: "#FF6D00" }} />
+                  <item.icon size={18} style={{ color: colors.orange }} />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-[13px] font-semibold" style={{ color: "#F5F5F7" }}>{item.label}</p>
-                  <p className="text-[11px]" style={{ color: "#48484A" }}>{item.sub}</p>
+                  <p className="text-[13px] font-semibold" style={{ color: colors.text }}>{item.label}</p>
+                  <p className="text-[11px]" style={{ color: colors.textDim }}>{item.sub}</p>
                 </div>
               </button>
             ))}
@@ -207,32 +208,32 @@ export default function PlaylistManager() {
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0"
                         style={{ background: pl.isXtream ? "rgba(124,58,237,0.12)" : "rgba(201,168,76,0.12)" }}>
-                        {pl.isXtream ? <Radio size={20} style={{ color: "#7C3AED" }} /> : <Layers size={20} style={{ color: "#C9A84C" }} />}
+                        {pl.isXtream ? <Radio size={20} style={{ color: colors.violet }} /> : <Layers size={20} style={{ color: colors.gold }} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-[14px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{pl.name}</p>
-                          {pl.isXtream && <span className="text-[9px] px-1.5 py-0.5 rounded-full shrink-0" style={{ background: "rgba(124,58,237,0.1)", color: "#7C3AED" }}>Xtream</span>}
+                          <p className="text-[14px] font-semibold truncate" style={{ color: colors.text }}>{pl.name}</p>
+                          {pl.isXtream && <span className="text-[9px] px-1.5 py-0.5 rounded-full shrink-0" style={{ background: "rgba(124,58,237,0.1)", color: colors.violet }}>Xtream</span>}
                         </div>
                         <div className="flex items-center gap-4 mb-1">
-                          <div className="flex items-center gap-1"><Tv size={11} style={{ color: "#48484A" }} /><span className="text-[10px]" style={{ color: "#48484A" }}>{pl.channels.length}</span></div>
-                          {(pl.vodStreams?.length || 0) > 0 && <div className="flex items-center gap-1"><Film size={11} style={{ color: "#48484A" }} /><span className="text-[10px]" style={{ color: "#48484A" }}>{pl.vodStreams!.length}</span></div>}
-                          {(pl.series?.length || 0) > 0 && <div className="flex items-center gap-1"><Clapperboard size={11} style={{ color: "#48484A" }} /><span className="text-[10px]" style={{ color: "#48484A" }}>{pl.series!.length}</span></div>}
-                          <div className="flex items-center gap-1"><Clock size={11} style={{ color: "#48484A" }} /><span className="text-[10px]" style={{ color: "#48484A" }}>{addedDate}</span></div>
+                          <div className="flex items-center gap-1"><Tv size={11} style={{ color: colors.textDim }} /><span className="text-[10px]" style={{ color: colors.textDim }}>{pl.channels.length}</span></div>
+                          {(pl.vodStreams?.length || 0) > 0 && <div className="flex items-center gap-1"><Film size={11} style={{ color: colors.textDim }} /><span className="text-[10px]" style={{ color: colors.textDim }}>{pl.vodStreams!.length}</span></div>}
+                          {(pl.series?.length || 0) > 0 && <div className="flex items-center gap-1"><Clapperboard size={11} style={{ color: colors.textDim }} /><span className="text-[10px]" style={{ color: colors.textDim }}>{pl.series!.length}</span></div>}
+                          <div className="flex items-center gap-1"><Clock size={11} style={{ color: colors.textDim }} /><span className="text-[10px]" style={{ color: colors.textDim }}>{addedDate}</span></div>
                         </div>
                         {pl.xtreamCredentials && (
                           <div className="flex items-center gap-1">
-                            <Globe size={10} style={{ color: "#48484A" }} />
-                            <span className="text-[9px] font-mono" style={{ color: "#48484A" }}>{pl.xtreamCredentials.server?.replace(/https?:\/\//, "").split("/")[0] || "—"}</span>
+                            <Globe size={10} style={{ color: colors.textDim }} />
+                            <span className="text-[9px] font-mono" style={{ color: colors.textDim }}>{pl.xtreamCredentials.server?.replace(/https?:\/\//, "").split("/")[0] || "—"}</span>
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => handleRefresh(pl)} className="rounded-lg p-2 transition-all hover:bg-white/5 active:scale-90" title="Rafraîchir">
-                          <RefreshCw size={14} className={refreshingId === pl.id ? "animate-spin" : ""} style={{ color: "#48484A" }} />
+                          <RefreshCw size={14} className={refreshingId === pl.id ? "animate-spin" : ""} style={{ color: colors.textDim }} />
                         </button>
                         <button onClick={() => handleDelete(pl.id)} className="rounded-lg p-2 transition-all hover:bg-red-500/10 active:scale-90" title="Supprimer">
-                          <Trash2 size={14} style={{ color: "#FF3B30" }} />
+                          <Trash2 size={14} style={{ color: colors.red }} />
                         </button>
                       </div>
                     </div>
@@ -242,9 +243,9 @@ export default function PlaylistManager() {
               })}
             </AnimatePresence>
             {playlists.length === 0 && (
-              <div className="text-center py-16 rounded-2xl" style={{ background: "#1E1E34", border: "1px solid #2A2A40" }}>
-                <Layers size={48} className="mx-auto mb-4" style={{ color: "#22223A" }} />
-                <p className="text-[14px] font-medium mb-1" style={{ color: "#48484A" }}>Aucune playlist chargée</p>
+              <div className="text-center py-16 rounded-2xl" style={{ background: colors.surfaceSolid2, border: "1px solid #2A2A40" }}>
+                <Layers size={48} className="mx-auto mb-4" style={{ color: colors.surfaceSolid2 }} />
+                <p className="text-[14px] font-medium mb-1" style={{ color: colors.textDim }}>Aucune playlist chargée</p>
                 <p className="text-[12px]" style={{ color: "#2C2C34" }}>Ajoutez une playlist pour commencer</p>
               </div>
             )}

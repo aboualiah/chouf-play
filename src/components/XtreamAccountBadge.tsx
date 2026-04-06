@@ -1,6 +1,7 @@
 import { AlertTriangle, Wifi, Monitor, Calendar, Shield, Copy, Check } from "lucide-react";
 import { Playlist } from "@/lib/storage";
 import { useState } from "react";
+import { colors, effects } from "@/lib/theme";
 
 interface XtreamAccountBadgeProps {
   playlist: Playlist;
@@ -37,7 +38,7 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
 
   const statusEmoji = isExpired ? "🔴" : isWarning ? "🟠" : "🟢";
   const statusLabel = isExpired ? "Expiré" : info?.status || "Actif";
-  const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759";
+  const statusColor = isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : colors.green;
   const expiresLabel = isValidExpiry
     ? expiresAt!.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
     : info?.exp_date ? `Raw: ${info.exp_date}` : "—";
@@ -56,7 +57,7 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
   };
 
   return (
-    <div className="mt-1.5 rounded-xl overflow-hidden" style={{ background: "#0A0A0F", border: "1px solid #1C1C24" }}>
+    <div className="mt-1.5 rounded-xl overflow-hidden" style={{ background: colors.background, border: "1px solid #1C1C24" }}>
       {/* Status header */}
       <div className="flex items-center justify-between px-2.5 py-1.5" style={{ borderBottom: "1px solid #1C1C24" }}>
         <div className="flex items-center gap-1.5">
@@ -66,8 +67,8 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Wifi size={9} style={{ color: "#48484A" }} />
-          <span className="text-[9px]" style={{ color: "#48484A" }}>
+          <Wifi size={9} style={{ color: colors.textDim }} />
+          <span className="text-[9px]" style={{ color: colors.textDim }}>
             Max {info?.max_connections || "—"}
           </span>
         </div>
@@ -77,37 +78,37 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
         {/* MAC address */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Monitor size={9} style={{ color: "#48484A" }} />
-            <span className="text-[9px] font-mono" style={{ color: "#86868B" }}>
+            <Monitor size={9} style={{ color: colors.textDim }} />
+            <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
               {mac}
             </span>
           </div>
           <button onClick={handleCopyMac} className="p-0.5 rounded hover:bg-[#1C1C24] transition-colors">
-            {copied ? <Check size={9} style={{ color: "#34C759" }} /> : <Copy size={9} style={{ color: "#48484A" }} />}
+            {copied ? <Check size={9} style={{ color: colors.green }} /> : <Copy size={9} style={{ color: colors.textDim }} />}
           </button>
         </div>
 
         {/* Expiration */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Calendar size={9} style={{ color: isWarning ? "#FF9F0A" : "#48484A" }} />
-            <span className="text-[9px]" style={{ color: isWarning ? "#FF9F0A" : "#86868B" }}>
+            <Calendar size={9} style={{ color: isWarning ? "#FF9F0A" : colors.textDim }} />
+            <span className="text-[9px]" style={{ color: isWarning ? "#FF9F0A" : colors.textMuted }}>
               {expiresLabel}
             </span>
           </div>
-          <span className="text-[9px] font-semibold" style={{ color: isWarning ? "#FF9F0A" : isExpired ? "#FF3B30" : "#86868B" }}>
+          <span className="text-[9px] font-semibold" style={{ color: isWarning ? "#FF9F0A" : isExpired ? "#FF3B30" : colors.textMuted }}>
             {daysRemaining !== null ? `${Math.max(daysRemaining, 0)}j` : "—"}
           </span>
         </div>
 
         {/* Progress bar */}
         {progressPct !== null && (
-          <div className="h-1 rounded-full overflow-hidden" style={{ background: "#1C1C24" }}>
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: colors.surfaceSolid2 }}>
             <div
               className="h-full rounded-full transition-all"
               style={{
                 width: `${progressPct}%`,
-                background: isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : "#34C759",
+                background: isExpired ? "#FF3B30" : isWarning ? "#FF9F0A" : colors.green,
               }}
             />
           </div>
@@ -115,7 +116,7 @@ export function XtreamAccountBadge({ playlist }: XtreamAccountBadgeProps) {
 
         {/* Warning */}
         {isWarning && (
-          <div className="flex items-center gap-1 text-[9px] pt-0.5" style={{ color: "#FF9F0A" }}>
+          <div className="flex items-center gap-1 text-[9px] pt-0.5" style={{ color: colors.warning }}>
             <AlertTriangle size={9} />
             <span>Expiration dans {daysRemaining}j</span>
           </div>

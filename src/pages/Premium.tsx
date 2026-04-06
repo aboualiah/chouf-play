@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X, Crown, Users, MonitorOff, Headphones, Check } from "lucide-react";
+import { colors, effects } from "@/lib/theme";
 
 const PLANS = [
   { id: "lifetime", price: "24,99 €", period: "À vie", badge: "Meilleure offre" },
@@ -20,14 +21,14 @@ export default function Premium() {
   const paymentUrl = "https://choufplay.app/premium";
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative px-4 py-10" style={{ background: "#0A0A0F" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center relative px-4 py-10" style={{ background: colors.background }}>
       {/* Close */}
       <button
         onClick={() => navigate("/", { replace: true })}
         className="absolute top-5 right-5 rounded-full p-2 transition-colors hover:bg-white/5 z-20"
-        style={{ background: "#131318", border: "1px solid #1C1C24" }}
+        style={{ background: colors.surfaceSolid, border: "1px solid #1C1C24" }}
       >
-        <X size={18} style={{ color: "#86868B" }} />
+        <X size={18} style={{ color: colors.textMuted }} />
       </button>
 
       {/* Background glow */}
@@ -49,19 +50,19 @@ export default function Premium() {
           className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl"
           style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(59,130,246,0.1))", border: "1px solid rgba(124,58,237,0.2)" }}
         >
-          <Crown size={32} style={{ color: "#A78BFA", filter: "drop-shadow(0 0 10px rgba(167,139,250,0.5))" }} />
+          <Crown size={32} style={{ color: colors.violetLight, filter: "drop-shadow(0 0 10px rgba(167,139,250,0.5))" }} />
         </motion.div>
 
-        <h1 className="text-[22px] font-bold mb-2" style={{ color: "#F5F5F7" }}>
-          Débloquer les fonctionnalités <span style={{ color: "#A78BFA" }}>Premium</span>
+        <h1 className="text-[22px] font-bold mb-2" style={{ color: colors.text }}>
+          Débloquer les fonctionnalités <span style={{ color: colors.violetLight }}>Premium</span>
         </h1>
 
         {/* Features */}
         <div className="flex items-center justify-center gap-6 mb-8">
           {FEATURES.map((f, i) => (
             <div key={i} className="flex items-center gap-2">
-              <f.icon size={16} style={{ color: "#A78BFA" }} />
-              <span className="text-[12px] font-medium" style={{ color: "#86868B" }}>{f.label}</span>
+              <f.icon size={16} style={{ color: colors.violetLight }} />
+              <span className="text-[12px] font-medium" style={{ color: colors.textMuted }}>{f.label}</span>
             </div>
           ))}
         </div>
@@ -82,7 +83,7 @@ export default function Premium() {
                 style={{
                   background: isLifetime
                     ? "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.08))"
-                    : "#131318",
+                    : colors.surfaceSolid,
                   border: isActive
                     ? isLifetime ? "2px solid #A78BFA" : "2px solid #FF6D00"
                     : "1px solid #1C1C24",
@@ -91,15 +92,15 @@ export default function Premium() {
               >
                 {plan.badge && (
                   <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-bold px-3 py-1 rounded-full whitespace-nowrap"
-                    style={{ background: "#34C759", color: "#fff" }}>
+                    style={{ background: colors.green, color: "#fff" }}>
                     {plan.badge}
                   </span>
                 )}
-                <p className="text-[20px] font-black mb-1" style={{ color: "#F5F5F7" }}>{plan.price}</p>
-                <p className="text-[12px] font-medium" style={{ color: "#86868B" }}>{plan.period}</p>
+                <p className="text-[20px] font-black mb-1" style={{ color: colors.text }}>{plan.price}</p>
+                <p className="text-[12px] font-medium" style={{ color: colors.textMuted }}>{plan.period}</p>
                 {isActive && (
                   <div className="absolute top-3 right-3 h-5 w-5 rounded-full flex items-center justify-center"
-                    style={{ background: isLifetime ? "#A78BFA" : "#FF6D00" }}>
+                    style={{ background: isLifetime ? "#A78BFA" : colors.orange }}>
                     <Check size={12} style={{ color: "#fff" }} />
                   </div>
                 )}
@@ -127,7 +128,7 @@ export default function Premium() {
             alt="QR Code Premium" width={160} height={160}
           />
         </div>
-        <p className="text-[11px]" style={{ color: "#48484A" }}>
+        <p className="text-[11px]" style={{ color: colors.textDim }}>
           Scannez pour accéder au paiement
         </p>
       </motion.div>

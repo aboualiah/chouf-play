@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { Channel } from "@/lib/channels";
 import { Play, Pause, Volume2, VolumeX, Radio, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { colors, effects } from "@/lib/theme";
 
 interface RadioPlayerProps {
   channels: Channel[];
@@ -49,10 +50,10 @@ export function RadioMiniPlayer({ station, playing, onToggle, onClose, volume, o
       className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-2.5"
       style={{ background: "rgba(19,19,24,0.95)", backdropFilter: "blur(20px)", borderTop: "1px solid #1C1C24" }}>
       <AnimatedBars playing={playing} />
-      <Radio size={16} style={{ color: "#34C759" }} />
+      <Radio size={16} style={{ color: colors.green }} />
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{station.name}</p>
-        <p className="text-[9px]" style={{ color: "#48484A" }}>{station.category}</p>
+        <p className="text-[12px] font-semibold truncate" style={{ color: colors.text }}>{station.name}</p>
+        <p className="text-[9px]" style={{ color: colors.textDim }}>{station.category}</p>
       </div>
 
       <button onClick={onToggle}
@@ -64,10 +65,10 @@ export function RadioMiniPlayer({ station, playing, onToggle, onClose, volume, o
       <div className="relative">
         <button onClick={() => setShowVolume(!showVolume)}
           className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#1C1C24] transition-colors">
-          {volume === 0 ? <VolumeX size={14} style={{ color: "#86868B" }} /> : <Volume2 size={14} style={{ color: "#86868B" }} />}
+          {volume === 0 ? <VolumeX size={14} style={{ color: colors.textMuted }} /> : <Volume2 size={14} style={{ color: colors.textMuted }} />}
         </button>
         {showVolume && (
-          <div className="absolute bottom-full right-0 mb-2 p-2 rounded-lg" style={{ background: "#1C1C24" }}>
+          <div className="absolute bottom-full right-0 mb-2 p-2 rounded-lg" style={{ background: colors.surfaceSolid2 }}>
             <input type="range" min={0} max={1} step={0.05} value={volume}
               onChange={e => onVolumeChange(Number(e.target.value))}
               className="h-1 w-20 accent-[#FF6D00]" />
@@ -76,7 +77,7 @@ export function RadioMiniPlayer({ station, playing, onToggle, onClose, volume, o
       </div>
 
       <button onClick={onClose} className="hover:bg-[#1C1C24] rounded-full p-1 transition-colors">
-        <X size={14} style={{ color: "#48484A" }} />
+        <X size={14} style={{ color: colors.textDim }} />
       </button>
     </motion.div>
   );
@@ -105,9 +106,9 @@ export function RadioList({ channels, activeStation, onSelect }: {
   if (radioChannels.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 p-8 gap-3">
-        <Radio size={40} style={{ color: "#48484A" }} />
-        <p className="text-[13px]" style={{ color: "#48484A" }}>Aucune station radio trouvée</p>
-        <p className="text-[11px] text-center" style={{ color: "#48484A" }}>
+        <Radio size={40} style={{ color: colors.textDim }} />
+        <p className="text-[13px]" style={{ color: colors.textDim }}>Aucune station radio trouvée</p>
+        <p className="text-[11px] text-center" style={{ color: colors.textDim }}>
           Les stations radio apparaîtront ici quand votre playlist contient des catégories "Radio"
         </p>
       </div>
@@ -117,14 +118,14 @@ export function RadioList({ channels, activeStation, onSelect }: {
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin">
       <div className="flex items-center gap-2 px-5 py-3">
-        <Radio size={16} style={{ color: "#34C759" }} />
-        <span className="text-[14px] font-bold" style={{ color: "#F5F5F7" }}>Radio en ligne</span>
-        <span className="text-[11px]" style={{ color: "#48484A" }}>{radioChannels.length} stations</span>
+        <Radio size={16} style={{ color: colors.green }} />
+        <span className="text-[14px] font-bold" style={{ color: colors.text }}>Radio en ligne</span>
+        <span className="text-[11px]" style={{ color: colors.textDim }}>{radioChannels.length} stations</span>
       </div>
 
       {grouped.map(([cat, stations]) => (
         <div key={cat} className="mb-4">
-          <h3 className="px-5 mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#48484A" }}>{cat}</h3>
+          <h3 className="px-5 mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: colors.textDim }}>{cat}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 px-3">
             {stations.map(s => (
               <button key={s.id} onClick={() => onSelect(s)}
@@ -138,11 +139,11 @@ export function RadioList({ channels, activeStation, onSelect }: {
                   {activeStation?.id === s.id ? (
                     <AnimatedBars playing={true} />
                   ) : (
-                    <Radio size={18} style={{ color: "#48484A" }} />
+                    <Radio size={18} style={{ color: colors.textDim }} />
                   )}
                 </div>
                 <span className="text-[11px] font-medium text-center truncate w-full"
-                  style={{ color: activeStation?.id === s.id ? "#34C759" : "#B0B0B5" }}>
+                  style={{ color: activeStation?.id === s.id ? "#34C759" : colors.textMuted }}>
                   {s.name}
                 </span>
               </button>

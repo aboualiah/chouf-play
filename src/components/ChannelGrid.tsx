@@ -2,6 +2,7 @@ import { Channel, CATEGORY_GRADIENTS } from "@/lib/channels";
 import { Heart, Play, Loader2 } from "lucide-react";
 import { MiniEpg } from "@/components/MiniEpg";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { colors, effects } from "@/lib/theme";
 
 interface ChannelGridProps {
   channels: Channel[];
@@ -27,7 +28,7 @@ const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite 
     onClick={onPlay}
     className="group relative cursor-pointer overflow-hidden rounded-[14px] transition-all duration-200 hover:scale-[1.02]"
     style={{
-      background: "#131318",
+      background: colors.surfaceSolid,
       border: `1px solid ${isActive ? "rgba(255, 109, 0, 0.5)" : "rgba(28, 28, 36, 0.5)"}`,
       boxShadow: isActive ? "0 0 20px rgba(255, 109, 0, 0.1)" : "none",
     }}
@@ -39,20 +40,20 @@ const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite 
         />
       ) : (
         <div className={`flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-gradient-to-br ${CATEGORY_GRADIENTS[ch.category] || "from-gray-600/40 to-gray-800/30"}`}>
-          <span className="text-sm font-bold" style={{ color: "#F5F5F7" }}>{getInitials(ch.name)}</span>
+          <span className="text-sm font-bold" style={{ color: colors.text }}>{getInitials(ch.name)}</span>
         </div>
       )}
     </div>
     <div className="px-3 py-2.5">
-      <p className="text-[11px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
-      <p className="text-[9px] truncate" style={{ color: "#48484A" }}>{ch.category}</p>
+      <p className="text-[11px] font-semibold truncate" style={{ color: colors.text }}>{ch.name}</p>
+      <p className="text-[9px] truncate" style={{ color: colors.textDim }}>{ch.category}</p>
     </div>
 
     {/* Active badge */}
     {isActive && (
       <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full px-2 py-0.5" style={{ background: "rgba(52, 199, 89, 0.15)" }}>
-        <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#34C759" }} />
-        <span className="text-[8px] font-bold" style={{ color: "#34C759" }}>EN DIRECT</span>
+        <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: colors.green }} />
+        <span className="text-[8px] font-bold" style={{ color: colors.green }}>EN DIRECT</span>
       </div>
     )}
 
@@ -62,7 +63,7 @@ const ChannelCard = React.memo(({ ch, isFav, isActive, onPlay, onToggleFavorite 
       className="absolute right-2 top-2 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
       style={{ background: "rgba(10, 10, 15, 0.6)", backdropFilter: "blur(4px)" }}
     >
-      <Heart size={11} className={isFav ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={isFav ? {} : { color: "#F5F5F7" }} />
+      <Heart size={11} className={isFav ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={isFav ? {} : { color: colors.text }} />
     </button>
 
     {/* Play overlay */}
@@ -107,7 +108,7 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
   if (channels.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
-        <p className="text-sm" style={{ color: "#48484A" }}>Aucune chaîne trouvée</p>
+        <p className="text-sm" style={{ color: colors.textDim }}>Aucune chaîne trouvée</p>
       </div>
     );
   }
@@ -126,16 +127,16 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
               {ch.logo ? (
                 <img src={ch.logo} alt={ch.name} loading="lazy" className="h-6 w-6 rounded object-contain" />
               ) : (
-                <span className="text-[10px] font-bold" style={{ color: "#F5F5F7" }}>{getInitials(ch.name)}</span>
+                <span className="text-[10px] font-bold" style={{ color: colors.text }}>{getInitials(ch.name)}</span>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-semibold truncate" style={{ color: "#F5F5F7" }}>{ch.name}</p>
+              <p className="text-[12px] font-semibold truncate" style={{ color: colors.text }}>{ch.name}</p>
               <MiniEpg channelName={ch.name} />
             </div>
             <button onClick={e => { e.stopPropagation(); onToggleFavorite(ch.id); }}
               className={`transition-opacity ${favorites.includes(ch.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-              <Heart size={14} className={favorites.includes(ch.id) ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={favorites.includes(ch.id) ? {} : { color: "#48484A" }} />
+              <Heart size={14} className={favorites.includes(ch.id) ? "fill-[#FF3B30] text-[#FF3B30]" : ""} style={favorites.includes(ch.id) ? {} : { color: colors.textDim }} />
             </button>
           </div>
         ))}
@@ -144,7 +145,7 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
             <button
               onClick={() => setVisibleCount((current) => Math.min(current + batchSize, channels.length))}
               className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-medium"
-              style={{ background: "#131318", color: "#86868B", border: "1px solid #1C1C24" }}
+              style={{ background: colors.surfaceSolid, color: colors.textMuted, border: "1px solid #1C1C24" }}
             >
               <Loader2 size={14} className="animate-spin" />
               {visibleCount} / {channels.length}
@@ -174,7 +175,7 @@ export function ChannelGrid({ channels, favorites, activeChannelId, onPlay, onTo
           <button
             onClick={() => setVisibleCount((current) => Math.min(current + batchSize, channels.length))}
             className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-medium"
-            style={{ background: "#131318", color: "#86868B", border: "1px solid #1C1C24" }}
+            style={{ background: colors.surfaceSolid, color: colors.textMuted, border: "1px solid #1C1C24" }}
           >
             <Loader2 size={14} className="animate-spin" />
             Charger plus ({visibleCount} / {channels.length})

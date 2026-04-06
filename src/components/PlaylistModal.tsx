@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Channel } from "@/lib/channels";
 import { toast } from "sonner";
 import { detectXtreamUrl, fetchTextWithProxy, loadXtreamPlaylist, XtreamPlaylistData } from "@/lib/xtream";
+import { colors, effects } from "@/lib/theme";
 
 interface PlaylistModalProps {
   open: boolean;
@@ -70,7 +71,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
     return () => window.removeEventListener("chouf-back", handler);
   }, [open, onClose]);
 
-  const inputStyle = { background: "#22223A", border: "1px solid #242430", color: "#F5F5F7" };
+  const inputStyle = { background: colors.surfaceSolid2, border: "1px solid #242430", color: colors.text };
 
   const requirePlaylistName = () => {
     if (playlistName.trim()) return true;
@@ -215,22 +216,22 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-[414px] rounded-[20px] p-5"
-            style={{ background: "#1E1E34", border: "2px solid #353540", boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)" }}
+            style={{ background: colors.surfaceSolid2, border: "2px solid #353540", boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)" }}
           >
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-bold" style={{ color: "#F5F5F7" }}>Ajouter une playlist</h2>
-              <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-[#22223A]" style={{ color: "#86868B" }}>
+              <h2 className="text-lg font-bold" style={{ color: colors.text }}>Ajouter une playlist</h2>
+              <button onClick={onClose} className="rounded-lg p-1.5 transition-colors hover:bg-[#22223A]" style={{ color: colors.textMuted }}>
                 <X size={18} />
               </button>
             </div>
 
-            <div className="mb-5 flex rounded-xl p-1" style={{ background: "#22223A" }}>
+            <div className="mb-5 flex rounded-xl p-1" style={{ background: colors.surfaceSolid2 }}>
               {tabs.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setTab(item.id)}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors"
-                  style={tab === item.id ? { background: "#242430", color: "#F5F5F7" } : { color: "#86868B" }}
+                  style={tab === item.id ? { background: colors.surfaceSolid2, color: colors.text } : { color: colors.textMuted }}
                 >
                   <item.icon size={13} />
                   {item.label}
@@ -239,7 +240,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
             </div>
 
             <div className="mb-4 space-y-1.5">
-              <label className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: "#86868B" }}>
+              <label className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: colors.textMuted }}>
                 <Type size={12} /> Nom de la liste
               </label>
               <input
@@ -263,7 +264,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   style={inputStyle}
                 />
                 {url && detectXtreamUrl(url) && (
-                  <p className="flex items-center gap-1 text-[11px]" style={{ color: "#FF6D00" }}>
+                  <p className="flex items-center gap-1 text-[11px]" style={{ color: colors.orange }}>
                     <Server size={11} /> Xtream détecté automatiquement
                   </p>
                 )}
@@ -280,8 +281,8 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
 
             {tab === "file" && (
               <label className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl p-8 transition-colors hover:bg-[#22223A]" style={{ border: "2px dashed #242430" }}>
-                <Upload size={28} style={{ color: "#48484A" }} />
-                <span className="text-[13px]" style={{ color: "#86868B" }}>Cliquez pour sélectionner un fichier .m3u</span>
+                <Upload size={28} style={{ color: colors.textDim }} />
+                <span className="text-[13px]" style={{ color: colors.textMuted }}>Cliquez pour sélectionner un fichier .m3u</span>
                 <input type="file" accept=".m3u,.m3u8" onChange={loadFromFile} className="hidden" />
               </label>
             )}
@@ -324,7 +325,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
               </div>
             )}
 
-            <div className="my-4 h-px" style={{ background: "#22223A" }} />
+            <div className="my-4 h-px" style={{ background: colors.surfaceSolid2 }} />
             <div className="flex gap-2">
               <button
                 onClick={() => {
@@ -332,7 +333,7 @@ export function PlaylistModal({ open, onClose, onPlaylistLoaded, onLoadDemo }: P
                   onClose();
                 }}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-[12px] font-medium transition-colors hover:bg-[#242430]"
-                style={{ background: "#22223A", color: "#F5F5F7" }}
+                style={{ background: colors.surfaceSolid2, color: colors.text }}
               >
                 <Tv size={14} /> Chaînes démo (24)
               </button>

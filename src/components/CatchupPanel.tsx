@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Channel } from "@/lib/channels";
 import { Play, Rewind, X, Radio as RadioIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { colors, effects } from "@/lib/theme";
 
 interface CatchupPanelProps {
   channel: Channel;
@@ -85,16 +86,16 @@ export function CatchupPanel({ channel, open, onClose, onPlay }: CatchupPanelPro
           <motion.div initial={{ x: 400 }} animate={{ x: 0 }} exit={{ x: 400 }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
             className="fixed right-0 top-0 z-50 h-full w-[380px] max-w-[90vw] flex flex-col"
-            style={{ background: "#131318", borderLeft: "1px solid #1C1C24" }}>
+            style={{ background: colors.surfaceSolid, borderLeft: "1px solid #1C1C24" }}>
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid #1C1C24" }}>
-              <Rewind size={16} style={{ color: "#FF6D00" }} />
+              <Rewind size={16} style={{ color: colors.orange }} />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold" style={{ color: "#F5F5F7" }}>Catch-up / Replay</p>
-                <p className="text-[10px] truncate" style={{ color: "#48484A" }}>{channel.name}</p>
+                <p className="text-[13px] font-semibold" style={{ color: colors.text }}>Catch-up / Replay</p>
+                <p className="text-[10px] truncate" style={{ color: colors.textDim }}>{channel.name}</p>
               </div>
               <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-[#1C1C24]">
-                <X size={14} style={{ color: "#86868B" }} />
+                <X size={14} style={{ color: colors.textMuted }} />
               </button>
             </div>
 
@@ -103,7 +104,7 @@ export function CatchupPanel({ channel, open, onClose, onPlay }: CatchupPanelPro
               {grouped.map(([day, progs]) => (
                 <div key={day}>
                   <div className="sticky top-0 z-10 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider"
-                    style={{ background: "#0A0A0F", color: "#48484A" }}>
+                    style={{ background: colors.background, color: colors.textDim }}>
                     {day}
                   </div>
                   {progs.map((p, i) => (
@@ -116,20 +117,20 @@ export function CatchupPanel({ channel, open, onClose, onPlay }: CatchupPanelPro
                         const duration = Math.floor((p.end.getTime() - p.start.getTime()) / 60000);
                         onPlay(`catchup:${channel.id}:${timestamp}:${duration}`);
                       }}>
-                      <span className="text-[10px] font-mono w-[85px] shrink-0" style={{ color: p.isCurrent ? "#FF6D00" : "#48484A" }}>
+                      <span className="text-[10px] font-mono w-[85px] shrink-0" style={{ color: p.isCurrent ? "#FF6D00" : colors.textDim }}>
                         {formatTime(p.start)} → {formatTime(p.end)}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-medium truncate" style={{ color: p.isCurrent ? "#F5F5F7" : "#86868B" }}>
+                        <p className="text-[12px] font-medium truncate" style={{ color: p.isCurrent ? "#F5F5F7" : colors.textMuted }}>
                           {p.title}
                         </p>
                       </div>
                       {p.isCurrent ? (
-                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,59,48,0.15)", color: "#FF3B30" }}>
+                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,59,48,0.15)", color: colors.red }}>
                           🔴 EN DIRECT
                         </span>
                       ) : (
-                        <Play size={12} style={{ color: "#48484A" }} />
+                        <Play size={12} style={{ color: colors.textDim }} />
                       )}
                     </div>
                   ))}
