@@ -60,33 +60,24 @@ function GlobalTVHandlers({ children }: { children: React.ReactNode }) {
           focused.click();
         }
       }
-      // Intercept Back button globally to prevent app exit
-      const isBack = e.key === "Backspace" || e.keyCode === 4 || e.keyCode === 10009;
+      // Intercept Android Back / TV remote back — prevent default browser back only
+      const isBack = e.keyCode === 4 || e.keyCode === 10009;
       if (isBack) {
-        // Let the specific page handlers deal with it, but prevent default browser behavior
-        // Only Escape is allowed to propagate normally
-        if (e.key === "Backspace" && (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA")) {
-          return; // Allow backspace in text fields
-        }
         e.preventDefault();
+        // Dispatch a custom event so page-level handlers can react
+        window.dispatchEvent(new CustomEvent('chouf-back'));
+      }
+      // Backspace: only prevent when NOT in a text field
+      if (e.key === "Backspace") {
+        const tag = document.activeElement?.tagName;
+        if (tag !== "INPUT" && tag !== "TEXTAREA") {
+          e.preventDefault();
+          window.dispatchEvent(new CustomEvent('chouf-back'));
+        }
       }
     };
     window.addEventListener("keydown", handler, { capture: true });
     return () => window.removeEventListener("keydown", handler, { capture: true });
-  }, []);
-
-  // Prevent popstate from exiting app
-  useEffect(() => {
-    // Push initial states to prevent exit
-    for (let i = 0; i < 3; i++) {
-      window.history.pushState({ chouf_guard: true }, '', window.location.href);
-    }
-    const handlePopState = () => {
-      // Re-push to prevent exit
-      window.history.pushState({ chouf_guard: true }, '', window.location.href);
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   return <>{children}</>;

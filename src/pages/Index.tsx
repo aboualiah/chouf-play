@@ -271,44 +271,38 @@ export default function Index() {
 
   const hasContent = demoLoaded || allChannels.length > 0 || allVod.length > 0 || allSeries.length > 0;
 
-  // ── Android TV: Back button / history management — anti-exit ──
+  // ── Android TV: Back button navigation ──
+  // Only use history guard at the root dashboard to prevent accidental app exit
   useEffect(() => {
     if (onboardingStep !== "app") return;
-
-    // Fill history to prevent exiting
-    for (let i = 0; i < 5; i++) {
-      window.history.pushState({ chouf: true }, '', window.location.href);
-    }
-
+    // Push one guard state so a single back press doesn't exit
+    window.history.pushState({ chouf: true }, '', window.location.href);
     const handlePopState = () => {
-      // Re-fill history to prevent exit
       window.history.pushState({ chouf: true }, '', window.location.href);
-      // Dispatch internal event
       window.dispatchEvent(new CustomEvent('chouf-back'));
     };
-
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [onboardingStep]);
 
-  // Listen for internal back navigation
+  // Listen for internal back navigation (from keydown or popstate)
   useEffect(() => {
     if (onboardingStep !== "app") return;
-
     const handleBack = () => {
-      if (activeChannel) {
-        setActiveChannel(null);
-      } else if (view === "content" || showEpgGrid || showRecordings) {
+      if (showEpg) { setShowEpg(false); return; }
+      if (activeChannel) { setActiveChannel(null); return; }
+      if (previewChannel) { setPreviewChannel(null); return; }
+      if (view === "content" || showEpgGrid || showRecordings) {
         setView("dashboard");
         setShowEpgGrid(false);
         setShowRecordings(false);
+        return;
       }
-      // At dashboard: do nothing (don't quit)
+      // At dashboard root: do nothing — don't quit
     };
-
     window.addEventListener("chouf-back", handleBack);
     return () => window.removeEventListener("chouf-back", handleBack);
-  }, [onboardingStep, activeChannel, view, showEpgGrid, showRecordings]);
+  }, [onboardingStep, activeChannel, view, showEpgGrid, showRecordings, showEpg, previewChannel]);
 
   // ── Auto-scroll focused elements into view (D-PAD navigation) ──
   useEffect(() => {
