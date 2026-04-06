@@ -158,9 +158,10 @@ export function DashboardCards({
   const tvFocusStyle = (i: number) =>
     tvFocus === i
       ? {
-          boxShadow: "0 0 0 3px #FF6D00, 0 0 30px rgba(255,109,0,0.25), 0 0 60px rgba(255,109,0,0.1)",
+          boxShadow: "0 0 0 3px #FF6D00, 0 0 40px rgba(255,109,0,0.35), 0 0 80px rgba(255,109,0,0.15)",
           transform: "scale(1.04)",
-          transition: "all 150ms ease",
+          transition: "all 200ms ease",
+          filter: "brightness(1.1)",
         }
       : {};
 
@@ -234,7 +235,7 @@ export function DashboardCards({
               }}
             >
               <btn.icon size={20} style={{ color: "#C9A84C", filter: "drop-shadow(0 0 4px rgba(201,168,76,0.3))" }} />
-              <span className="text-[11px] font-medium" style={{ color: "#86868B" }}>{btn.label}</span>
+              <span className="text-[11px] font-medium" style={{ color: "#9E9EA8" }}>{btn.label}</span>
             </button>
           ))}
         </div>

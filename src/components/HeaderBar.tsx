@@ -42,7 +42,7 @@ export function HeaderBar({ searchQuery, onSearchChange, viewMode, onViewModeCha
 
   const headerFocusStyle = (idx: number) =>
     tvHeaderFocus === idx
-      ? { boxShadow: "0 0 0 3px #FF6D00, 0 0 20px rgba(255,109,0,0.3)", transform: "scale(1.15)", transition: "all 150ms ease" }
+      ? { boxShadow: "0 0 0 3px #FF6D00, 0 0 25px rgba(255,109,0,0.35)", transform: "scale(1.2)", transition: "all 200ms ease" }
       : {};
   const time = now.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" });
   const date = now.toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" });

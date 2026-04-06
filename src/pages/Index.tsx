@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Radio, Star, Play, Filter, ArrowLeft, Heart } from "lucide-react";
+import { Radio, Star, Play, Filter, ArrowLeft, Heart, LogOut } from "lucide-react";
 import { getCurrentProgram } from "@/components/MiniEpg";
 import { MiniEpg } from "@/components/MiniEpg";
 import { useTvNavigation } from "@/hooks/useTvNavigation";
@@ -66,6 +66,7 @@ export default function Index() {
   const [showRecordings, setShowRecordings] = useState(false);
   const [previewChannel, setPreviewChannel] = useState<Channel | null>(null);
   const [headerTvFocus, setHeaderTvFocus] = useState<number | null>(null);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   // Radio player hook
   const { radioStation, radioPlaying, radioVolume, setRadioVolume, playRadio, toggleRadio, stopRadio } = useRadioPlayer();
@@ -299,7 +300,8 @@ export default function Index() {
         setShowRecordings(false);
         return;
       }
-      // At dashboard root: do nothing — don't quit
+      // At dashboard root: show exit confirmation
+      setShowExitDialog(true);
     };
     window.addEventListener("chouf-back", handleBack);
     return () => window.removeEventListener("chouf-back", handleBack);
@@ -416,9 +418,9 @@ export default function Index() {
     // Live TV with 3-panel layout: Categories | Channels | Preview
     if (activeTab === "live") {
       return (
-        <div className="flex flex-1 h-full overflow-hidden">
+        <div className="flex flex-1 h-full overflow-hidden" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,109,0,0.03) 0%, #0D0D1A 60%)" }}>
           {/* ═══ Column 1: Categories ═══ */}
-          <div className="w-[220px] shrink-0 flex flex-col overflow-hidden" style={{ background: "#14142A", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="w-[220px] shrink-0 flex flex-col overflow-hidden" style={{ background: "rgba(18,18,40,0.85)", backdropFilter: "blur(12px)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="px-4 py-3 flex items-center gap-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
               <div className="h-2 w-2 rounded-full" style={{ background: "#FF6D00", boxShadow: "0 0 8px rgba(255,109,0,0.5)" }} />
               <p className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: "#86868B" }}>Catégories</p>
@@ -454,7 +456,7 @@ export default function Index() {
                   >
                     <div className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer">
                       {Icon && <Icon size={15} style={{ color: isItemActive || isTvFocused ? "#FF6D00" : "#48484A" }} />}
-                      <span className="text-[13px] font-semibold flex-1 truncate" style={{ color: isTvFocused ? "#FFFFFF" : isItemActive ? "#F5F5F7" : "#86868B" }}>
+                      <span className="text-[13px] font-semibold flex-1 truncate" style={{ color: isTvFocused ? "#FFFFFF" : isItemActive ? "#F5F5F7" : "#9E9EA8" }}>
                         {item.label}
                       </span>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md tabular-nums" style={{
@@ -469,7 +471,7 @@ export default function Index() {
           </div>
 
           {/* ═══ Column 2: Channel List ═══ */}
-          <div className="w-[340px] shrink-0 flex flex-col overflow-hidden" style={{ background: "#181830", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="w-[340px] shrink-0 flex flex-col overflow-hidden" style={{ background: "rgba(20,20,48,0.80)", backdropFilter: "blur(12px)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
               <div className="flex items-center gap-2.5">
                 <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#34C759", boxShadow: "0 0 8px rgba(52,199,89,0.5)" }} />
@@ -506,9 +508,9 @@ export default function Index() {
                       style={
                         focused
                           ? {
-                              background: "linear-gradient(90deg, rgba(255,109,0,0.30) 0%, rgba(255,109,0,0.10) 100%)",
+                              background: "linear-gradient(90deg, rgba(255,109,0,0.35) 0%, rgba(255,109,0,0.12) 100%)",
                               borderLeft: "5px solid #FF6D00",
-                              boxShadow: "inset 0 0 30px rgba(255,109,0,0.12), 0 0 20px rgba(255,109,0,0.12)",
+                              boxShadow: "inset 0 0 40px rgba(255,109,0,0.15), 0 0 30px rgba(255,109,0,0.2), 0 0 60px rgba(255,109,0,0.08)",
                             }
                           : isPlaying
                             ? {
@@ -543,7 +545,7 @@ export default function Index() {
                       {/* Info */}
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold truncate" style={{
-                          color: focused ? "#FFFFFF" : isPlaying ? "#34C759" : isSelected ? "#F5F5F7" : "#B0B0B5",
+                          color: focused ? "#FFFFFF" : isPlaying ? "#34C759" : isSelected ? "#F5F5F7" : "#C8C8D0",
                           textShadow: focused ? "0 0 12px rgba(255,109,0,0.4)" : "none",
                           fontSize: focused ? "14px" : "13px",
                           fontWeight: focused ? 700 : 600,
@@ -573,7 +575,7 @@ export default function Index() {
           </div>
 
           {/* ═══ Column 3: Preview / Program / Actions ═══ */}
-          <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #161630 0%, #1A1A36 100%)" }}>
+          <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(255,109,0,0.04) 0%, #12122A 70%)" }}>
             {previewChannel ? (() => {
               const prog = getCurrentProgram(previewChannel.name);
               const isFav = favorites.includes(previewChannel.id);
@@ -742,7 +744,7 @@ export default function Index() {
 
       {/* Main App */}
       {!splash && onboardingStep === "app" && (
-        <div className="flex h-screen w-full overflow-hidden" style={{ background: "#151524" }}>
+        <div className="flex h-screen w-full overflow-hidden" style={{ background: "radial-gradient(ellipse at 50% 20%, rgba(255,109,0,0.025) 0%, #0D0D1A 50%, #151524 100%)" }}>
           <div className="flex flex-1 flex-col overflow-hidden">
             {/* Header */}
             {!activeChannel && hasContent && (
@@ -927,6 +929,34 @@ export default function Index() {
           onClose={() => setShowCatchup(false)}
           onPlay={(url) => { setShowCatchup(false); toast.info("Catch-up sera disponible dans une future version"); }}
         />
+      )}
+
+      {/* Exit confirmation dialog */}
+      {showExitDialog && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}>
+          <div className="rounded-2xl p-8 text-center max-w-sm mx-4" style={{ background: "#1A1A2E", border: "1px solid rgba(255,109,0,0.2)", boxShadow: "0 0 60px rgba(255,109,0,0.1)" }}>
+            <LogOut size={36} style={{ color: "#FF6D00", margin: "0 auto 16px", filter: "drop-shadow(0 0 10px rgba(255,109,0,0.4))" }} />
+            <h3 className="text-xl font-bold mb-2" style={{ color: "#F5F5F7" }}>Quitter CHOUF Play ?</h3>
+            <p className="text-sm mb-6" style={{ color: "#86868B" }}>Voulez-vous vraiment quitter l'application ?</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowExitDialog(false)}
+                className="px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+                style={{ background: "rgba(255,255,255,0.06)", color: "#B0B0B5", border: "1px solid rgba(255,255,255,0.1)" }}
+                autoFocus
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => { window.close(); window.location.href = "about:blank"; }}
+                className="px-6 py-3 rounded-xl text-sm font-bold transition-all"
+                style={{ background: "linear-gradient(135deg, #FF6D00, #FF8C38)", color: "#fff", boxShadow: "0 4px 20px rgba(255,109,0,0.3)" }}
+              >
+                Quitter
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
