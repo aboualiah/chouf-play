@@ -53,10 +53,10 @@ export default function PlaylistManager() {
   const totalSeries = playlists.reduce((s, p) => s + (p.series?.length || 0), 0);
 
   return (
-    <div className="min-h-screen" style={{ background: "#0A0A0F" }}>
+    <div className="min-h-screen" style={{ background: "#12121A" }}>
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 sm:px-6"
-        style={{ background: "rgba(10,10,15,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #1C1C24" }}>
+        style={{ background: "rgba(18,18,26,0.92)", backdropFilter: "blur(16px)", borderBottom: "1px solid #252530" }}>
         <button onClick={() => navigate("/", { replace: true })} className="rounded-xl p-2 transition-all hover:scale-105 active:scale-95"
           style={{ background: "linear-gradient(135deg, #1C1C24, #242430)", border: "1px solid #2A2A36" }}>
           <ArrowLeft size={18} style={{ color: "#FF6D00" }} />
@@ -76,7 +76,7 @@ export default function PlaylistManager() {
             { icon: Film, label: "Total films", count: totalVod, color: "#7C3AED", bg: "rgba(124,58,237,0.08)" },
             { icon: Clapperboard, label: "Total séries", count: totalSeries, color: "#34C759", bg: "rgba(52,199,89,0.08)" },
           ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
               <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ background: s.bg }}>
                 <s.icon size={20} style={{ color: s.color }} />
               </div>
@@ -88,7 +88,7 @@ export default function PlaylistManager() {
 
         {/* Liaison TV / Remote add */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="rounded-2xl p-5" style={{ background: "#131318", border: "1px solid #1C1C24" }}>
+          className="rounded-2xl p-5" style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
           <div className="flex items-center gap-3 mb-4">
             <Smartphone size={18} style={{ color: "#48484A" }} />
             <div>
@@ -105,7 +105,7 @@ export default function PlaylistManager() {
         </motion.div>
 
         {/* Add + Manage tabs */}
-        <div className="flex gap-1 rounded-xl p-1" style={{ background: "#131318" }}>
+        <div className="flex gap-1 rounded-xl p-1" style={{ background: "#1A1A24" }}>
           {[
             { id: "add" as const, icon: Plus, label: "Ajouter une playlist" },
             { id: "manage" as const, icon: Layers, label: "Gérer les playlists" },

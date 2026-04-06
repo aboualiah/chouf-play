@@ -40,6 +40,9 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
 
   const epgInfo = useMemo(() => getCurrentProgram(channel.name), [channel.name]);
 
+  // Double-tap Enter for fullscreen
+  const lastEnterRef = useRef(0);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); onPrev?.(); }
@@ -54,7 +57,24 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
         const v = videoRef.current;
         if (v && v.duration && isFinite(v.duration)) v.currentTime = Math.min(v.duration, v.currentTime + 10);
       }
-      else if (e.key === "Enter" || e.key === "i" || e.key === "I" || e.keyCode === 165) {
+      else if (e.key === "f" || e.key === "F" || e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+      else if (e.key === "Enter" || e.keyCode === 13 || e.keyCode === 23) {
+        e.preventDefault();
+        e.stopPropagation();
+        const now = Date.now();
+        if (now - lastEnterRef.current < 500) {
+          // Double tap → fullscreen
+          toggleFullscreen();
+          lastEnterRef.current = 0;
+        } else {
+          lastEnterRef.current = now;
+          hideControlsAfterDelay();
+        }
+      }
+      else if (e.key === "i" || e.key === "I" || e.keyCode === 165) {
         e.preventDefault();
         hideControlsAfterDelay();
       }
@@ -116,11 +136,11 @@ export function VideoPlayer({ channel, isFavorite, onBack, onToggleFavorite, onP
   const volPercent = Math.round((muted ? 0 : volume) * 100);
 
   return (
-    <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: "#0A0A0F" }}
+    <div ref={containerRef} data-player-container className="relative flex h-full w-full flex-col" style={{ background: "#12121A" }}
       onMouseMove={hideControlsAfterDelay} onClick={hideControlsAfterDelay}>
 
       {/* Video */}
-      <video ref={videoRef} className="absolute inset-0 h-full w-full object-contain" style={{ background: "#0A0A0F" }} autoPlay playsInline onClick={togglePlay} />
+      <video ref={videoRef} className="absolute inset-0 h-full w-full object-contain" style={{ background: "#12121A" }} autoPlay playsInline onClick={togglePlay} />
 
       {/* Loading */}
       {loading && !error && (
