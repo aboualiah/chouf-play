@@ -421,12 +421,12 @@ export default function Index() {
                     <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#FF6D00" }} />
                     <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#86868B" }}>Catégories</p>
                   </div>
-                  {categoryItems.map((item) => {
+                  {categoryItems.map((item, catIdx) => {
                     const isAll = item.id === "__all";
                     const isFavItem = item.id === "__fav";
                     const isItemActive = (isAll && !activeCategory && activeSubTab === "all") || (isFavItem && activeSubTab === "favorites") || activeCategory === item.id;
-                    const tvId = `cat_${item.id}`;
-                    const isTvFocused = focusedItemId === tvId;
+                    const tvId = `tv-categories-${catIdx}`;
+                    const isTvFocused = tvState.section === "categories" && tvState.indices.categories === catIdx;
                     const count = isAll ? allChannels.length : isFavItem ? allChannels.filter(c => favorites.includes(c.id)).length : allChannels.filter(c => c.category === item.id).length;
                     const Icon = isAll ? Radio : isFavItem ? Star : null;
 
@@ -472,8 +472,8 @@ export default function Index() {
                   {filteredChannels.map((ch, i) => {
                     const isFav = favorites.includes(ch.id);
                     const isSelected = previewChannel?.id === ch.id;
-                    const tvId = `ch_${ch.id}`;
-                    const isTvFocused = focusedItemId === tvId;
+                    const tvId = `tv-channels-${i}`;
+                    const isTvFocused = tvState.section === "channels" && tvState.indices.channels === i;
                     return (
                       <TvFocusable
                         key={ch.id}
@@ -549,8 +549,8 @@ export default function Index() {
                         { id: "tv_fav", color: "#FF3B30", label: "Favoris", action: () => handleToggleFavorite(previewChannel.id) },
                         { id: "tv_epg", color: "#34C759", label: "EPG", action: () => { handlePlay(previewChannel); setTimeout(() => setShowEpg(true), 300); } },
                         { id: "tv_options", color: "#FFD60A", label: "Options", action: () => {} },
-                      ].map((btn) => {
-                        const isTvFocused = focusedItemId === btn.id;
+                      ].map((btn, btnIdx) => {
+                        const isTvFocused = tvState.section === "preview" && tvState.indices.preview === btnIdx;
                         return (
                           <TvFocusable
                             key={btn.id}
