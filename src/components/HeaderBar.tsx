@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { Channel } from "@/lib/channels";
 import ChoufPlayLogo from "./ChoufPlayLogo";
 import {
-import { colors, effects } from "@/lib/theme";
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { colors, effects } from "@/lib/theme";
 
 interface HeaderBarProps {
   searchQuery: string;
