@@ -224,8 +224,8 @@ export default function PlaylistManager() {
                       </div>
                     </div>
                   </motion.div>
-                );
-              })}
+                </TvFocusable>
+              );
             </AnimatePresence>
             {playlists.length === 0 && (
               <div className="text-center py-16 rounded-2xl" style={{ background: "#1A1A24", border: "1px solid #252530" }}>
