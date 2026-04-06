@@ -300,7 +300,8 @@ export default function Index() {
         setShowRecordings(false);
         return;
       }
-      // At dashboard root: do nothing — don't quit
+      // At dashboard root: show exit confirmation
+      setShowExitDialog(true);
     };
     window.addEventListener("chouf-back", handleBack);
     return () => window.removeEventListener("chouf-back", handleBack);
