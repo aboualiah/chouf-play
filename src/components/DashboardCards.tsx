@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard } from "lucide-react";
+import { Tv, Film, Clapperboard, BookOpen, Rewind, Circle, Layers, ArrowRight, Crown, Fingerprint, Settings, LayoutDashboard, Radio, Monitor } from "lucide-react";
 import { Playlist } from "@/lib/storage";
 import { Channel } from "@/lib/channels";
 import { motion } from "framer-motion";
@@ -61,6 +61,8 @@ const QUICK_BUTTONS = [
   { label: "Rattrapage", icon: Rewind, action: "catchup" },
   { label: "Enregistrements", icon: Circle, action: "recordings" },
   { label: "Playlist", icon: Layers, action: "playlist" },
+  { label: "Radio", icon: Radio, action: "radio" },
+  { label: "TV Démo", icon: Monitor, action: "demo" },
 ];
 
 export function DashboardCards({
