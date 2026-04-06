@@ -150,6 +150,11 @@ export function DashboardCards({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Notify parent about header focus state
+  useEffect(() => {
+    onHeaderFocusChange?.(tvFocus < 0 ? tvFocus : null);
+  }, [tvFocus, onHeaderFocusChange]);
+
   const tvFocusStyle = (i: number) =>
     tvFocus === i
       ? {
