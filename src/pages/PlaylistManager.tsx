@@ -178,10 +178,18 @@ export default function PlaylistManager() {
               {playlists.map((pl, i) => {
                 const addedDate = new Date(pl.addedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
                 return (
-                  <motion.div key={pl.id}
+                <TvFocusable
+                  key={pl.id}
+                  section="preview"
+                  index={i}
+                  focused={isFocused("preview", i)}
+                  as="div"
+                  className="rounded-2xl mb-3"
+                >
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
                     transition={{ delay: i * 0.06 }}
-                    className="rounded-2xl p-4 mb-3 transition-all"
+                    className="rounded-2xl p-4 transition-all"
                     style={{ background: "rgba(26,26,36,0.85)", backdropFilter: "blur(10px)", border: "1px solid #252530" }}>
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0"
