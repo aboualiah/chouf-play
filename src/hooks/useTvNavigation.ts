@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   TvCounts,
   TvFocusState,
@@ -22,20 +22,37 @@ export function useTvNavigation({
 }: UseTvNavigationOptions) {
   const [focus, setFocus] = useState<TvFocusState>(createInitialTvFocus);
 
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
+
   useEffect(() => {
-    setFocus((prev) => ({
-      ...prev,
-      indices: {
+    setFocus((prev) => {
+      const newIndices = {
         categories: Math.min(prev.indices.categories, Math.max(0, counts.categories - 1)),
         channels: Math.min(prev.indices.channels, Math.max(0, counts.channels - 1)),
         preview: Math.min(prev.indices.preview, Math.max(0, counts.preview - 1)),
-      },
-      section:
+      };
+      const newSection =
         counts[prev.section] > 0
           ? prev.section
-          : (["categories", "channels", "preview"] as const).find((s) => counts[s] > 0) ?? "categories",
-    }));
-  }, [counts]);
+          : (["categories", "channels", "preview"] as const).find((s) => counts[s] > 0) ?? "categories";
+      // Only update if something actually changed
+      if (
+        newIndices.categories === prev.indices.categories &&
+        newIndices.channels === prev.indices.channels &&
+        newIndices.preview === prev.indices.preview &&
+        newSection === prev.section
+      ) {
+        return prev; // Return same reference — no re-render
+      }
+      return { ...prev, indices: newIndices, section: newSection };
+    });
+  }, [counts.categories, counts.channels, counts.preview]);
+
+  const onEnterRef = useRef(onEnter);
+  onEnterRef.current = onEnter;
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -47,8 +64,8 @@ export function useTvNavigation({
       const isBack =
         key === "Escape" ||
         key === "Backspace" ||
-        code === 4 ||      // Android back
-        code === 10009;    // certaines télécommandes TV
+        code === 4 ||
+        code === 10009;
 
       if (
         ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(key) || isBack
@@ -58,29 +75,33 @@ export function useTvNavigation({
       }
 
       if (isBack) {
-        onBack?.();
+        onBackRef.current?.();
         return;
       }
 
+      const c = countsRef.current;
       switch (key) {
         case "ArrowUp":
-          setFocus((prev) => moveVertical(prev, "up", counts));
+          setFocus((prev) => moveVertical(prev, "up", c));
           break;
         case "ArrowDown":
-          setFocus((prev) => moveVertical(prev, "down", counts));
+          setFocus((prev) => moveVertical(prev, "down", c));
           break;
         case "ArrowLeft":
-          setFocus((prev) => moveHorizontal(prev, "left", counts));
+          setFocus((prev) => moveHorizontal(prev, "left", c));
           break;
         case "ArrowRight":
-          setFocus((prev) => moveHorizontal(prev, "right", counts));
+          setFocus((prev) => moveHorizontal(prev, "right", c));
           break;
         case "Enter":
-          onEnter?.(focus);
+          setFocus((prev) => {
+            onEnterRef.current?.(prev);
+            return prev;
+          });
           break;
       }
     },
-    [counts, enabled, focus, onBack, onEnter]
+    [enabled]
   );
 
   useEffect(() => {

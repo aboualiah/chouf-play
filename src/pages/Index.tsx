@@ -335,11 +335,11 @@ export default function Index() {
     { id: "tv_options", color: colors.yellow, label: "Options" },
   ];
 
-  const counts: TvCounts = {
+  const counts: TvCounts = useMemo(() => ({
     categories: categoryItems.length,
     channels: filteredChannels.length,
     preview: previewChannel ? 4 : 1,
-  };
+  }), [categoryItems.length, filteredChannels.length, previewChannel]);
 
   const { focus, isFocused, setFocus } = useTvNavigation({
     counts,
