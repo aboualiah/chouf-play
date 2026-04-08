@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  TvCounts,
-  TvFocusState,
+  type TvCounts,
+  type TvFocusState,
   createInitialTvFocus,
   moveHorizontal,
   moveVertical,
