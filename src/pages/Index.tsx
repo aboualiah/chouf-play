@@ -5,7 +5,7 @@ import { getCurrentProgram } from "@/components/MiniEpg";
 import { MiniEpg } from "@/components/MiniEpg";
 import { useTvNavigation } from "@/hooks/useTvNavigation";
 import { TvFocusable } from "@/components/TvFocusable";
-import { TvSection, TvCounts, TvFocusState } from "@/lib/tvNavigation";
+import { type TvSection, type TvCounts, type TvFocusState } from "@/lib/tvNavigation";
 import { getCategories } from "@/lib/channels";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TermsScreen } from "@/components/TermsScreen";
