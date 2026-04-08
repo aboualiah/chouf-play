@@ -22,20 +22,32 @@ export function useTvNavigation({
 }: UseTvNavigationOptions) {
   const [focus, setFocus] = useState<TvFocusState>(createInitialTvFocus);
 
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
+
   useEffect(() => {
-    setFocus((prev) => ({
-      ...prev,
-      indices: {
+    setFocus((prev) => {
+      const newIndices = {
         categories: Math.min(prev.indices.categories, Math.max(0, counts.categories - 1)),
         channels: Math.min(prev.indices.channels, Math.max(0, counts.channels - 1)),
         preview: Math.min(prev.indices.preview, Math.max(0, counts.preview - 1)),
-      },
-      section:
+      };
+      const newSection =
         counts[prev.section] > 0
           ? prev.section
-          : (["categories", "channels", "preview"] as const).find((s) => counts[s] > 0) ?? "categories",
-    }));
-  }, [counts]);
+          : (["categories", "channels", "preview"] as const).find((s) => counts[s] > 0) ?? "categories";
+      // Only update if something actually changed
+      if (
+        newIndices.categories === prev.indices.categories &&
+        newIndices.channels === prev.indices.channels &&
+        newIndices.preview === prev.indices.preview &&
+        newSection === prev.section
+      ) {
+        return prev; // Return same reference — no re-render
+      }
+      return { ...prev, indices: newIndices, section: newSection };
+    });
+  }, [counts.categories, counts.channels, counts.preview]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
