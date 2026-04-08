@@ -49,6 +49,11 @@ export function useTvNavigation({
     });
   }, [counts.categories, counts.channels, counts.preview]);
 
+  const onEnterRef = useRef(onEnter);
+  onEnterRef.current = onEnter;
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!enabled) return;
@@ -59,8 +64,8 @@ export function useTvNavigation({
       const isBack =
         key === "Escape" ||
         key === "Backspace" ||
-        code === 4 ||      // Android back
-        code === 10009;    // certaines télécommandes TV
+        code === 4 ||
+        code === 10009;
 
       if (
         ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(key) || isBack
@@ -70,29 +75,33 @@ export function useTvNavigation({
       }
 
       if (isBack) {
-        onBack?.();
+        onBackRef.current?.();
         return;
       }
 
+      const c = countsRef.current;
       switch (key) {
         case "ArrowUp":
-          setFocus((prev) => moveVertical(prev, "up", counts));
+          setFocus((prev) => moveVertical(prev, "up", c));
           break;
         case "ArrowDown":
-          setFocus((prev) => moveVertical(prev, "down", counts));
+          setFocus((prev) => moveVertical(prev, "down", c));
           break;
         case "ArrowLeft":
-          setFocus((prev) => moveHorizontal(prev, "left", counts));
+          setFocus((prev) => moveHorizontal(prev, "left", c));
           break;
         case "ArrowRight":
-          setFocus((prev) => moveHorizontal(prev, "right", counts));
+          setFocus((prev) => moveHorizontal(prev, "right", c));
           break;
         case "Enter":
-          onEnter?.(focus);
+          setFocus((prev) => {
+            onEnterRef.current?.(prev);
+            return prev;
+          });
           break;
       }
     },
-    [counts, enabled, focus, onBack, onEnter]
+    [enabled]
   );
 
   useEffect(() => {
